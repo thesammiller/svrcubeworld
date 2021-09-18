@@ -1,7 +1,7 @@
 #include "SvrCubeWorld.h"
 
 #include <GLFW/glfw3.h>
-//#include "Appl.h"
+#include "vertex_data.h"
 
 
 SvrCubeWorld::SvrCubeWorld()
@@ -34,6 +34,24 @@ bool SvrCubeWorld::AppInit() {
     // Uses the GlProgram class to compile shaders
     Program = GlProgram::Build(vShader, fShader, nullptr, 0);
     VertexTransformAttribute = glGetAttribLocation(Program.Program, "VertexTransform");
+
+    // Create the cube.
+    VertexAttribs attribs;
+    attribs.position.resize(8);
+    attribs.color.resize(8);
+    for (int i = 0; i < 8; i++) {
+        attribs.position[i] = cubeVertices.positions[i];
+        attribs.color[i] = cubeVertices.colors[i];
+    }
+
+    std::vector<TriangleIndex> indices;
+    indices.resize(36);
+    for (int i = 0; i < 36; i++) {
+        indices[i] = cubeIndices[i];
+    }
+
+    //GlGeometry.cpp
+    Cube.Create(attribs, indices);
 
 
     return true;

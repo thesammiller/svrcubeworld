@@ -10,7 +10,7 @@
 
 
 // Custom OVR
-#include "vertex_data.h"
+//#include "vertex_data.h"
 #include "SvrCubeWorld.h"
 
 using OVR::Vector4f;
