@@ -1,11 +1,11 @@
 #include "Appl.h"
 
 
-
+/*
 void svrAppl::AppEyeGLStateSetup(
-    const ovrApplFrameIn& /* in */,
+    const ovrApplFrameIn& , //in
     const ovrFramebuffer* fb,
-    int /* eye */) {
+    int ) { //eye
     GL(glEnable(GL_SCISSOR_TEST));
     GL(glDepthMask(GL_TRUE));
     GL(glEnable(GL_DEPTH_TEST));
@@ -18,3 +18,4 @@ void svrAppl::AppEyeGLStateSetup(
     GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
     GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 }
+*/
