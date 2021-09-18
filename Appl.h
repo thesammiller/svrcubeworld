@@ -1,4 +1,7 @@
 #include "OVR_Math.h"
+#include "VrApi_Helpers.h"
+
+using OVR::Matrix4f;
 
 #include "SurfaceRender.h"
 

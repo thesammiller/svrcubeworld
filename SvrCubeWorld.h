@@ -27,6 +27,9 @@ class SvrCubeWorld : public svrAppl {
     private:
         svrRenderState RenderState;
         svrSurfaceRender SurfaceRender;
+
+        ovrMatrix4f CenterEyeViewMatrix;
+
         
 };
 
