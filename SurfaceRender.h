@@ -1,4 +1,4 @@
-
+#include "GlGeometry.h"
 
 
 class svrSurfaceRender {

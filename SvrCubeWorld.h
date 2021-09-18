@@ -28,6 +28,8 @@ class SvrCubeWorld : public svrAppl {
         svrRenderState RenderState;
         svrSurfaceRender SurfaceRender;
 
+        GlProgram Program;
+
         ovrMatrix4f CenterEyeViewMatrix;
 
         
