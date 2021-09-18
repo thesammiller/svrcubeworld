@@ -1,4 +1,15 @@
 #include "Appl.h"
+#include <iostream>
+
+
+svrAppl::svrAppl() {
+    std::cout << "Created Server Application Object" << std::endl;    
+}
+
+bool svrAppl::AppInit() {
+    std::cout << "Appl -- Initialize App --> SHOULD BE OVERRIDDEN" << std::endl;
+    return false;
+}
 
 
 /*

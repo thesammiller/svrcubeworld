@@ -3,12 +3,15 @@
 #include <GLFW/glfw3.h>
 
 // OVR
-#include "Appl.h"
+//#include "Appl.h"
 
 
 // Learn OpenGL
 #include "shader_s.h"
 
+// Custom OVR
+#include "vertex_data.h"
+#include "SvrCubeWorld.h"
 
 using OVR::Vector4f;
 
@@ -68,6 +71,10 @@ int main(void)
   glViewport(0, 0, WIDTH, HEIGHT);
   //callback for resizing of frame
   glfwSetFramebufferSizeCallback(window1, framebuffer_size_callback);
+
+  // Create a Server Cube World Object
+  // TODO: Reimplement Oculus VR as best as possible in One Window
+  SvrCubeWorld serverCubeWorld = SvrCubeWorld();
 
   // render loop
   while (!glfwWindowShouldClose(window1))
