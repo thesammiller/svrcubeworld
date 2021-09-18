@@ -3,6 +3,9 @@
 
 #include "shader_s.h"
 
+static const int NUM_INSTANCES = 1500;
+static const int NUM_ROTATIONS = 16;
+
 class SvrCubeWorld : public svrAppl {
     public:
         SvrCubeWorld();
@@ -30,17 +33,23 @@ class SvrCubeWorld : public svrAppl {
         svrRenderState RenderState;
         svrSurfaceRender SurfaceRender;
 
+        svrSurfaceDef SurfaceDef;
+        //OpenGL Program with Shaders
         GlProgram Program;
         GLint VertexTransformAttribute;
-
-        
+        //OpenGl Vertex Attributes
         GlGeometry Cube;
-
-        unsigned int Random;
-
+        GLuint InstanceTransformBuffer;
+        //Game Logic for Rotations and Positions
+        ovrVector3f Rotations[NUM_ROTATIONS];
+        ovrVector3f CubePositions[NUM_INSTANCES];  
+        int CubeRotations[NUM_INSTANCES];
+      
         ovrMatrix4f CenterEyeViewMatrix;
-
+        unsigned int Random;
         float RandomFloat();
+
+        double startTime;
 
         
 };

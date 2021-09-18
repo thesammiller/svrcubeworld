@@ -1,5 +1,9 @@
-#include <GLFW/glfw3.h>
+#include "Egl.h"
 #include "OVR_Math.h"
+
+#include "GpuState.h"
+
+#pragma once
 
 //This file is an adaptation of the one in the OVR. I don't want to bring a lot of baggage with this logic.
 
@@ -126,4 +130,17 @@ struct GlProgram {
        private:
         bool wasEnabled;
     };
+};
+
+
+struct svrGraphicsCommand {
+    static const int MAX_TEXTURES = 8;
+
+    GlProgram Program;
+    ovrGpuState GpuState;
+    ovrUniformData
+        UniformData[ovrUniform::MAX_UNIFORMS]; // data matching the types in Program.Uniforms[]
+    //GlTexture Textures[ovrGraphicsCommand::MAX_TEXTURES];
+
+    void BindUniformTextures();
 };

@@ -3,6 +3,8 @@
 #include "OVR_Math.h"
 #include "GlProgram.h"
 
+#pragma once
+
 struct VertexAttribs {
     std::vector<OVR::Vector3f> position;
     std::vector<OVR::Vector3f> normal;

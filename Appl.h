@@ -1,7 +1,7 @@
 #include "OVR_Math.h"
 #include "VrApi_Helpers.h"
 
-#include <GLFW/glfw3.h>
+#pragma once
 
 using OVR::Matrix4f;
 

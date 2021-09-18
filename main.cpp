@@ -19,9 +19,6 @@ using OVR::Vector4f;
 int WIDTH = 800;
 int HEIGHT = 600;
 
-static const int NUM_INSTANCES = 1500;
-static const int NUM_ROTATIONS = 16;
-
 /*
 The OVR Sample application doesn't actually use CLEAR_COLOR anywhere.
 It gets declared and never used -- so it just must be some left over crud?
