@@ -2,7 +2,13 @@
 
 #include <GLFW/glfw3.h>
 
+// OVR
 #include "Appl.h"
+
+
+// Learn OpenGL
+#include "shader_s.h"
+
 
 using OVR::Vector4f;
 
