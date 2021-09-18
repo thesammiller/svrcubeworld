@@ -1,5 +1,20 @@
+#include <GLFW/glfw3.h>
+#include "OVR_Math.h"
+
 //This file is an adaptation of the one in the OVR. I don't want to bring a lot of baggage with this logic.
 
+enum VertexAttributeLocation {
+    VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
+    VERTEX_ATTRIBUTE_LOCATION_NORMAL = 1,
+    VERTEX_ATTRIBUTE_LOCATION_TANGENT = 2,
+    VERTEX_ATTRIBUTE_LOCATION_BINORMAL = 3,
+    VERTEX_ATTRIBUTE_LOCATION_COLOR = 4,
+    VERTEX_ATTRIBUTE_LOCATION_UV0 = 5,
+    VERTEX_ATTRIBUTE_LOCATION_UV1 = 6,
+    VERTEX_ATTRIBUTE_LOCATION_JOINT_INDICES = 7,
+    VERTEX_ATTRIBUTE_LOCATION_JOINT_WEIGHTS = 8,
+    VERTEX_ATTRIBUTE_LOCATION_FONT_PARMS = 9
+};
 
 enum class ovrProgramParmType : char {
     INT, // int

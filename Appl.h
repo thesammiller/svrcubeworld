@@ -1,6 +1,8 @@
 #include "OVR_Math.h"
 #include "VrApi_Helpers.h"
 
+#include <GLFW/glfw3.h>
+
 using OVR::Matrix4f;
 
 #include "SurfaceRender.h"

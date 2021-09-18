@@ -7,7 +7,7 @@
 
 
 // Learn OpenGL
-#include "shader_s.h"
+
 
 // Custom OVR
 #include "vertex_data.h"

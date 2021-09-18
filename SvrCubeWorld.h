@@ -1,6 +1,8 @@
 #include "Appl.h"
 #include <iostream>
 
+#include "shader_s.h"
+
 class SvrCubeWorld : public svrAppl {
     public:
         SvrCubeWorld();
@@ -29,8 +31,16 @@ class SvrCubeWorld : public svrAppl {
         svrSurfaceRender SurfaceRender;
 
         GlProgram Program;
+        GLint VertexTransformAttribute;
+
+        
+        GlGeometry Cube;
+
+        unsigned int Random;
 
         ovrMatrix4f CenterEyeViewMatrix;
+
+        float RandomFloat();
 
         
 };
