@@ -45,7 +45,9 @@ void svrAppl::DefaultRenderFrame_Running(const svrApplFrameIn& in, svrRendererOu
     layerCount = 0;
     ovrLayerProjection2& layer = Layers[layerCount].Projection;
     layer = vrapi_DefaultLayerProjection2();
+    //Would be great to have a default HeadPose to use
     layer.HeadPose = Tracking.HeadPose;
+    //And now we're into the land of FrameBuffers
     for (int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; ++eye) {
         ovrFramebuffer* framebuffer = Framebuffer[NumFramebuffers == 1 ? 0 : eye].get();
         layer.Textures[eye].ColorSwapChain = framebuffer->ColorTextureSwapChain;

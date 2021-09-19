@@ -2,11 +2,13 @@
 #include "VrApi_Helpers.h"
 #include "FrameParams.h"
 
+
 #pragma once
 
 using OVR::Matrix4f;
 
 #include "SurfaceRender.h"
+#include "Framebuffer.h"
 
 
 enum svrRenderState {
@@ -38,7 +40,7 @@ class svrAppl {
         //Used in AppRenderFrame
         float SuggestedEyeFovDegreesX = 90.0f;
         float SuggestedEyeFovDegreesY = 90.0f;
-            ovrLayer_Union2 Layers[ovrMaxLayerCount] = {};
+        ovrLayer_Union2 Layers[ovrMaxLayerCount] = {};
 
 
 };

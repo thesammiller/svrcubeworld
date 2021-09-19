@@ -260,8 +260,10 @@ void SvrCubeWorld::AppRenderFrame(const svrApplFrameIn& in, svrRendererOutput& o
                 /// Surface
                 out.Surfaces.push_back(svrDrawSurface(&SurfaceDef));
 
+                //TODO: Can I completely eliminate the GuiSys system?
+                // Or do I need it for something?
                 // Append GuiSys surfaces.
-                GuiSys->AppendSurfaceList(out.FrameMatrices.CenterView, &out.Surfaces);
+                //GuiSys->AppendSurfaceList(out.FrameMatrices.CenterView, &out.Surfaces);
 
                 ///	worldLayer.Header.Flags |=
                 /// VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
