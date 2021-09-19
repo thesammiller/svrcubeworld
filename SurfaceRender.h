@@ -49,4 +49,22 @@ class svrSurfaceRender {
 
 };
 
+//Vector of these is used in FrameParams for svrRendererOutput 
+//Which gets used in the ApplRenderFrame method
+struct svrDrawSurface {
+    svrDrawSurface() : surface(NULL) {}
+
+    svrDrawSurface(const OVR::Matrix4f& modelMatrix_, const svrSurfaceDef* surface_)
+        : modelMatrix(modelMatrix_), surface(surface_) {}
+
+    svrDrawSurface(const svrSurfaceDef* surface_) : surface(surface_) {}
+
+    void Clear() {
+        modelMatrix = OVR::Matrix4f();
+        surface = NULL;
+    }
+
+    OVR::Matrix4f modelMatrix;
+    const svrSurfaceDef* surface;
+};
 

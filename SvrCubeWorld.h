@@ -23,11 +23,11 @@ class SvrCubeWorld : public svrAppl {
         */
         // Called once per frame when the VR session is active.
         virtual svrApplFrameOut AppFrame(const svrApplFrameIn& in) override;
-        /*
+        
         // Called once per frame to allow the application to render eye buffers.
-        virtual void AppRenderFrame(const OVRFW::ovrApplFrameIn& in, OVRFW::ovrRendererOutput& out)
+        virtual void AppRenderFrame(const svrApplFrameIn& in, svrRendererOutput& out)
             override;
-        // Called once per eye each frame for default renderer
+        /*// Called once per eye each frame for default renderer
         virtual void
         AppRenderEye(const OVRFW::ovrApplFrameIn& in, OVRFW::ovrRendererOutput& out, int eye) override;
         */

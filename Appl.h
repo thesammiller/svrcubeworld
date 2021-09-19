@@ -18,9 +18,28 @@ enum svrRenderState {
 class svrAppl {
     public:
         svrAppl();
-    
+
+        //Creates the OpenGL Context
         virtual bool AppInit();
+        //Handles the controller information
         virtual svrApplFrameOut AppFrame(const svrApplFrameIn& /* in */);
+        //Render method
+        virtual void AppRenderFrame(const svrApplFrameIn &in, svrRendererOutput& out);
+        // Called in the AppRenderFrame if nothing's going on yet
+        void DefaultRenderFrame_Loading(const svrApplFrameIn& in, svrRendererOutput& out);
+        //Called when we actually have a surface to render
+        void DefaultRenderFrame_Running(const svrApplFrameIn& in, svrRendererOutput& out);
+
+    
+    protected:
+        //Used in Default Render Frame Loading & Running
+        int NumLayers = 0;
+        int FrameFlags = 0;
+        //Used in AppRenderFrame
+        float SuggestedEyeFovDegreesX = 90.0f;
+        float SuggestedEyeFovDegreesY = 90.0f;
+            ovrLayer_Union2 Layers[ovrMaxLayerCount] = {};
+
 
 };
 

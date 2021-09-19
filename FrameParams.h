@@ -92,3 +92,17 @@ struct svrApplFrameIn {
         return (LastFrameHeadsetIsMounted && !HeadsetIsMounted);
     }
 };
+
+
+
+struct FrameMatrices {
+    OVR::Matrix4f CenterView; // the view transform for the point between the eyes
+    OVR::Matrix4f EyeView[NUM_EYES]; // the view transforms for each of the eyes
+    OVR::Matrix4f EyeProjection[NUM_EYES]; // the projection transforms for each of the eyes
+};
+
+// This is the output of the ApplRenderFrame method
+struct svrRendererOutput {
+    FrameMatrices FrameMatrices; // view and projection transforms
+    std::vector<svrDrawSurface> Surfaces; // list of surfaces to render
+};

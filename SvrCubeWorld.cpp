@@ -240,4 +240,37 @@ svrApplFrameOut SvrCubeWorld::AppFrame(const svrApplFrameIn& vrFrame) {
 
 }
 
+void SvrCubeWorld::AppRenderFrame(const svrApplFrameIn& in, svrRendererOutput& out) {
+    switch (RenderState) {
+        case RENDER_STATE_LOADING: {
+            DefaultRenderFrame_Loading(in, out);
+        } break;
+        case RENDER_STATE_RUNNING: {
+            {
+                /// Frame matrices
+                out.FrameMatrices.CenterView = CenterEyeViewMatrix;
+                //TODO: Make sure that this NUM_EYES gets adjusted back to 2 when necessary
+                for (int eye = 0; eye < NUM_EYES; eye++) {
+                    out.FrameMatrices.EyeView[eye] = in.Eye[eye].ViewMatrix;
+                    // Calculate projection matrix using custom near plane value.
+                    out.FrameMatrices.EyeProjection[eye] = ovrMatrix4f_CreateProjectionFov(
+                        SuggestedEyeFovDegreesX, SuggestedEyeFovDegreesY, 0.0f, 0.0f, 0.1f, 0.0f);
+                }
+
+                /// Surface
+                out.Surfaces.push_back(svrDrawSurface(&SurfaceDef));
+
+                // Append GuiSys surfaces.
+                GuiSys->AppendSurfaceList(out.FrameMatrices.CenterView, &out.Surfaces);
+
+                ///	worldLayer.Header.Flags |=
+                /// VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
+            }
+            DefaultRenderFrame_Running(in, out);
+        } break;
+        case RENDER_STATE_ENDING: {
+            DefaultRenderFrame_Ending(in, out);
+        } break;
+    }
+}
 
