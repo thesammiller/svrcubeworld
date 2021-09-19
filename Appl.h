@@ -1,5 +1,6 @@
 #include "OVR_Math.h"
 #include "VrApi_Helpers.h"
+#include "FrameParams.h"
 
 #pragma once
 
@@ -19,6 +20,7 @@ class svrAppl {
         svrAppl();
     
         virtual bool AppInit();
+        virtual svrApplFrameOut AppFrame(const svrApplFrameIn& /* in */);
 
 };
 

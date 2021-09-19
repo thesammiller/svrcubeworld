@@ -20,8 +20,10 @@ class SvrCubeWorld : public svrAppl {
         virtual void AppResumed() override;
         // Called when the application is paused by the system.
         virtual void AppPaused() override;
+        */
         // Called once per frame when the VR session is active.
-        virtual OVRFW::ovrApplFrameOut AppFrame(const OVRFW::ovrApplFrameIn& in) override;
+        virtual svrApplFrameOut AppFrame(const svrApplFrameIn& in) override;
+        /*
         // Called once per frame to allow the application to render eye buffers.
         virtual void AppRenderFrame(const OVRFW::ovrApplFrameIn& in, OVRFW::ovrRendererOutput& out)
             override;

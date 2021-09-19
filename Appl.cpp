@@ -6,10 +6,24 @@ svrAppl::svrAppl() {
     std::cout << "Created Server Application Object" << std::endl;    
 }
 
+//Appl::Init()
+/*
+- This initializes the vrApi
+- Creates the Context for GL
+- Initializes the REnderr
+- Framebuffers for each eye
+*/
+
 bool svrAppl::AppInit() {
-    std::cout << "Appl -- Initialize App --> SHOULD BE OVERRIDDEN" << std::endl;
+    std::cout << "Default AppInit called!" << std::endl;
     return false;
 }
+
+svrApplFrameOut svrAppl::AppFrame(const svrApplFrameIn& /* in */) {
+    std::cout << "Default AppFrame called!" << std::endl;
+    return svrApplFrameOut(false);
+}
+
 
 
 /*

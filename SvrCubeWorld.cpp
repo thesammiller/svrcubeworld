@@ -25,16 +25,21 @@ SvrCubeWorld::SvrCubeWorld()
     CenterEyeViewMatrix = ovrMatrix4f_CreateIdentity();
 }
 
-//SvrCubeWorld::SvrCubeWorld() {
-//    
-//}
+// Returns a random float in the range [0, 1].
+float SvrCubeWorld::RandomFloat() {
+    Random = 1664525L * Random + 1013904223L;
+    unsigned int rf = 0x3F800000 | (Random & 0x007FFFFF);
+    return (*(float*)&rf) - 1.0f;
+}
+
+
 
 bool SvrCubeWorld::AppInit() {
     std::cout << "SvrCubeWorld -- Initialize App" << std::endl;
 
     //Ignore JNI
     //Ignore FileSys
-    //Ignore Locle
+    //Ignore Locale
     //Ignore SoundEffectPlayer
     //Ignore GuiSys
 
@@ -159,15 +164,80 @@ bool SvrCubeWorld::AppInit() {
 
     startTime = GetTimeInSeconds();
 
-
-
-
     return true;
 }
 
-// Returns a random float in the range [0, 1].
-float SvrCubeWorld::RandomFloat() {
-    Random = 1664525L * Random + 1013904223L;
-    unsigned int rf = 0x3F800000 | (Random & 0x007FFFFF);
-    return (*(float*)&rf) - 1.0f;
+svrApplFrameOut SvrCubeWorld::AppFrame(const svrApplFrameIn& vrFrame) {
+    // process input events first because this mirrors the behavior when OnKeyEvent was
+    // a virtual function on VrAppInterface and was called by VrAppFramework.
+    /*
+    for (int i = 0; i < static_cast<int>(vrFrame.KeyEvents.size()); i++) {
+        const int keyCode = vrFrame.KeyEvents[i].KeyCode;
+        const int action = vrFrame.KeyEvents[i].Action;
+
+        if (GuiSys->OnKeyEvent(keyCode, action)) {
+            continue;
+        }
+    }
+    */ //TODO: Update this when ready to process input
+
+    Vector3f currentRotation;
+    currentRotation.x = (float)(vrFrame.PredictedDisplayTime - startTime);
+    currentRotation.y = (float)(vrFrame.PredictedDisplayTime - startTime);
+    currentRotation.z = (float)(vrFrame.PredictedDisplayTime - startTime);
+
+    ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
+    for (int i = 0; i < NUM_ROTATIONS; i++) {
+        rotationMatrices[i] = ovrMatrix4f_CreateRotation(
+            Rotations[i].x * currentRotation.x,
+            Rotations[i].y * currentRotation.y,
+            Rotations[i].z * currentRotation.z);
+    }
+
+    //OpenGL --> Array Buffer Binding
+    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+    GL(Matrix4f* cubeTransforms = (Matrix4f*)glMapBufferRange(
+           GL_ARRAY_BUFFER,
+           0,
+           NUM_INSTANCES * sizeof(Matrix4f),
+           GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
+    for (int i = 0; i < NUM_INSTANCES; i++) {
+        const int index = CubeRotations[i];
+
+        // Write in order in case the mapped buffer lives on write-combined memory.
+        cubeTransforms[i].M[0][0] = rotationMatrices[index].M[0][0];
+        cubeTransforms[i].M[0][1] = rotationMatrices[index].M[0][1];
+        cubeTransforms[i].M[0][2] = rotationMatrices[index].M[0][2];
+        cubeTransforms[i].M[0][3] = rotationMatrices[index].M[0][3];
+
+        cubeTransforms[i].M[1][0] = rotationMatrices[index].M[1][0];
+        cubeTransforms[i].M[1][1] = rotationMatrices[index].M[1][1];
+        cubeTransforms[i].M[1][2] = rotationMatrices[index].M[1][2];
+        cubeTransforms[i].M[1][3] = rotationMatrices[index].M[1][3];
+
+        cubeTransforms[i].M[2][0] = rotationMatrices[index].M[2][0];
+        cubeTransforms[i].M[2][1] = rotationMatrices[index].M[2][1];
+        cubeTransforms[i].M[2][2] = rotationMatrices[index].M[2][2];
+        cubeTransforms[i].M[2][3] = rotationMatrices[index].M[2][3];
+
+        cubeTransforms[i].M[3][0] = CubePositions[i].x;
+        cubeTransforms[i].M[3][1] = CubePositions[i].y;
+        cubeTransforms[i].M[3][2] = CubePositions[i].z;
+        cubeTransforms[i].M[3][3] = 1.0f;
+    }
+    //Clear binding
+    GL(glUnmapBuffer(GL_ARRAY_BUFFER));
+    GL(glBindBuffer(GL_ARRAY_BUFFER, 0));
+
+    //TODO: Is there a good default here for HeadPose?
+    //I may just want to eliminate the CenterEyeViewMatrix entirely... 
+    CenterEyeViewMatrix = OVR::Matrix4f(vrFrame.HeadPose);
+
+    // Update GUI systems last, but before rendering anything.
+    //GuiSys->Frame(vrFrame, CenterEyeViewMatrix);
+
+    return svrApplFrameOut();
+
 }
+
+
