@@ -1,0 +1,118 @@
+In file included from Appl.h:3,
+                 from SvrCubeWorld.h:1,
+                 from main.cpp:14:
+FrameParams.h:106:19: warning: declaration of ‘FrameMatrices svrRendererOutput::FrameMatrices’ changes meaning of ‘FrameMatrices’ [-fpermissive]
+  106 |     FrameMatrices FrameMatrices; // view and projection transforms
+      |                   ^~~~~~~~~~~~~
+FrameParams.h:98:8: note: ‘FrameMatrices’ declared here as ‘struct FrameMatrices’
+   98 | struct FrameMatrices {
+      |        ^~~~~~~~~~~~~
+In file included from SvrCubeWorld.h:1,
+                 from main.cpp:14:
+Appl.h:38:14: warning: extra qualification ‘svrAppl::’ on member ‘AppEyeGLStateSetup’ [-fpermissive]
+   38 |         void svrAppl::AppEyeGLStateSetup(const svrApplFrameIn& , const svrFramebuffer* fb, int );
+      |              ^~~~~~~
+In file included from Appl.h:3,
+                 from SvrCubeWorld.h:1,
+                 from SvrCubeWorld.cpp:1:
+FrameParams.h:106:19: warning: declaration of ‘FrameMatrices svrRendererOutput::FrameMatrices’ changes meaning of ‘FrameMatrices’ [-fpermissive]
+  106 |     FrameMatrices FrameMatrices; // view and projection transforms
+      |                   ^~~~~~~~~~~~~
+FrameParams.h:98:8: note: ‘FrameMatrices’ declared here as ‘struct FrameMatrices’
+   98 | struct FrameMatrices {
+      |        ^~~~~~~~~~~~~
+In file included from SvrCubeWorld.h:1,
+                 from SvrCubeWorld.cpp:1:
+Appl.h:38:14: warning: extra qualification ‘svrAppl::’ on member ‘AppEyeGLStateSetup’ [-fpermissive]
+   38 |         void svrAppl::AppEyeGLStateSetup(const svrApplFrameIn& , const svrFramebuffer* fb, int );
+      |              ^~~~~~~
+SvrCubeWorld.cpp: In member function ‘virtual void SvrCubeWorld::AppRenderFrame(const svrApplFrameIn&, svrRendererOutput&)’:
+SvrCubeWorld.cpp:274:13: error: ‘DefaultRenderFrame_Ending’ was not declared in this scope; did you mean ‘DefaultRenderFrame_Loading’?
+  274 |             DefaultRenderFrame_Ending(in, out);
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |             DefaultRenderFrame_Loading
+In file included from Appl.h:3,
+                 from Appl.cpp:1:
+FrameParams.h:106:19: warning: declaration of ‘FrameMatrices svrRendererOutput::FrameMatrices’ changes meaning of ‘FrameMatrices’ [-fpermissive]
+  106 |     FrameMatrices FrameMatrices; // view and projection transforms
+      |                   ^~~~~~~~~~~~~
+FrameParams.h:98:8: note: ‘FrameMatrices’ declared here as ‘struct FrameMatrices’
+   98 | struct FrameMatrices {
+      |        ^~~~~~~~~~~~~
+In file included from Appl.cpp:1:
+Appl.h:38:14: warning: extra qualification ‘svrAppl::’ on member ‘AppEyeGLStateSetup’ [-fpermissive]
+   38 |         void svrAppl::AppEyeGLStateSetup(const svrApplFrameIn& , const svrFramebuffer* fb, int );
+      |              ^~~~~~~
+Appl.cpp: In member function ‘void svrAppl::DefaultRenderFrame_Running(const svrApplFrameIn&, svrRendererOutput&)’:
+Appl.cpp:80:5: error: ‘ovrFramebuffer_SetNone’ was not declared in this scope; did you mean ‘svrFramebuffer_SetNone’?
+   80 |     ovrFramebuffer_SetNone();
+      |     ^~~~~~~~~~~~~~~~~~~~~~
+      |     svrFramebuffer_SetNone
+Framebuffer.cpp: In function ‘bool ovrFramebuffer_Create(svrFramebuffer*, bool, GLenum, int, int, int)’:
+Framebuffer.cpp:86:5: error: ‘ALOGV’ was not declared in this scope
+   86 |     ALOGV("        frameBuffer->UseMultiview = %d", frameBuffer->UseMultiview);
+      |     ^~~~~
+In file included from Framebuffer.h:2,
+                 from Framebuffer.cpp:14:
+Framebuffer.cpp:113:20: error: ‘glFramebufferTextureMultisampleMultiviewOVR’ was not declared in this scope; did you mean ‘glFramebufferTextureMultiviewOVR’?
+  113 |                 GL(glFramebufferTextureMultisampleMultiviewOVR(
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Egl.h:10:5: note: in definition of macro ‘GL’
+   10 |     func;        \
+      |     ^~~~
+Framebuffer.cpp:152:11: error: ‘else’ without a previous ‘if’
+  152 |         } else {
+      |           ^~~~
+Framebuffer.cpp:154:17: error: ‘glFramebufferTexture2DMultisampleEXT’ was not declared in this scope; did you mean ‘glFramebufferTextureMultiviewOVR’?
+  154 |                 glFramebufferTexture2DMultisampleEXT != NULL) {
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                 glFramebufferTextureMultiviewOVR
+In file included from Framebuffer.h:2,
+                 from Framebuffer.cpp:14:
+Framebuffer.cpp:156:69: error: ‘i’ was not declared in this scope
+  156 |                 GL(glGenRenderbuffers(1, &frameBuffer->DepthBuffers[i]));
+      |                                                                     ^
+Egl.h:10:5: note: in definition of macro ‘GL’
+   10 |     func;        \
+      |     ^~~~
+Framebuffer.cpp:170:21: error: ‘colorTexture’ was not declared in this scope; did you mean ‘glIsTexture’?
+  170 |                     colorTexture,
+      |                     ^~~~~~~~~~~~
+Egl.h:10:5: note: in definition of macro ‘GL’
+   10 |     func;        \
+      |     ^~~~
+Framebuffer.cpp:186:69: error: ‘i’ was not declared in this scope
+  186 |                 GL(glGenRenderbuffers(1, &frameBuffer->DepthBuffers[i]));
+      |                                                                     ^
+Egl.h:10:5: note: in definition of macro ‘GL’
+   10 |     func;        \
+      |     ^~~~
+Framebuffer.cpp:200:79: error: ‘colorTexture’ was not declared in this scope; did you mean ‘glIsTexture’?
+  200 |                     GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0));
+      |                                                                               ^~~~~~~~~~~~
+Egl.h:10:5: note: in definition of macro ‘GL’
+   10 |     func;        \
+      |     ^~~~
+Framebuffer.cpp:205:21: error: expected primary-expression before ‘return’
+  205 |                     return false;
+      |                     ^~~~~~
+Framebuffer.cpp: At global scope:
+Framebuffer.cpp:211:5: error: expected unqualified-id before ‘return’
+  211 |     return true;
+      |     ^~~~~~
+Framebuffer.cpp:212:1: error: expected declaration before ‘}’ token
+  212 | }
+      | ^
+Framebuffer.cpp: In function ‘void svrFramebuffer_Destroy(svrFramebuffer*)’:
+Framebuffer.cpp:221:5: error: ‘vrapi_DestroyTextureSwapChain’ was not declared in this scope; did you mean ‘vrapi_CreateTextureSwapChain3’?
+  221 |     vrapi_DestroyTextureSwapChain(frameBuffer->ColorTextureSwapChain);
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |     vrapi_CreateTextureSwapChain3
+Framebuffer.cpp:226:5: error: ‘ovrFramebuffer_Clear’ was not declared in this scope; did you mean ‘svrFramebuffer_Clear’?
+  226 |     ovrFramebuffer_Clear(frameBuffer);
+      |     ^~~~~~~~~~~~~~~~~~~~
+      |     svrFramebuffer_Clear
+Framebuffer.cpp: In function ‘bool ovrFramebuffer_Create(svrFramebuffer*, bool, GLenum, int, int, int)’:
+Framebuffer.cpp:209:5: warning: control reaches end of non-void function [-Wreturn-type]
+  209 |     }
+      |     ^

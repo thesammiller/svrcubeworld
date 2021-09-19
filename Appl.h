@@ -2,6 +2,10 @@
 #include "VrApi_Helpers.h"
 #include "FrameParams.h"
 
+#include <cstdint>
+#include <vector>
+#include <mutex>
+#include <memory>
 
 #pragma once
 
@@ -31,6 +35,9 @@ class svrAppl {
         void DefaultRenderFrame_Loading(const svrApplFrameIn& in, svrRendererOutput& out);
         //Called when we actually have a surface to render
         void DefaultRenderFrame_Running(const svrApplFrameIn& in, svrRendererOutput& out);
+        void svrAppl::AppEyeGLStateSetup(const svrApplFrameIn& , const svrFramebuffer* fb, int );
+        //Is this a no-op? There's no body to method?
+        void AppRenderEye(const svrApplFrameIn& /* in */, svrRendererOutput& /* out */, int /* eye */);
 
     
     protected:
@@ -41,6 +48,12 @@ class svrAppl {
         float SuggestedEyeFovDegreesX = 90.0f;
         float SuggestedEyeFovDegreesY = 90.0f;
         ovrLayer_Union2 Layers[ovrMaxLayerCount] = {};
+        int NumFramebuffers;
+        std::unique_ptr<svrFramebuffer> Framebuffer[NUM_EYES];
+        
+        //Holds HeadPose, Projection Matrix, ViewMatrix
+        ovrTracking2 Tracking;
+
 
 
 };

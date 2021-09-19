@@ -14,6 +14,12 @@ svrAppl::svrAppl() {
 - Framebuffers for each eye
 */
 
+
+void svrAppl::AppRenderEye(
+    const svrApplFrameIn& /* in */,
+    svrRendererOutput& /* out */,
+    int /* eye */) {}
+
 bool svrAppl::AppInit() {
     std::cout << "Default AppInit called!" << std::endl;
     return false;
@@ -49,7 +55,7 @@ void svrAppl::DefaultRenderFrame_Running(const svrApplFrameIn& in, svrRendererOu
     layer.HeadPose = Tracking.HeadPose;
     //And now we're into the land of FrameBuffers
     for (int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; ++eye) {
-        ovrFramebuffer* framebuffer = Framebuffer[NumFramebuffers == 1 ? 0 : eye].get();
+        svrFramebuffer* framebuffer = Framebuffer[NumFramebuffers == 1 ? 0 : eye].get();
         layer.Textures[eye].ColorSwapChain = framebuffer->ColorTextureSwapChain;
         layer.Textures[eye].SwapChainIndex = framebuffer->TextureSwapChainIndex;
         layer.Textures[eye].TexCoordsFromTanAngles = ovrMatrix4f_TanAngleMatrixFromProjection(
@@ -58,26 +64,26 @@ void svrAppl::DefaultRenderFrame_Running(const svrApplFrameIn& in, svrRendererOu
     layer.Header.Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
     layerCount++;
 
+    //TODO: HIJACK THIS SECTION --> SEND THE FRAMEBUFFER/RECEIVE THE FRAMEBUFFER
     // render images for each eye
     for (int eye = 0; eye < NumFramebuffers; ++eye) {
-        ovrFramebuffer* framebuffer = Framebuffer[eye].get();
-        ovrFramebuffer_SetCurrent(framebuffer);
+        svrFramebuffer* framebuffer = Framebuffer[eye].get();
+        svrFramebuffer_SetCurrent(framebuffer);
 
         AppEyeGLStateSetup(in, framebuffer, eye);
         AppRenderEye(in, out, eye);
 
-        ovrFramebuffer_Resolve(framebuffer);
-        ovrFramebuffer_Advance(framebuffer);
+        svrFramebuffer_Resolve(framebuffer);
+        svrFramebuffer_Advance(framebuffer);
     }
 
     ovrFramebuffer_SetNone();
 }
 
 
-/*
 void svrAppl::AppEyeGLStateSetup(
-    const ovrApplFrameIn& , //in
-    const ovrFramebuffer* fb,
+    const svrApplFrameIn& , //in
+    const svrFramebuffer* fb,
     int ) { //eye
     GL(glEnable(GL_SCISSOR_TEST));
     GL(glDepthMask(GL_TRUE));
@@ -91,4 +97,4 @@ void svrAppl::AppEyeGLStateSetup(
     GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
     GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 }
-*/
+
