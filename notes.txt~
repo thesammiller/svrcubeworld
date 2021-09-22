@@ -1,0 +1,45 @@
+# Graphics Pipeline
+
+Two major parts:
+1) Convert 3D coords to 2D coords
+2) Convert 2D coords to actual color pixels
+
+Graphics Pipeline taks as
+Input SET OF 3D COORDINATES
+Output COLORED 2D PIXELS
+
+Pipeline divided into several steps
+Each step takes the previous output as input
+Highly specialized (each has one specific cuntion)
+Can easily be executed in parallel
+
+GPUs run SHADERS in parallel (shader is a small program for each step)
+
+OpenGL Shading Language
+
+INPUT 3D DATA --
+1) Vertex Shader
+2) Shape Assembly
+3) Geometry Shader
+4) Test and Blending
+5) Fragment Shader
+6) Rasterization
+
+Primitives --> points, triangles, lines
+
+A FRAGMENT is all the data required to render a single pixel
+
+Required to define at least a VERTEX and FRAGMENT shader
+
+2D --> Z coordinate of 0 (depth remains the same, looking 2d)
+
+Once coords have been processed, NORMALIZED DEVICE COORDS
+X, Y, Z, in range -1.0 -- 1.0
+Anything outside will be clipped
+0,0 is center of screen
+-1, 1 is top left
+1, -1 is bottom right
+
+will be transformed to SCREEN SPACE COORDINATES via the VIEWPORT TRANSFORM using data
+from the glViewport
+
