@@ -165,9 +165,9 @@ static ovrCubeVertices cubeVertices = {
     // colors
     {
         Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
-        Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
-        Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
-        Vector4f(1.0f, 0.0f, 0.0f, 1.0f)
+        Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
+        Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
+        Vector4f(1.0f, 1.0f, 0.0f, 1.0f)
     },
     };
 
