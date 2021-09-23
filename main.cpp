@@ -148,33 +148,45 @@ static float ovrScene_RandomFloat(int) {
     return (float) ( rand() ) / RAND_MAX;
 }
 
-  struct ovrCubeVertices {
-        Vector3f positions[4];
-        Vector4f colors[4];
-    };
+
+
+// setup Cube
+struct ovrCubeVertices {
+    Vector3f positions[8];
+    Vector4f colors[8];
+};
 
 static ovrCubeVertices cubeVertices = {
     // positions
     {
-        Vector3f(-0.5f, +0.5f, 0.0f), //-1.0f
-        Vector3f(+0.5f, +0.5f, 0.0f), //-1.0f
-        Vector3f(+0.5f, -0.5f, 0.0f), //+1.0f
-        Vector3f(-0.5f, -0.5f, 0.0f)    
-    }, 
-            
-    // colors
-    {
-        Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
-        Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
-        Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
-        Vector4f(1.0f, 1.0f, 0.0f, 1.0f)
+        Vector3f(-1.0f, +1.0f, -1.0f),
+        Vector3f(+1.0f, +1.0f, -1.0f),
+        Vector3f(+1.0f, +1.0f, +1.0f),
+        Vector3f(-1.0f, +1.0f, +1.0f), // top
+        Vector3f(-1.0f, -1.0f, -1.0f),
+        Vector3f(-1.0f, -1.0f, +1.0f),
+        Vector3f(+1.0f, -1.0f, +1.0f),
+        Vector3f(+1.0f, -1.0f, -1.0f) // bottom
     },
-    };
+    // colors
+    {Vector4f(1.0f, 0.0f, 1.0f, 1.0f),
+     Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
+     Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
+     Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
+     Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
+     Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
+     Vector4f(1.0f, 0.0f, 1.0f, 1.0f),
+     Vector4f(1.0f, 0.0f, 0.0f, 1.0f)},
+};
 
-    static const unsigned short cubeIndices[6] = {
-        0, 1, 2,
-        2, 0, 3
-    };
+static const unsigned short cubeIndices[36] = {
+    0, 2, 1, 2, 0, 3, // top
+    4, 6, 5, 6, 4, 7, // bottom
+    2, 6, 7, 7, 1, 2, // right
+    0, 4, 5, 5, 3, 0, // left
+    3, 5, 6, 6, 2, 3, // front
+    0, 1, 7, 7, 4, 0 // back
+};
 
 
 int main()
@@ -213,7 +225,7 @@ int main()
     Shader program("vertexShader.vs", "fragmentShader.fs");
 
 
-    int VERTICES_PER_OBJECT = 4; //8
+    int VERTICES_PER_OBJECT = 8; //8
     VertexAttribs attribs;
     attribs.position.resize(VERTICES_PER_OBJECT);
     attribs.color.resize(VERTICES_PER_OBJECT);
@@ -223,7 +235,7 @@ int main()
     }
 
     std::vector<TriangleIndex> indices;
-    int NUMBER_OF_INDICES = 6; //36
+    int NUMBER_OF_INDICES = 36; //36
     indices.resize(NUMBER_OF_INDICES);
     for (int i = 0; i < NUMBER_OF_INDICES; i++) {
         indices[i] = cubeIndices[i];
@@ -269,13 +281,6 @@ int main()
         GL_STATIC_DRAW);
 
     glBindVertexArray(0);
-
-    //glEnableVertexAttribArray(0);    
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-    //glEnableVertexAttribArray(VERTEX_ATTRIBUTE_LOCATION_COLOR);
-    //glVertexAttribPointer(VERTEX_ATTRIBUTE_LOCATION_COLOR, 4, GL_FLOAT, GL_FALSE, 0, (void*)(3 * 4 * sizeof(float)));
-    
 
     
 
@@ -337,7 +342,7 @@ void processInput(GLFWwindow *window)
     
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
       cameraPos += cameraSpeed * cameraFront;
-      std::cout << "Forward" << std::endl;
+      //std::cout << "Forward" << std::endl;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
       cameraPos -= cameraSpeed * cameraFront;
