@@ -119,6 +119,7 @@ typedef struct {
     ovrVertexAttribPointer VertexAttribs[MAX_VERTEX_ATTRIB_POINTERS];
 } ovrGeometry;
 
+/*
 enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
     VERTEX_ATTRIBUTE_LOCATION_NORMAL = 1,
@@ -131,6 +132,15 @@ enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_JOINT_WEIGHTS = 8,
     VERTEX_ATTRIBUTE_LOCATION_FONT_PARMS = 9
 };
+*/
+
+
+enum VertexAttributeLocation {
+    VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
+    VERTEX_ATTRIBUTE_LOCATION_COLOR = 1
+};
+
+
 
 
 // Returns a random float in the range [0, 1].
