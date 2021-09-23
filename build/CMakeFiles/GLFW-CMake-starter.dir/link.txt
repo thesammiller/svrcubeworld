@@ -1,1 +1,0 @@
-/usr/bin/c++    -rdynamic CMakeFiles/GLFW-CMake-starter.dir/main.cpp.o  -o GLFW-CMake-starter  -lGL -lGLU glfw/src/libglfw3.a -lpthread -lrt -lm -ldl -lX11 
