@@ -146,24 +146,24 @@ static float ovrScene_RandomFloat(int) {
 static ovrCubeVertices cubeVertices = {
     // positions
     {
-        Vector3f(-1.0f, +1.0f, 0.0f), //-1.0f
-        Vector3f(+1.0f, +1.0f, 0.0f), //-1.0f
-        Vector3f(+1.0f, -1.0f, 0.0f), //+1.0f
-        Vector3f(-1.0f, -1.0f, 0.0f)    
+        Vector3f(-0.5f, +0.5f, 0.0f), //-1.0f
+        Vector3f(+0.5f, +0.5f, 0.0f), //-1.0f
+        Vector3f(+0.5f, -0.5f, 0.0f), //+1.0f
+        Vector3f(-0.5f, -0.5f, 0.0f)    
     }, 
             
     // colors
     {
-        Vector4f(1.0f, 0.0f, 1.0f, 1.0f),
-        Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
-        Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
+        Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
+        Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
+        Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
         Vector4f(1.0f, 0.0f, 0.0f, 1.0f)
     },
     };
 
     static const unsigned short cubeIndices[6] = {
         0, 1, 2,
-        0, 3, 2
+        2, 0, 3
     };
 
 
@@ -237,6 +237,8 @@ int main()
     glGenBuffers(1, &indexBuffer);
     glGenVertexArrays(1, &vertexArrayObject);
     glBindVertexArray(vertexArrayObject);
+
+    glBindAttribLocation(program.ID, VERTEX_ATTRIBUTE_LOCATION_COLOR, "VertexColor");    
     
 
     std::vector<uint8_t> packed;
@@ -257,11 +259,15 @@ int main()
         GL_STATIC_DRAW);
 
     glBindVertexArray(0);
-    
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    
-    GL(glBindVertexArray(0));
 
+    //glEnableVertexAttribArray(0);    
+    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+    //glEnableVertexAttribArray(VERTEX_ATTRIBUTE_LOCATION_COLOR);
+    //glVertexAttribPointer(VERTEX_ATTRIBUTE_LOCATION_COLOR, 4, GL_FLOAT, GL_FALSE, 0, (void*)(3 * 4 * sizeof(float)));
+    
+
+    
 
     // render loop
     // -----------
@@ -277,11 +283,11 @@ int main()
   
 
         GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
-        //GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
+        GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
         GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
         GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        //GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
+        GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
         GL(glBindVertexArray(vertexArrayObject));
         GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
         GL(glBindVertexArray(0));
