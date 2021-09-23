@@ -163,7 +163,7 @@ static ovrCubeVertices cubeVertices = {
 
     static const unsigned short cubeIndices[6] = {
         0, 1, 2,
-        3, 1, 0
+        0, 3, 2
     };
 
 
