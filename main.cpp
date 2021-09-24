@@ -313,6 +313,9 @@ int main()
     //glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
     projection = ovrMatrix4f_CreateProjectionFov(90.0f, 90.0f, 0.0f, 0.0f, 0.1f, 0.0f);
 
+
+    //Sample Data
+    //0.131918 -0.019500 0.001918 0.991067	0.005008 1.083717 0.058313
     ovrPosef pose = {};
     pose.Position.x = 0.0f;
     pose.Position.y = 0.0f;
@@ -322,9 +325,6 @@ int main()
     pose.Orientation.z = 0.0f;
     pose.Orientation.w = 1.0f;
 
-    
-
-    
 
     // render loop
     // -----------
@@ -344,18 +344,11 @@ int main()
         model = ovrMatrix4f_Multiply(&model, &rotationMatrix);
 
 
-        //Sample Data
-        //0.131918 -0.019500 0.001918 0.991067	0.005008 1.083717 0.058313
-        // Default
-        
+        // VIEW
+        // ---------
         ovrMatrix4f poseM = vrapi_GetTransformFromPose(&pose);
-
-        //print_matrix(&view);
-        //
-        //print_matrix(&centerEyeViewMatrix);
         view =  ovrMatrix4f_Multiply(&view, &poseM); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
         //view = ovrMatrix4f_Transpose(&view);
-        
         //view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
     
 
