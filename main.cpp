@@ -2,11 +2,10 @@
 
 
 #include "OVR_Math.h"
+#include "VrApi_Helpers.h"
 
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
-
-
 
 
 #include <glm/glm.hpp>
@@ -22,6 +21,7 @@
 
 using OVR::Vector3f;
 using OVR::Vector4f;
+using OVR::Matrix4f;
 
 const int NUM_INSTANCES = 150;
 const int NUM_ROTATIONS = 16;
@@ -282,13 +282,29 @@ int main()
 
     glBindVertexArray(0);
 
-    glm::mat4 model = glm::mat4(1.0f);
+    ovrMatrix4f model = ovrMatrix4f_CreateIdentity();
     
-    glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    ovrMatrix4f view = ovrMatrix4f_CreateIdentity();
+    //glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
-    glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+    /*
+    ovrMatrix4f_Multiply(view, poseM) --> poseM is the return from GetTransformFroMPose
+    static inline ovrMatrix4f vrapi_GetTransformFromPose(const ovrPosef* pose) {
+    const ovrMatrix4f rotation = ovrMatrix4f_CreateFromQuaternion(&pose->Orientation);
+    const ovrMatrix4f translation =
+        ovrMatrix4f_CreateTranslation(pose->Position.x, pose->Position.y, pose->Position.z);
+    return ovrMatrix4f_Multiply(&translation, &rotation);
+    }
+    */
+    ovrMatrix4f translationMatrix = ovrMatrix4f_CreateTranslation(0.0f, 0.0f, -3.0f);
+    view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
+
+
+    ovrMatrix4f projection;
+    //glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+    projection = ovrMatrix4f_CreateProjectionFov(90.0f, 90.0f, 0.0f, 0.0f, 0.1f, 0.0f);
+    
+    
 
     
 
@@ -305,18 +321,19 @@ int main()
         program.use();
 
         float time = glfwGetTime();
-        model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0, 1.0, 1.0));
+        ovrMatrix4f rotationMatrix = ovrMatrix4f_CreateRotation(1.0f, 1.0f, 1.0f);
+        model = ovrMatrix4f_Multiply(&model, &rotationMatrix);
     
 
         unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model.M[0][0]);
         
   
         unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view.M[0][0]);
 
         unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, &projection.M[0][0]);
   
 
         GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
