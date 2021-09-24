@@ -317,13 +317,13 @@ int main()
     //Sample Data
     //0.131918 -0.019500 0.001918 0.991067	0.005008 1.083717 0.058313
     ovrPosef pose = {};
-    pose.Position.x = 0.0f;
-    pose.Position.y = 0.0f;
-    pose.Position.z = 0.0f;
-    pose.Orientation.x = 0.0f;
-    pose.Orientation.y = 0.0f;
-    pose.Orientation.z = 0.0f;
-    pose.Orientation.w = 1.0f;
+    pose.Position.x = 0.005f;
+    pose.Position.y = 1.083f;
+    pose.Position.z = 0.05f;
+    pose.Orientation.x = 0.13f;
+    pose.Orientation.y = -0.019f;
+    pose.Orientation.z = 0.0019f;
+    pose.Orientation.w = 0.99f;
 
 
     // render loop
@@ -346,11 +346,14 @@ int main()
 
         // VIEW
         // ---------
-        ovrMatrix4f poseM = vrapi_GetTransformFromPose(&pose);
-        view =  ovrMatrix4f_Multiply(&view, &poseM); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
+
+        Matrix4f CenterEyeViewMatrix = Matrix4f(pose);
+
+        //ovrMatrix4f poseM = vrapi_GetTransformFromPose(&pose);
+        //view =  ovrMatrix4f_Multiply(&view, &poseM); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
         //view = ovrMatrix4f_Transpose(&view);
         //view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
-    
+        view = vrapi_GetViewMatrixFromPose(&pose);
 
         unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, &model.M[0][0]);
