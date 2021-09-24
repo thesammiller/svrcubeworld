@@ -296,13 +296,13 @@ int main()
     return ovrMatrix4f_Multiply(&translation, &rotation);
     }
     */
-    ovrMatrix4f translationMatrix = ovrMatrix4f_CreateTranslation(0.0f, 0.0f, -3.0f);
+    ovrMatrix4f translationMatrix = ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f);
     view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
 
 
     ovrMatrix4f projection;
     //glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-    projection = ovrMatrix4f_CreateProjectionFov(90.0f, 90.0f, 0.0f, 0.0f, 0.1f, 0.0f);
+    projection = ovrMatrix4f_CreateProjectionFov(90.0f, 90.0f, 0.0f, 0.0f, 0.1f, 100.0f);
     
     
 
@@ -321,7 +321,7 @@ int main()
         program.use();
 
         float time = glfwGetTime();
-        ovrMatrix4f rotationMatrix = ovrMatrix4f_CreateRotation(1.0f, 1.0f, 1.0f);
+        ovrMatrix4f rotationMatrix = ovrMatrix4f_CreateRotation(0.0f, 0.0f, 0.0f);
         model = ovrMatrix4f_Multiply(&model, &rotationMatrix);
     
 
