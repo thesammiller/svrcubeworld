@@ -179,7 +179,7 @@ static ovrCubeVertices cubeVertices = {
         Vector3f(+1.0f, -1.0f, -1.0f) // bottom
     },
     // colors
-    {Vector4f(1.0f, 0.0f, 1.0f, 1.0f),
+    {Vector4f(1.0f, 0.0f, 1.0f, 1.0f), //1, 0, 1
      Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
      Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
      Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
@@ -197,6 +197,22 @@ static const unsigned short cubeIndices[36] = {
     3, 5, 6, 6, 2, 3, // front
     0, 1, 7, 7, 4, 0 // back
 };
+
+ovrMatrix4f ModelMatrix( const int texWidth, const int texHeight, const ovrVector3f translation, const float rotateYaw,
+    const float rotatePitch, const float radius, const float density) {
+    const ovrMatrix4f scaleMatrix =
+        ovrMatrix4f_CreateScale(radius, radius * (float)texHeight * VRAPI_PI / density, radius);
+    const ovrMatrix4f transMatrix =
+        ovrMatrix4f_CreateTranslation(translation.x, translation.y, translation.z);
+    const ovrMatrix4f rotXMatrix = ovrMatrix4f_CreateRotation(rotatePitch, 0.0f, 0.0f);
+    const ovrMatrix4f rotYMatrix = ovrMatrix4f_CreateRotation(0.0f, rotateYaw, 0.0f);
+
+    const ovrMatrix4f m0 = ovrMatrix4f_Multiply(&transMatrix, &scaleMatrix);
+    const ovrMatrix4f m1 = ovrMatrix4f_Multiply(&rotXMatrix, &m0);
+    const ovrMatrix4f m2 = ovrMatrix4f_Multiply(&rotYMatrix, &m1);
+
+    return m2;
+}
 
 
 int main()
@@ -325,6 +341,7 @@ int main()
     pose.Orientation.z = 0.0019f;
     pose.Orientation.w = 0.99f;
 
+    model = ovrMatrix4f_CreateIdentity();
 
     // render loop
     // -----------
@@ -339,20 +356,17 @@ int main()
         program.use();
 
         float time = glfwGetTime();
-        model = ovrMatrix4f_CreateIdentity();
-        ovrMatrix4f rotationMatrix = ovrMatrix4f_CreateRotation(0.0f, 0.0f, 0.0f);
-        model = ovrMatrix4f_Multiply(&model, &rotationMatrix);
-
+        
+        
+        ovrVector3f trans = Vector3f(0.0f, 0.0f, -2.0f);
+        const float density = 4500.0f;
+        const float rotateYaw = 0.0f;
+        const float rotatePitch = 0.0f;
+        const float radius = 3.0f;
+        model = ModelMatrix(SCR_WIDTH, SCR_HEIGHT, trans, rotateYaw, rotatePitch, radius, density);
 
         // VIEW
         // ---------
-
-        Matrix4f CenterEyeViewMatrix = Matrix4f(pose);
-
-        //ovrMatrix4f poseM = vrapi_GetTransformFromPose(&pose);
-        //view =  ovrMatrix4f_Multiply(&view, &poseM); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
-        //view = ovrMatrix4f_Transpose(&view);
-        //view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
         view = vrapi_GetViewMatrixFromPose(&pose);
 
         unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
