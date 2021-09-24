@@ -282,6 +282,14 @@ int main()
 
     glBindVertexArray(0);
 
+    glm::mat4 model = glm::mat4(1.0f);
+    
+    glm::mat4 view = glm::mat4(1.0f);
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+
     
 
     // render loop
@@ -295,6 +303,20 @@ int main()
         // render
         // ------
         program.use();
+
+        float time = glfwGetTime();
+        model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0, 1.0, 1.0));
+    
+
+        unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        
+  
+        unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+        unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
   
 
         GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
