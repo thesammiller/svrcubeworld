@@ -347,7 +347,7 @@ int main()
         ovrPosef pose = {};
         pose.Position.x = 0.0f;
         pose.Position.y = 0.0f;
-        pose.Position.z = -2.0f;
+        pose.Position.z = -3.0f;
         pose.Orientation.x = 0.0f;
         pose.Orientation.y = 0.0f;
         pose.Orientation.z = 0.0f;
