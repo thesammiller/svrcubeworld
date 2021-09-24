@@ -311,8 +311,17 @@ int main()
 
     ovrMatrix4f projection;
     //glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-    projection = ovrMatrix4f_CreateProjectionFov(90.0f, 90.0f, 0.0f, 0.0f, 0.1f, 100.0f);
-    
+    projection = ovrMatrix4f_CreateProjectionFov(90.0f, 90.0f, 0.0f, 0.0f, 0.1f, 0.0f);
+
+    ovrPosef pose = {};
+    pose.Position.x = 0.0f;
+    pose.Position.y = 0.0f;
+    pose.Position.z = 0.0f;
+    pose.Orientation.x = 0.0f;
+    pose.Orientation.y = 0.0f;
+    pose.Orientation.z = 0.0f;
+    pose.Orientation.w = 1.0f;
+
     
 
     
@@ -330,35 +339,22 @@ int main()
         program.use();
 
         float time = glfwGetTime();
+        model = ovrMatrix4f_CreateIdentity();
         ovrMatrix4f rotationMatrix = ovrMatrix4f_CreateRotation(0.0f, 0.0f, 0.0f);
         model = ovrMatrix4f_Multiply(&model, &rotationMatrix);
 
-        //Using sample data from the head pose... 
-        ovrQuatf quat; 
-        quat.x = 0.0f; //0.131918f;
-        quat.y = 0.0f; //-0.019500f;
-        quat.z = 0.0f; //0.001918f;
-        quat.w = 1.0f; //0.991067f;
-        //const ovrMatrix4f rotation = ovrMatrix4f_CreateFromQuaternion(&quat);
-        //const ovrMatrix4f translation = ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.05f);
-        //ovrMatrix4f_CreateTranslation(0.005f, 1.0f, 0.05f);
 
-
-        ovrPosef pose = {};
-        pose.Position.x = 0.0f;
-        pose.Position.y = 0.0f;
-        pose.Position.z = -3.0f;
-        pose.Orientation.x = 0.0f;
-        pose.Orientation.y = 0.0f;
-        pose.Orientation.z = 0.0f;
-        pose.Orientation.w = 1.0f;
+        //Sample Data
+        //0.131918 -0.019500 0.001918 0.991067	0.005008 1.083717 0.058313
+        // Default
+        
         ovrMatrix4f poseM = vrapi_GetTransformFromPose(&pose);
-        
-        print_matrix(&poseM);
-        
-        ovrMatrix4f centerEyeViewMatrix = vrapi_GetViewMatrixFromPose(&pose);
-        print_matrix(&centerEyeViewMatrix);
-        view =  ovrMatrix4f_Multiply(&centerEyeViewMatrix, &poseM); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
+
+        //print_matrix(&view);
+        //
+        //print_matrix(&centerEyeViewMatrix);
+        view =  ovrMatrix4f_Multiply(&view, &poseM); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
+        //view = ovrMatrix4f_Transpose(&view);
         
         //view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
     
