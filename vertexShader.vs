@@ -13,6 +13,6 @@ out vec4 outColor;
 
 void main()
 {
-	gl_Position = projection * view * model * vec4(vertexPosition, 1.0);
+	gl_Position = projection * (view * (model * vec4(vertexPosition, 1.0)));
 	outColor = vertexColor; 
 }

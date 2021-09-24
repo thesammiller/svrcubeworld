@@ -296,8 +296,7 @@ int main()
     return ovrMatrix4f_Multiply(&translation, &rotation);
     }
     */
-    ovrMatrix4f translationMatrix = ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f);
-    view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
+    
 
 
     ovrMatrix4f projection;
@@ -323,6 +322,18 @@ int main()
         float time = glfwGetTime();
         ovrMatrix4f rotationMatrix = ovrMatrix4f_CreateRotation(0.0f, 0.0f, 0.0f);
         model = ovrMatrix4f_Multiply(&model, &rotationMatrix);
+
+        ovrQuatf quat; 
+        quat.x = 0.131918f;
+        quat.y = -0.019500f;
+        quat.z = 0.001918f;
+        quat.w = 0.991067f;
+        const ovrMatrix4f rotation = ovrMatrix4f_CreateFromQuaternion(&quat);
+        const ovrMatrix4f translation = ovrMatrix4f_CreateTranslation(0.005f, 1.0f, 0.05f);
+    
+        view =  ovrMatrix4f_Multiply(&translation, &rotation); //ovrMatrix4f_CreateTranslation(0.0f, 0.0f, 0.0f );
+        
+        //view =  ovrMatrix4f_Multiply(&view, &translationMatrix);
     
 
         unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
