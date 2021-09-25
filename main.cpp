@@ -2,6 +2,7 @@
 
 
 #include "OVR_Math.h"
+#include "VrApi_Helpers.h"
 
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
@@ -357,14 +358,14 @@ int main()
 
         CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
     }
+    unsigned int InstanceTransformBuffer;
+    unsigned int VertexTransformAttribute;
+    VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");
 
-    glm::mat4 modelMatrices[NUM_INSTANCES];
+    float startTime = glfwGetTime();
 
-    for (int i = 0; i < NUM_INSTANCES; i++) {
-            modelMatrices[i] = glm::mat4(1.0f);
-            modelMatrices[i] = glm::translate(modelMatrices[i], glm::vec3(CubePositions[i].x, CubePositions[i].y, CubePositions[i].z));
-    }
-    
+    // Update the instance transform attributes.
+   
 
     // render loop
     // -----------
@@ -379,6 +380,67 @@ int main()
         program.use();
 
         float time = glfwGetTime();
+        float elapsed = time - startTime;
+
+        
+
+
+        GL(glGenBuffers(1, &InstanceTransformBuffer));
+        GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+        GL(glBufferData(
+            GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
+        for (int i = 0; i < 4; i++) {
+            GL(glEnableVertexAttribArray(VertexTransformAttribute + i));
+            GL(glVertexAttribPointer(
+                VertexTransformAttribute + i,
+                4,
+                GL_FLOAT,
+                false,
+                4 * 4 * sizeof(float),
+                (void*)(i * 4 * sizeof(float))));
+            GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
+        }
+        GL(glBindVertexArray(0));
+        
+         ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
+        for (int i = 0; i < NUM_ROTATIONS; i++) {
+            rotationMatrices[i] = ovrMatrix4f_CreateRotation(
+                Rotations[i].x * elapsed,
+                Rotations[i].y * elapsed,
+                Rotations[i].z * elapsed);
+        }
+
+        GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+        GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
+            GL_ARRAY_BUFFER,
+            0,
+            NUM_INSTANCES * sizeof(ovrMatrix4f),
+            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
+        for (int i = 0; i < NUM_INSTANCES; i++) {
+            const int index = CubeRotations[i];
+
+            // Write in order in case the mapped buffer lives on write-combined memory.
+            cubeTransforms[i].M[0][0] = rotationMatrices[index].M[0][0];
+            cubeTransforms[i].M[0][1] = rotationMatrices[index].M[0][1];
+            cubeTransforms[i].M[0][2] = rotationMatrices[index].M[0][2];
+            cubeTransforms[i].M[0][3] = rotationMatrices[index].M[0][3];
+
+            cubeTransforms[i].M[1][0] = rotationMatrices[index].M[1][0];
+            cubeTransforms[i].M[1][1] = rotationMatrices[index].M[1][1];
+            cubeTransforms[i].M[1][2] = rotationMatrices[index].M[1][2];
+            cubeTransforms[i].M[1][3] = rotationMatrices[index].M[1][3];
+
+            cubeTransforms[i].M[2][0] = rotationMatrices[index].M[2][0];
+            cubeTransforms[i].M[2][1] = rotationMatrices[index].M[2][1];
+            cubeTransforms[i].M[2][2] = rotationMatrices[index].M[2][2];
+            cubeTransforms[i].M[2][3] = rotationMatrices[index].M[2][3];
+
+            cubeTransforms[i].M[3][0] = CubePositions[i].x;
+            cubeTransforms[i].M[3][1] = CubePositions[i].y;
+            cubeTransforms[i].M[3][2] = CubePositions[i].z;
+            cubeTransforms[i].M[3][3] = 1.0f;
+        }
+        GL(glUnmapBuffer(GL_ARRAY_BUFFER));
 
         GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
         GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
@@ -395,16 +457,16 @@ int main()
 
 
         //TODO: Reimplement this so that it's more performant
-        for (int i = 0; i < NUM_INSTANCES; i++) {
-            glm::mat4 model = glm::rotate(modelMatrices[i], glm::radians((float) CubeRotations[i] * time), glm::vec3(1.0, 1.0, 1.0));
-            unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        //for (int i = 0; i < NUM_INSTANCES; i++) {
+        //    glm::mat4 model = glm::rotate(modelMatrices[i], glm::radians((float) CubeRotations[i] * time), glm::vec3(1.0, 1.0, 1.0));
+        //    unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
+        //    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
             
 
-            GL(glBindVertexArray(vertexArrayObject));
-            GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
+        GL(glBindVertexArray(vertexArrayObject));
+        GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
            
-        }
+        
 
          GL(glBindVertexArray(0));
         GL(glUseProgram(0));
