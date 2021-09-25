@@ -24,7 +24,7 @@
 using OVR::Vector3f;
 using OVR::Vector4f;
 
-const int NUM_INSTANCES = 1500;
+const int NUM_INSTANCES = 150;
 const int NUM_ROTATIONS = 16;
 
 ovrVector3f* Rotations = (ovrVector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
@@ -93,7 +93,7 @@ void PackVertexAttribute(
     }
 }
 
-unsigned int Random;
+unsigned int Random;    
 float RandomFloat() {
     Random = 1664525L * Random + 1013904223L;
     unsigned int rf = 0x3F800000 | (Random & 0x007FFFFF);
@@ -323,7 +323,7 @@ int main()
             // Test for overlap with any of the existing cubes.
             bool overlap = false;
             for (int j = 0; j < i; j++) {
-                if (fabsf(rx - CubePositions[j].x) < 4.0f &&
+                if (fabsf(rx - CubePositions[j].x) < 4.0f && //4
                     fabsf(ry - CubePositions[j].y) < 4.0f &&
                     fabsf(rz - CubePositions[j].z) < 4.0f) {
                     overlap = true;
@@ -336,9 +336,9 @@ int main()
             }
         }
 
-        rx *= 0.1f;
-        ry *= 0.1f;
-        rz *= 0.1f;
+        //rx *= 0.1f;
+        //ry *= 0.1f;
+        //rz *= 0.1f;
 
         // Insert into list sorted based on distance.
         int insert = 0;
