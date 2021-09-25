@@ -23,7 +23,7 @@
 using OVR::Vector3f;
 using OVR::Vector4f;
 
-const int NUM_INSTANCES = 150;
+const int NUM_INSTANCES = 500;
 const int NUM_ROTATIONS = 16;
 
 Vector3f* Rotations = (Vector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
@@ -90,6 +90,11 @@ void PackVertexAttribute(
     } else {
         glDisableVertexAttribArray(glLocation);
     }
+}
+
+float RandomFloat() {
+    srand(time(0));
+    return (float) rand() / (float) RAND_MAX;
 }
 
 /*
@@ -285,12 +290,74 @@ int main()
     glm::mat4 model = glm::mat4(1.0f);
     
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
 
-    
+    Vector3f CubePositions[NUM_INSTANCES];
+    Vector3f Rotations[NUM_ROTATIONS];
+
+    for (int i = 0; i < NUM_ROTATIONS; i++) {
+        Rotations[i].x = RandomFloat();
+        Rotations[i].y = RandomFloat();
+        Rotations[i].z = RandomFloat();
+    }
+
+    for (int i = 0; i < NUM_INSTANCES; i++) {
+        volatile float rx, ry, rz;
+        for (;;) {
+            rx = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
+            ry = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
+            rz = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
+
+            // If too close to 0,0,0
+            if (fabsf(rx) < 4.0f && fabsf(ry) < 4.0f && fabsf(rz) < 4.0f) {
+                continue;
+            }
+
+            // Test for overlap with any of the existing cubes.
+            bool overlap = false;
+            for (int j = 0; j < i; j++) {
+                if (fabsf(rx - CubePositions[j].x) < 4.0f &&
+                    fabsf(ry - CubePositions[j].y) < 4.0f &&
+                    fabsf(rz - CubePositions[j].z) < 4.0f) {
+                    overlap = true;
+                    break;
+                }
+            }
+
+            if (!overlap) {
+                break;
+            }
+        }
+
+        rx *= 0.1f;
+        ry *= 0.1f;
+        rz *= 0.1f;
+
+        // Insert into list sorted based on distance.
+        int insert = 0;
+        const float distSqr = rx * rx + ry * ry + rz * rz;
+        for (int j = i; j > 0; j--) {
+            Vector3f* otherPos = &CubePositions[j - 1];
+            const float otherDistSqr =
+                otherPos->x * otherPos->x + otherPos->y * otherPos->y + otherPos->z * otherPos->z;
+            if (distSqr > otherDistSqr) {
+                insert = j;
+                break;
+            }
+            CubePositions[j] = CubePositions[j - 1];
+            CubeRotations[j] = CubeRotations[j - 1];
+        }
+
+        CubePositions[insert].x = rx;
+        CubePositions[insert].y = ry;
+        CubePositions[insert].z = rz;
+
+        CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
+    }
+
 
     // render loop
     // -----------
@@ -305,29 +372,32 @@ int main()
         program.use();
 
         float time = glfwGetTime();
-        model = glm::rotate(model, glm::radians(1.0f), glm::vec3(1.0, 1.0, 1.0));
+
+        for (int i = 0; i < NUM_INSTANCES; i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(CubePositions[i].x, CubePositions[i].y, CubePositions[i].z));
+            model = glm::rotate(model, glm::radians((float) CubeRotations[i] * time), glm::vec3(1.0, 1.0, 1.0));
+            unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            
     
+            unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-        unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        
-  
-        unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
+            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+            GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
+            GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
+            GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
+            GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
+            GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+            GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
+            GL(glBindVertexArray(vertexArrayObject));
+            GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, 1));
+           
+        }
 
-        unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-  
-
-        GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
-        GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
-        GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
-        GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
-        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
-        GL(glBindVertexArray(vertexArrayObject));
-        GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
-        GL(glBindVertexArray(0));
+         GL(glBindVertexArray(0));
         GL(glUseProgram(0));
 
 
