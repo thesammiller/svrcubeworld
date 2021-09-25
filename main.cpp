@@ -23,7 +23,7 @@
 using OVR::Vector3f;
 using OVR::Vector4f;
 
-const int NUM_INSTANCES = 500;
+const int NUM_INSTANCES = 100;
 const int NUM_ROTATIONS = 16;
 
 Vector3f* Rotations = (Vector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
@@ -373,6 +373,14 @@ int main()
 
         float time = glfwGetTime();
 
+        GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
+        GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
+        GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
+        GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
+        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
+        
+
         for (int i = 0; i < NUM_INSTANCES; i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(CubePositions[i].x, CubePositions[i].y, CubePositions[i].z));
@@ -386,14 +394,8 @@ int main()
 
             unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-            GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
-            GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
-            GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
-            GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
-            GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-            GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
             GL(glBindVertexArray(vertexArrayObject));
-            GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, 1));
+            GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
            
         }
 
