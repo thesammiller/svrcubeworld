@@ -143,7 +143,8 @@ enum VertexAttributeLocation {
 
 enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
-    VERTEX_ATTRIBUTE_LOCATION_COLOR = 1
+    VERTEX_ATTRIBUTE_LOCATION_COLOR = 1,
+    VERTEX_ATTRIBUTE_LOCATION_ROTATION = 2
 };
 
 
@@ -384,6 +385,7 @@ int main()
 
         
 
+        glBindVertexArray(vertexArrayObject);
 
         GL(glGenBuffers(1, &InstanceTransformBuffer));
         GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
