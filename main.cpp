@@ -24,7 +24,7 @@
 using OVR::Vector3f;
 using OVR::Vector4f;
 
-const int NUM_INSTANCES = 100;
+const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
 Vector3f* Rotations = (Vector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
@@ -295,10 +295,10 @@ int main()
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
 
     glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 1000.0f);
+    projection = glm::perspective(glm::radians(90.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 1000.0f);
 
-    Vector3f CubePositions[NUM_INSTANCES];
-    Vector3f Rotations[NUM_ROTATIONS];
+    ovrVector3f CubePositions[NUM_INSTANCES];
+    ovrVector3f Rotations[NUM_ROTATIONS];
 
     for (int i = 0; i < NUM_ROTATIONS; i++) {
         Rotations[i].x = RandomFloat();
@@ -342,7 +342,7 @@ int main()
         int insert = 0;
         const float distSqr = rx * rx + ry * ry + rz * rz;
         for (int j = i; j > 0; j--) {
-            Vector3f* otherPos = &CubePositions[j - 1];
+            ovrVector3f* otherPos = &CubePositions[j - 1];
             const float otherDistSqr =
                 otherPos->x * otherPos->x + otherPos->y * otherPos->y + otherPos->z * otherPos->z;
             if (distSqr > otherDistSqr) {
