@@ -357,7 +357,7 @@ int main()
 
         CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
     }
-
+    
 
     // render loop
     // -----------
