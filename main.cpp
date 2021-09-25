@@ -93,11 +93,12 @@ void PackVertexAttribute(
     }
 }
 
+unsigned int Random;
 float RandomFloat() {
-    srand(time(0));
-    return (float) rand() / (float) RAND_MAX;
+    Random = 1664525L * Random + 1013904223L;
+    unsigned int rf = 0x3F800000 | (Random & 0x007FFFFF);
+    return (*(float*)&rf) - 1.0f;
 }
-
 /*
 ================================================================================
 
