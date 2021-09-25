@@ -293,7 +293,7 @@ int main()
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
 
     glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+    projection = glm::perspective(glm::radians(45.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 1000.0f);
 
     Vector3f CubePositions[NUM_INSTANCES];
     Vector3f Rotations[NUM_ROTATIONS];
@@ -357,6 +357,13 @@ int main()
 
         CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
     }
+
+    glm::mat4 modelMatrices[NUM_INSTANCES];
+
+    for (int i = 0; i < NUM_INSTANCES; i++) {
+            modelMatrices[i] = glm::mat4(1.0f);
+            modelMatrices[i] = glm::translate(modelMatrices[i], glm::vec3(CubePositions[i].x, CubePositions[i].y, CubePositions[i].z));
+    }
     
 
     // render loop
@@ -379,21 +386,21 @@ int main()
         GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
-        
 
-        for (int i = 0; i < NUM_INSTANCES; i++) {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(CubePositions[i].x, CubePositions[i].y, CubePositions[i].z));
-            model = glm::rotate(model, glm::radians((float) CubeRotations[i] * time), glm::vec3(1.0, 1.0, 1.0));
-            unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            
-    
             unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
             unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
             glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+
+        //TODO: Reimplement this so that it's more performant
+        for (int i = 0; i < NUM_INSTANCES; i++) {
+            glm::mat4 model = glm::rotate(modelMatrices[i], glm::radians((float) CubeRotations[i] * time), glm::vec3(1.0, 1.0, 1.0));
+            unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            
+
             GL(glBindVertexArray(vertexArrayObject));
             GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
            

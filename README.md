@@ -1,5 +1,6 @@
 # CubeWorld Linux Port
-Here I go again
+LearnOpenGL Version of Cube Rotation
+using a sub-optimal implementation looping in the render loop
 
 Support our work through [GitHub Sponsors](https://github.com/sponsors/dougbinks) or [Patreon](https://www.patreon.com/enkisoftware)
 
