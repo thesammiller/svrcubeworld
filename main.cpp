@@ -27,8 +27,8 @@ using OVR::Vector4f;
 const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
-Vector3f* Rotations = (Vector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
-Vector3f* CubePositions = (Vector3f*) malloc (sizeof(Vector3f) * NUM_INSTANCES);
+ovrVector3f* Rotations = (ovrVector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
+ovrVector3f* CubePositions = (ovrVector3f*) malloc (sizeof(Vector3f) * NUM_INSTANCES);
 int CubeRotations[NUM_INSTANCES];
     
 
@@ -383,7 +383,6 @@ int main()
         float time = glfwGetTime();
         float elapsed = time - startTime;
 
-        
 
         glBindVertexArray(vertexArrayObject);
 
@@ -402,7 +401,7 @@ int main()
                 (void*)(i * 4 * sizeof(float))));
             GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
         }
-        GL(glBindVertexArray(0));
+        //GL(glBindVertexArray(0));
         
          ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
         for (int i = 0; i < NUM_ROTATIONS; i++) {
@@ -451,26 +450,16 @@ int main()
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 
-            unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-            unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
-            glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-
-        //TODO: Reimplement this so that it's more performant
-        //for (int i = 0; i < NUM_INSTANCES; i++) {
-        //    glm::mat4 model = glm::rotate(modelMatrices[i], glm::radians((float) CubeRotations[i] * time), glm::vec3(1.0, 1.0, 1.0));
-        //    unsigned int modelLoc = glGetUniformLocation(program.ID,"model");
-        //    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            
+        unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         GL(glBindVertexArray(vertexArrayObject));
         GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
-           
-        
 
-         GL(glBindVertexArray(0));
+        GL(glBindVertexArray(0));
         GL(glUseProgram(0));
 
 
