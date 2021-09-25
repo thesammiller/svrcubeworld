@@ -277,7 +277,7 @@ int main()
     PackVertexAttribute(packed, attribs.color, VERTEX_ATTRIBUTE_LOCATION_COLOR, GL_FLOAT, 4);
 
 
-    glBufferData(GL_ARRAY_BUFFER, packed.size() * sizeof(packed[0]), packed.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, packed.size() * sizeof(packed[0]), packed.data(), GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 
@@ -295,7 +295,7 @@ int main()
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
 
     glm::mat4 projection;
-    projection = glm::perspective(glm::radians(90.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 1000.0f);
+    projection = glm::perspective(glm::radians(90.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 10000.0f);
 
     ovrVector3f CubePositions[NUM_INSTANCES];
     ovrVector3f Rotations[NUM_ROTATIONS];
@@ -313,6 +313,7 @@ int main()
             ry = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
             rz = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
 
+            
             // If too close to 0,0,0
             if (fabsf(rx) < 4.0f && fabsf(ry) < 4.0f && fabsf(rz) < 4.0f) {
                 continue;
@@ -381,8 +382,13 @@ int main()
         program.use();
 
         float time = glfwGetTime();
-        float elapsed = time - startTime;
 
+
+        Vector3f currentRotation;
+        currentRotation.x = (float)(time - startTime);
+        currentRotation.y = (float)(time - startTime);
+        currentRotation.z = (float)(time - startTime);
+    
 
         glBindVertexArray(vertexArrayObject);
 
@@ -406,12 +412,13 @@ int main()
          ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
         for (int i = 0; i < NUM_ROTATIONS; i++) {
             rotationMatrices[i] = ovrMatrix4f_CreateRotation(
-                Rotations[i].x * elapsed,
-                Rotations[i].y * elapsed,
-                Rotations[i].z * elapsed);
+                Rotations[i].x * currentRotation.x,
+                Rotations[i].y * currentRotation.y,
+                Rotations[i].z * currentRotation.z);
         }
 
         GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+
         GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
             GL_ARRAY_BUFFER,
             0,
