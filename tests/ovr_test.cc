@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../OVR_Bridge.h"
+#include "../ovr/OVR_Bridge.h"
 
 TEST(RandomFloatTest, BasicAssertions) {
   float random_a = RandomFloat();

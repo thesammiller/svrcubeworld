@@ -3,10 +3,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 
-#include "OVR_Bridge.h"
+#include "ovr/OVR_Bridge.h"
 
-#include "OVR_Math.h"
-#include "VrApi_Helpers.h"
+#include "ovr/OVR_Math.h"
+#include "ovr/VrApi_Helpers.h"
 
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
