@@ -1,30 +1,23 @@
-cmake_minimum_required( VERSION 3.1 )
+cmake_minimum_required(VERSION 3.16)
+project(svr_cubeworld)
 
-project( GLFW-CMake-starter )
+set(CMAKE_CXX_STANDARD 11)
 
-find_package( OpenGL REQUIRED )
 
-include_directories( ${OPENGL_INCLUDE_DIRS} )
+add_executable(${PROJECT_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 
-set( GLFW_BUILD_DOCS OFF CACHE BOOL  "GLFW lib only" )
-set( GLFW_INSTALL OFF CACHE BOOL  "GLFW lib only" )
+# OpenGL
+find_package(OpenGL REQUIRED)
+message(STATUS "OpenGL included at ${OPENGL_INCLUDE_DIR}")
 
-add_subdirectory( glfw )
+# GLM
+add_subdirectory(glm)
+message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
 
-if( MSVC )
-    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /ENTRY:mainCRTStartup" )
-endif()
+# GLFW
+add_subdirectory(glfw)
+message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
-set( GLFW-CMAKE-STARTER-SRC
-     main.cpp
-     )
-     
-add_executable( GLFW-CMake-starter WIN32 ${GLFW-CMAKE-STARTER-SRC} )
-target_link_libraries( GLFW-CMake-starter ${OPENGL_LIBRARIES} glfw )
-if( MSVC )
-    if(${CMAKE_VERSION} VERSION_LESS "3.6.0") 
-        message( "\n\t[ WARNING ]\n\n\tCMake version lower than 3.6.\n\n\t - Please update CMake and rerun; OR\n\t - Manually set 'GLFW-CMake-starter' as StartUp Project in Visual Studio.\n" )
-    else()
-        set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT GLFW-CMake-starter )
-    endif()
-endif()
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm)
+
