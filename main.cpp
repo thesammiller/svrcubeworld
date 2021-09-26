@@ -1,5 +1,5 @@
-
 #define GL_GLEXT_PROTOTYPES
+
 #include <GLFW/glfw3.h>
 
 #include <glm/glm.hpp>
@@ -24,6 +24,8 @@ const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
 
+
+
 #define GL(func) func;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -33,8 +35,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
-
 
 struct VertexAttribs {
     std::vector<OVR::Vector3f> position;
@@ -92,7 +92,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -314,6 +314,7 @@ void processInput(GLFWwindow *window)
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+       
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 

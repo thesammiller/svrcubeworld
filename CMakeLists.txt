@@ -45,7 +45,7 @@ add_executable(
 )
 target_link_libraries(
   gl_test
-  gtest_main
+  gtest_main glfw glm
 )
 
 include(GoogleTest)
