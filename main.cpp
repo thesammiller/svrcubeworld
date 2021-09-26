@@ -258,89 +258,31 @@ int main()
 
     glBindVertexArray(0);
 
-    glm::mat4 model = glm::mat4(1.0f);
-    
+    // GLM MVP Matrices
+    // -------------------
+    glm::mat4 model = glm::mat4(1.0f);    
     glm::mat4 view = glm::mat4(1.0f);
-    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
-    
-
     glm::mat4 projection;
+
     projection = glm::perspective(glm::radians(90.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 10000.0f);
 
+
+    // OVR Game Logic Setup
+    // ------------------------
     ovrVector3f CubePositions[NUM_INSTANCES];
     ovrVector3f Rotations[NUM_ROTATIONS];
     int CubeRotations[NUM_INSTANCES];
 
-    for (int i = 0; i < NUM_ROTATIONS; i++) {
-        Rotations[i].x = RandomFloat();
-        Rotations[i].y = RandomFloat();
-        Rotations[i].z = RandomFloat();
-    }
-
-    for (int i = 0; i < NUM_INSTANCES; i++) {
-        volatile float rx, ry, rz;
-        for (;;) {
-            rx = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
-            ry = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
-            rz = (RandomFloat() - 0.5f) * (50.0f + static_cast<float>(sqrt(NUM_INSTANCES)));
-
-            
-            // If too close to 0,0,0
-            if (fabsf(rx) < 4.0f && fabsf(ry) < 4.0f && fabsf(rz) < 4.0f) {
-                continue;
-            }
-
-            // Test for overlap with any of the existing cubes.
-            bool overlap = false;
-            for (int j = 0; j < i; j++) {
-                if (fabsf(rx - CubePositions[j].x) < 4.0f && //4
-                    fabsf(ry - CubePositions[j].y) < 4.0f &&
-                    fabsf(rz - CubePositions[j].z) < 4.0f) {
-                    overlap = true;
-                    break;
-                }
-            }
-
-            if (!overlap) {
-                break;
-            }
-        }
-
-        //rx *= 0.1f;
-        //ry *= 0.1f;
-        //rz *= 0.1f;
-
-        // Insert into list sorted based on distance.
-        int insert = 0;
-        const float distSqr = rx * rx + ry * ry + rz * rz;
-        for (int j = i; j > 0; j--) {
-            ovrVector3f* otherPos = &CubePositions[j - 1];
-            const float otherDistSqr =
-                otherPos->x * otherPos->x + otherPos->y * otherPos->y + otherPos->z * otherPos->z;
-            if (distSqr > otherDistSqr) {
-                insert = j;
-                break;
-            }
-            CubePositions[j] = CubePositions[j - 1];
-            CubeRotations[j] = CubeRotations[j - 1];
-        }
-
-        CubePositions[insert].x = rx;
-        CubePositions[insert].y = ry;
-        CubePositions[insert].z = rz;
-
-        CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
-    }
+    generate_random_rotations(Rotations, NUM_ROTATIONS);
+    generate_random_locations(CubePositions, CubeRotations, NUM_INSTANCES, Rotations, NUM_ROTATIONS);
+    
 
     unsigned int InstanceTransformBuffer;
     unsigned int VertexTransformAttribute;
     VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");
 
     float startTime = glfwGetTime();
-
-    // Update the instance transform attributes.
    
-
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -356,12 +298,13 @@ int main()
         float time = glfwGetTime();
 
 
+        // OVR CubeWorld Game Logic Updates
+        // ---------------------------------
         Vector3f currentRotation;
         currentRotation.x = (float)(time - startTime);
         currentRotation.y = (float)(time - startTime);
         currentRotation.z = (float)(time - startTime);
     
-
         glBindVertexArray(vertexArrayObject);
 
         GL(glGenBuffers(1, &InstanceTransformBuffer));
@@ -381,7 +324,7 @@ int main()
         }
         //GL(glBindVertexArray(0));
         
-         ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
+        ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
         for (int i = 0; i < NUM_ROTATIONS; i++) {
             rotationMatrices[i] = ovrMatrix4f_CreateRotation(
                 Rotations[i].x * currentRotation.x,
@@ -420,8 +363,11 @@ int main()
             cubeTransforms[i].M[3][2] = CubePositions[i].z;
             cubeTransforms[i].M[3][3] = 1.0f;
         }
+
         GL(glUnmapBuffer(GL_ARRAY_BUFFER));
 
+        // GL Clear Screen and Prepare Draw
+        // --------------------------------
         GL(glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT));
         GL(glScissor(0, 0, SCR_WIDTH, SCR_HEIGHT));
         GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
@@ -429,7 +375,8 @@ int main()
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 
-        //camera poisition
+        // GLM Update Camera Postion
+        // -------------------------
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -437,6 +384,8 @@ int main()
         unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+        // GL DRAW CALL
+        // ------------------
         GL(glBindVertexArray(vertexArrayObject));
         GL(glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
 
