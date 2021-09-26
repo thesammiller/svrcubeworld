@@ -27,6 +27,7 @@ float fov   =  45.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     //std::cout << "Moving mouse" << std::endl;

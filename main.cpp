@@ -19,23 +19,23 @@
 #include <vector>
 #include <sys/resource.h>
 
-
+// CubeWorld Settings
+// Set Number of Cubes and Variety of Rotations
 const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
-
-
-
+// GL Debugging Wrapper -- no-op
 #define GL(func) func;
 
+// GL Functions -- Resize Window Callback, ProcessInput
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-// settings
+// GL Window Settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+// OVR VertexAttributes 
 struct VertexAttribs {
     std::vector<OVR::Vector3f> position;
     std::vector<OVR::Vector3f> normal;
@@ -102,6 +102,9 @@ int main()
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+
+    //TODO: Convert Mouse Input to Pose object
     //mouse input
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     glfwSetCursorPosCallback(window, mouse_callback);
@@ -115,7 +118,9 @@ int main()
     // ------------------------------------
     Shader program("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
 
-
+    
+    //CubeWorld Setup
+    //Convert Vertex Struct to Vector of Vertexes
     int VERTICES_PER_OBJECT = 8; //8
     VertexAttribs attribs;
     attribs.position.resize(VERTICES_PER_OBJECT);
@@ -125,6 +130,7 @@ int main()
         attribs.color[i] = cubeVertices.colors[i];
     }
 
+    //Convert Index Struct to Vector if Indices
     std::vector<TriangleIndex> indices;
     int NUMBER_OF_INDICES = 36; //36
     indices.resize(NUMBER_OF_INDICES);
@@ -132,7 +138,7 @@ int main()
         indices[i] = cubeIndices[i];
     }
 
-    //GlGeometry Create Function
+    //Get size of new data structure
     int vertexCount = attribs.position.size();
     int indexCount = indices.size();
 
@@ -141,35 +147,36 @@ int main()
     std::vector<OVR::Vector3f> tangent;
     std::vector<OVR::Vector3f> binormal;
 
-    unsigned int vertexBuffer; //VBO
-    unsigned int indexBuffer, vertexArrayObject;
+    //GL Create the Vertex Buffer, IndexBuffer and VertexArrayObject
+    unsigned int vertexBuffer, indexBuffer, vertexArrayObject;
 
+    //GL Generate Buffer Pointers
     glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
     glGenBuffers(1, &indexBuffer);
     glGenVertexArrays(1, &vertexArrayObject);
+    
+    //GL Bind to Buffers and Attribute Location
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBindVertexArray(vertexArrayObject);
-
     glBindAttribLocation(program.ID, VERTEX_ATTRIBUTE_LOCATION_COLOR, "VertexColor");    
     
+    //OVR Use the PackVertexAttribute function
     std::vector<uint8_t> packed;
     PackVertexAttribute(
         packed, attribs.position, VERTEX_ATTRIBUTE_LOCATION_POSITION, GL_FLOAT, 3);
 
     PackVertexAttribute(packed, attribs.color, VERTEX_ATTRIBUTE_LOCATION_COLOR, GL_FLOAT, 4);
 
-
+    //GL Add Data to the Buffers
     glBufferData(GL_ARRAY_BUFFER, packed.size() * sizeof(packed[0]), packed.data(), GL_DYNAMIC_DRAW);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
         indices.size() * sizeof(indices[0]),
         indices.data(),
         GL_STATIC_DRAW);
 
+    //Unbind the Vertex Array
     glBindVertexArray(0);
 
     // GLM MVP Matrices
@@ -190,7 +197,7 @@ int main()
     generate_random_rotations(Rotations, NUM_ROTATIONS);
     generate_random_locations(CubePositions, CubeRotations, NUM_INSTANCES, Rotations, NUM_ROTATIONS);
     
-
+    // Get the attribute for the instance transforms
     unsigned int InstanceTransformBuffer;
     unsigned int VertexTransformAttribute;
     VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");

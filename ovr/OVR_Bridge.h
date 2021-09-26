@@ -56,6 +56,8 @@ static const unsigned short cubeIndices[36] = {
 };
 
 
+
+
 void generate_random_rotations(ovrVector3f *Rotations, int NUM_ROTATIONS) {
     for (int i = 0; i < NUM_ROTATIONS; i++) {
             Rotations[i].x = RandomFloat();
