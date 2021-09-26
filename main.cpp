@@ -20,14 +20,9 @@
 #include <sys/resource.h>
 
 
-using OVR::Vector3f;
-using OVR::Vector4f;
-
 const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
-
-    
 
 #define GL(func) func;
 
@@ -89,34 +84,6 @@ void PackVertexAttribute(
         glDisableVertexAttribArray(glLocation);
     }
 }
-
-
-/*
-================================================================================
-
-ovrGeometry
-
-================================================================================
-*/
-typedef struct {
-    GLint Index;
-    GLint Size;
-    GLenum Type;
-    GLboolean Normalized;
-    GLsizei Stride;
-    const GLvoid* Pointer;
-} ovrVertexAttribPointer;
-
-
-#define MAX_VERTEX_ATTRIB_POINTERS 3
-typedef struct {
-    GLuint VertexBuffer;
-    GLuint IndexBuffer;
-    GLuint VertexArrayObject;
-    int VertexCount;
-    int IndexCount;
-    ovrVertexAttribPointer VertexAttribs[MAX_VERTEX_ATTRIB_POINTERS];
-} ovrGeometry;
 
 
 enum VertexAttributeLocation {
