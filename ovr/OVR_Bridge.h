@@ -77,3 +77,46 @@ void generate_random_locations(ovrVector3f *CubePositions, int *CubeRotations, i
         CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
     }
 }
+
+
+void update_cube_rotations(float startTime, float currentTime, ovrVector3f *Rotations, 
+                        int NUM_ROTATIONS, ovrMatrix4f *cubeTransforms, int NUM_INSTANCES, int *CubeRotations, ovrVector3f *CubePositions) {
+    ovrVector3f currentRotation;
+    currentRotation.x = (float)(currentTime - startTime);
+    currentRotation.y = (float)(currentTime - startTime);
+    currentRotation.z = (float)(currentTime - startTime);
+        
+    ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
+    for (int i = 0; i < NUM_ROTATIONS; i++) {
+        rotationMatrices[i] = ovrMatrix4f_CreateRotation(
+            Rotations[i].x * currentRotation.x,
+            Rotations[i].y * currentRotation.y,
+            Rotations[i].z * currentRotation.z);
+        }
+    
+    for (int i = 0; i < NUM_INSTANCES; i++) {
+            const int index = CubeRotations[i];
+
+            // Write in order in case the mapped buffer lives on write-combined memory.
+            cubeTransforms[i].M[0][0] = rotationMatrices[index].M[0][0];
+            cubeTransforms[i].M[0][1] = rotationMatrices[index].M[0][1];
+            cubeTransforms[i].M[0][2] = rotationMatrices[index].M[0][2];
+            cubeTransforms[i].M[0][3] = rotationMatrices[index].M[0][3];
+
+            cubeTransforms[i].M[1][0] = rotationMatrices[index].M[1][0];
+            cubeTransforms[i].M[1][1] = rotationMatrices[index].M[1][1];
+            cubeTransforms[i].M[1][2] = rotationMatrices[index].M[1][2];
+            cubeTransforms[i].M[1][3] = rotationMatrices[index].M[1][3];
+
+            cubeTransforms[i].M[2][0] = rotationMatrices[index].M[2][0];
+            cubeTransforms[i].M[2][1] = rotationMatrices[index].M[2][1];
+            cubeTransforms[i].M[2][2] = rotationMatrices[index].M[2][2];
+            cubeTransforms[i].M[2][3] = rotationMatrices[index].M[2][3];
+
+            cubeTransforms[i].M[3][0] = CubePositions[i].x;
+            cubeTransforms[i].M[3][1] = CubePositions[i].y;
+            cubeTransforms[i].M[3][2] = CubePositions[i].z;
+            cubeTransforms[i].M[3][3] = 1.0f;
+        }
+
+}

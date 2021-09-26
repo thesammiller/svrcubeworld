@@ -298,10 +298,7 @@ int main()
 
         // OVR CubeWorld Game Logic Updates
         // ---------------------------------
-        Vector3f currentRotation;
-        currentRotation.x = (float)(time - startTime);
-        currentRotation.y = (float)(time - startTime);
-        currentRotation.z = (float)(time - startTime);
+        
     
         glBindVertexArray(vertexArrayObject);
 
@@ -322,13 +319,7 @@ int main()
         }
         //GL(glBindVertexArray(0));
         
-        ovrMatrix4f rotationMatrices[NUM_ROTATIONS];
-        for (int i = 0; i < NUM_ROTATIONS; i++) {
-            rotationMatrices[i] = ovrMatrix4f_CreateRotation(
-                Rotations[i].x * currentRotation.x,
-                Rotations[i].y * currentRotation.y,
-                Rotations[i].z * currentRotation.z);
-        }
+        
 
         GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
 
@@ -337,31 +328,10 @@ int main()
             0,
             NUM_INSTANCES * sizeof(ovrMatrix4f),
             GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
-        for (int i = 0; i < NUM_INSTANCES; i++) {
-            const int index = CubeRotations[i];
+        
 
-            // Write in order in case the mapped buffer lives on write-combined memory.
-            cubeTransforms[i].M[0][0] = rotationMatrices[index].M[0][0];
-            cubeTransforms[i].M[0][1] = rotationMatrices[index].M[0][1];
-            cubeTransforms[i].M[0][2] = rotationMatrices[index].M[0][2];
-            cubeTransforms[i].M[0][3] = rotationMatrices[index].M[0][3];
-
-            cubeTransforms[i].M[1][0] = rotationMatrices[index].M[1][0];
-            cubeTransforms[i].M[1][1] = rotationMatrices[index].M[1][1];
-            cubeTransforms[i].M[1][2] = rotationMatrices[index].M[1][2];
-            cubeTransforms[i].M[1][3] = rotationMatrices[index].M[1][3];
-
-            cubeTransforms[i].M[2][0] = rotationMatrices[index].M[2][0];
-            cubeTransforms[i].M[2][1] = rotationMatrices[index].M[2][1];
-            cubeTransforms[i].M[2][2] = rotationMatrices[index].M[2][2];
-            cubeTransforms[i].M[2][3] = rotationMatrices[index].M[2][3];
-
-            cubeTransforms[i].M[3][0] = CubePositions[i].x;
-            cubeTransforms[i].M[3][1] = CubePositions[i].y;
-            cubeTransforms[i].M[3][2] = CubePositions[i].z;
-            cubeTransforms[i].M[3][3] = 1.0f;
-        }
-
+        update_cube_rotations(startTime, time, Rotations, NUM_ROTATIONS, cubeTransforms, NUM_INSTANCES, CubeRotations, CubePositions); 
+        
         GL(glUnmapBuffer(GL_ARRAY_BUFFER));
 
         // GL Clear Screen and Prepare Draw
