@@ -4,12 +4,10 @@
 
 
 #include "ovr/OVR_Bridge.h"
-
 #include "ovr/OVR_Math.h"
 #include "ovr/VrApi_Helpers.h"
 
 #include <GLFW/glfw3.h>
-#include "stb_image.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
