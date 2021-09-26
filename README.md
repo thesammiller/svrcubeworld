@@ -3,11 +3,11 @@
 This is a port of the Oculus Mobile SDK sample program Cube World.
 
 # Original Copyright #
-Filename	:	VrCubeWorld_Framework.cpp
-Content		:	This sample uses the application framework.
-Created		:	March, 2015
-Authors		:	J.M.P. van Waveren
-Copyright	:	Copyright (c) Facebook Technologies, LLC and its affiliates. All rights reserved.
+Filename	:	VrCubeWorld_Framework.cpp    
+Content		:	This sample uses the application framework.    
+Created		:	March, 2015    
+Authors		:	J.M.P. van Waveren    
+Copyright	:	Copyright (c) Facebook Technologies, LLC and its affiliates. All rights reserved.    
 
 
 # How To Build and Run
