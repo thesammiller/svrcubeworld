@@ -12,11 +12,11 @@ find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL included at ${OPENGL_INCLUDE_DIR}")
 
 # GLM
-find_package(glm)
+add_subdirectory(extern/glm)
 message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
 
 # GLFW
-add_subdirectory(glfw)
+add_subdirectory(extern/glfw)
 message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 
 target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm)
