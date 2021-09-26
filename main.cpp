@@ -11,9 +11,6 @@
 #include <GLFW/glfw3.h>
 #include "stb_image.h"
 
-
-
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -31,9 +28,7 @@ using OVR::Vector4f;
 const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
-ovrVector3f* Rotations = (ovrVector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
-ovrVector3f* CubePositions = (ovrVector3f*) malloc (sizeof(Vector3f) * NUM_INSTANCES);
-int CubeRotations[NUM_INSTANCES];
+
     
 
 #define GL(func) func;
@@ -125,37 +120,12 @@ typedef struct {
     ovrVertexAttribPointer VertexAttribs[MAX_VERTEX_ATTRIB_POINTERS];
 } ovrGeometry;
 
-/*
-enum VertexAttributeLocation {
-    VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
-    VERTEX_ATTRIBUTE_LOCATION_NORMAL = 1,
-    VERTEX_ATTRIBUTE_LOCATION_TANGENT = 2,
-    VERTEX_ATTRIBUTE_LOCATION_BINORMAL = 3,
-    VERTEX_ATTRIBUTE_LOCATION_COLOR = 4,
-    VERTEX_ATTRIBUTE_LOCATION_UV0 = 5,
-    VERTEX_ATTRIBUTE_LOCATION_UV1 = 6,
-    VERTEX_ATTRIBUTE_LOCATION_JOINT_INDICES = 7,
-    VERTEX_ATTRIBUTE_LOCATION_JOINT_WEIGHTS = 8,
-    VERTEX_ATTRIBUTE_LOCATION_FONT_PARMS = 9
-};
-*/
-
 
 enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
     VERTEX_ATTRIBUTE_LOCATION_COLOR = 1,
     VERTEX_ATTRIBUTE_LOCATION_ROTATION = 2
 };
-
-
-
-
-// Returns a random float in the range [0, 1].
-static float ovrScene_RandomFloat(int) {
-    return (float) ( rand() ) / RAND_MAX;
-}
-
-
 
 // setup Cube
 struct ovrCubeVertices {
@@ -269,7 +239,6 @@ int main()
 
     glBindAttribLocation(program.ID, VERTEX_ATTRIBUTE_LOCATION_COLOR, "VertexColor");    
     
-
     std::vector<uint8_t> packed;
     PackVertexAttribute(
         packed, attribs.position, VERTEX_ATTRIBUTE_LOCATION_POSITION, GL_FLOAT, 3);
@@ -300,6 +269,7 @@ int main()
 
     ovrVector3f CubePositions[NUM_INSTANCES];
     ovrVector3f Rotations[NUM_ROTATIONS];
+    int CubeRotations[NUM_INSTANCES];
 
     for (int i = 0; i < NUM_ROTATIONS; i++) {
         Rotations[i].x = RandomFloat();
@@ -361,6 +331,7 @@ int main()
 
         CubeRotations[insert] = (int)(RandomFloat() * (NUM_ROTATIONS - 0.1f));
     }
+
     unsigned int InstanceTransformBuffer;
     unsigned int VertexTransformAttribute;
     VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");
