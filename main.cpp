@@ -93,7 +93,6 @@ enum VertexAttributeLocation {
 };
 
 
-
 int main()
 {
     // glfw: initialize and configure
