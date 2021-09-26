@@ -125,43 +125,6 @@ enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_ROTATION = 2
 };
 
-// setup Cube
-struct ovrCubeVertices {
-    Vector3f positions[8];
-    Vector4f colors[8];
-};
-
-static ovrCubeVertices cubeVertices = {
-    // positions
-    {
-        Vector3f(-1.0f, +1.0f, -1.0f),
-        Vector3f(+1.0f, +1.0f, -1.0f),
-        Vector3f(+1.0f, +1.0f, +1.0f),
-        Vector3f(-1.0f, +1.0f, +1.0f), // top
-        Vector3f(-1.0f, -1.0f, -1.0f),
-        Vector3f(-1.0f, -1.0f, +1.0f),
-        Vector3f(+1.0f, -1.0f, +1.0f),
-        Vector3f(+1.0f, -1.0f, -1.0f) // bottom
-    },
-    // colors
-    {Vector4f(1.0f, 0.0f, 1.0f, 1.0f),
-     Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
-     Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
-     Vector4f(1.0f, 0.0f, 0.0f, 1.0f),
-     Vector4f(0.0f, 0.0f, 1.0f, 1.0f),
-     Vector4f(0.0f, 1.0f, 0.0f, 1.0f),
-     Vector4f(1.0f, 0.0f, 1.0f, 1.0f),
-     Vector4f(1.0f, 0.0f, 0.0f, 1.0f)},
-};
-
-static const unsigned short cubeIndices[36] = {
-    0, 2, 1, 2, 0, 3, // top
-    4, 6, 5, 6, 4, 7, // bottom
-    2, 6, 7, 7, 1, 2, // right
-    0, 4, 5, 5, 3, 0, // left
-    3, 5, 6, 6, 2, 3, // front
-    0, 1, 7, 7, 4, 0 // back
-};
 
 
 int main()
@@ -296,16 +259,16 @@ int main()
         float time = glfwGetTime();
 
 
-        // OVR CubeWorld Game Logic Updates
+        // OVR CubeWorld Game Logic Updates -- update instance transforms
         // ---------------------------------
         
-    
         glBindVertexArray(vertexArrayObject);
 
         GL(glGenBuffers(1, &InstanceTransformBuffer));
         GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
         GL(glBufferData(
             GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
+        
         for (int i = 0; i < 4; i++) {
             GL(glEnableVertexAttribArray(VertexTransformAttribute + i));
             GL(glVertexAttribPointer(
@@ -317,10 +280,7 @@ int main()
                 (void*)(i * 4 * sizeof(float))));
             GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
         }
-        //GL(glBindVertexArray(0));
-        
-        
-
+            
         GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
 
         GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
@@ -328,7 +288,6 @@ int main()
             0,
             NUM_INSTANCES * sizeof(ovrMatrix4f),
             GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
-        
 
         update_cube_rotations(startTime, time, Rotations, NUM_ROTATIONS, cubeTransforms, NUM_INSTANCES, CubeRotations, CubePositions); 
         
@@ -385,6 +344,7 @@ int main()
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window)
 {
+    //TODO: Process input from TAO
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {    
         glfwSetWindowShouldClose(window, true);
