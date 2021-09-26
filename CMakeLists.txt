@@ -32,7 +32,7 @@ enable_testing()
 
 add_executable(
   ovr_test
-  ovr_test.cc
+  tests/ovr_test.cc
 )
 target_link_libraries(
   ovr_test
