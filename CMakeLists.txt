@@ -1,25 +1,23 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.16)
 project(sample)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(CMAKE_MODULE_PATH /usr/local/lib/cmake /usr/local/lib/x86_64-linux-gnu/cmake)
-set(CMAKE_PREFIX_PATH /usr/local/lib/cmake/glfw)
-
-find_package (PkgConfig REQUIRED)
-find_package (OpenGL REQUIRED)
-find_package (glfw3 REQUIRED)
-find_package (glm REQUIRED)
-
-set(SOURCE_FILES main.cpp)
-add_executable(sample ${SOURCE_FILES})
-target_link_libraries (sample ${OPENGL_LIBRARIES} ${GLFW3_LIBRARY}
-        Xxf86vm pthread Xrandr Xinerama Xi Xcursor)
-
-      # glfw
-add_subdirectory(glfw/src EXCLUDE_FROM_ALL)
-target_link_libraries(sample PRIVATE glfw)
+set(CMAKE_CXX_STANDARD 11)
 
 
-# glm
-add_subdirectory(glm/glm EXCLUDE_FROM_ALL)
-target_link_libraries(sample PRIVATE glm)
+add_executable(${PROJECT_NAME} main.cpp)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
+
+# OpenGL
+find_package(OpenGL REQUIRED)
+message(STATUS "OpenGL included at ${OPENGL_INCLUDE_DIR}")
+
+# GLM
+add_subdirectory(glm)
+message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
+
+# GLFW
+add_subdirectory(glfw)
+message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
+
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm)
+
