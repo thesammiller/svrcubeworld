@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 
+#include "OVR_Bridge.h"
+
 #include "OVR_Math.h"
 #include "VrApi_Helpers.h"
 
@@ -95,12 +97,7 @@ void PackVertexAttribute(
     }
 }
 
-unsigned int Random;    
-float RandomFloat() {
-    Random = 1664525L * Random + 1013904223L;
-    unsigned int rf = 0x3F800000 | (Random & 0x007FFFFF);
-    return (*(float*)&rf) - 1.0f;
-}
+
 /*
 ================================================================================
 
