@@ -12,7 +12,7 @@ find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL included at ${OPENGL_INCLUDE_DIR}")
 
 # GLM
-add_subdirectory(glm)
+find_package(glm)
 message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
 
 # GLFW
