@@ -31,11 +31,7 @@ struct GLWindowTest : testing::Test
 
 };
 
-// GL Test Window is not null
-TEST_F(GLWindowTest, GLInitialWindowTest) {
-  ASSERT_NE(setup->window, (void*) NULL);
-}
-
+// Test that mouse callback repositions the Camera Front
 TEST_F(GLWindowTest, GLMouseLookAtTest) {
   cameraFront = glm::vec3(1.0f);
   glm::vec3 oldCameraFront = glm::vec3(1.0f);
