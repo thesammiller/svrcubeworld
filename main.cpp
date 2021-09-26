@@ -199,7 +199,7 @@ int main()
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader program("vertexShader.vs", "fragmentShader.fs");
+    Shader program("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
 
 
     int VERTICES_PER_OBJECT = 8; //8
