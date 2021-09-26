@@ -24,7 +24,7 @@
 using OVR::Vector3f;
 using OVR::Vector4f;
 
-const int NUM_INSTANCES = 150;
+const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
 ovrVector3f* Rotations = (ovrVector3f*) malloc(sizeof(Vector3f) * NUM_ROTATIONS);
@@ -293,7 +293,8 @@ int main()
     glm::mat4 model = glm::mat4(1.0f);
     
     glm::mat4 view = glm::mat4(1.0f);
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+    //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+    
 
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(90.0f), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 10000.0f);
@@ -458,6 +459,8 @@ int main()
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
         GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 
+        //camera poisition
+        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
