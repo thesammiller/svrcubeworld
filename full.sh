@@ -1,6 +1,8 @@
 #!/bin/sh
 
+./clean.sh
 ./configure.sh
 ./build.sh
-./run.sh
 ./tests.sh
+./run.sh
+

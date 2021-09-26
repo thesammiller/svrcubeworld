@@ -39,5 +39,14 @@ target_link_libraries(
   gtest_main
 )
 
+add_executable(
+  gl_test
+  tests/gl_test.cc
+)
+target_link_libraries(
+  gl_test
+  gtest_main
+)
+
 include(GoogleTest)
-gtest_discover_tests(ovr_test)
+gtest_discover_tests(ovr_test gl_test)
