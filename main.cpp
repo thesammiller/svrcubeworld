@@ -1,20 +1,20 @@
+//Needed for extensions
 #define GL_GLEXT_PROTOTYPES
 
+//GLFW
 #include <GLFW/glfw3.h>
-
+//GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-
+//OVR
 #include "ovr/OVR_Bridge.h"
 #include "ovr/OVR_Math.h"
 #include "ovr/VrApi_Helpers.h"
-
+//GL Local
 #include "gl_helper.h"
-
 #include "shader_s.h"
-
+//STD
 #include <iostream>
 #include <vector>
 #include <sys/resource.h>
