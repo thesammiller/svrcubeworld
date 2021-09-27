@@ -121,7 +121,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 
 
 void run_orb() {
-    std::cout << "Running Orb" << std::endl;
+    ACE_DEBUG((LM_DEBUG, "Running Orb"));
     orb->run();
 }
 
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
       ACE_OS::fclose (output_file);
 
       poa_manager->activate ();
-     std::thread(run_orb);
+    std::thread(run_orb);
     }
     
  
@@ -194,8 +194,6 @@ int main(int argc, char* argv[])
       return 1;
     }
     
-
-
 
     // glfw: initialize and configure
     // ------------------------------
