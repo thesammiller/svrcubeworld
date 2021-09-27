@@ -184,8 +184,7 @@ int main(int argc, char* argv[])
       ACE_OS::fclose (output_file);
 
       poa_manager->activate ();
-
-      std::thread orb_thread(run_orb);
+     std::thread(run_orb);
     }
     
  
