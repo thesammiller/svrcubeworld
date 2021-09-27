@@ -13,10 +13,12 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 set(ACE_LIB ${ACE_ROOT}/lib)
+find_library(TAO_IORTable SHARED TAO_IORTable PATHS "${ACE_LIB}")
 find_library(libTAO_PortableServer SHARED TAO_PortableServer PATHS "${ACE_LIB}")
 find_library(libTAO_AnyTypeCode SHARED TAO_AnyTypeCode PATHS "${ACE_LIB}")
 find_library(libTAO SHARED TAO PATHS "${ACE_LIB}")
 find_library(libACE SHARED ACE PATHS "${ACE_LIB}")
+
 message(STATUS "${ACE_LIB}")
 
 
@@ -38,7 +40,7 @@ message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 include_directories(${ACE_ROOT})
 include_directories(${TAO_ROOT})
 
-target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${TAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 
 enable_testing()
