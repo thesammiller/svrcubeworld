@@ -97,6 +97,13 @@ void generate_random_locations(ovrVector3f *CubePositions, int *CubeRotations, i
             }
         }
 
+        
+        // For testing vertex maximum
+        //rx *= 2.0f;
+        //ry *= 2.0f;
+        //rz *= 2.0f;
+        
+        // Default for OVR
         //rx *= 0.1f;
         //ry *= 0.1f;
         //rz *= 0.1f;
