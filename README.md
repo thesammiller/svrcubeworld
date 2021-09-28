@@ -16,5 +16,5 @@ Copyright	:	Copyright (c) Facebook Technologies, LLC and its affiliates. All rig
 OR
 Run `./full.sh` to run through all steps and tests
 
-
-
+# Related Repositories
+- Server and Client samples from previous work: https://github.com/thesammiller/tao-oculus-servers.git

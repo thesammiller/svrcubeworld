@@ -24,6 +24,7 @@
 #include "tao/IORTable/IORTable.h"
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_stdio.h"
+#include "ace/Task.h"
 
 
 
@@ -32,6 +33,11 @@
 // Highest I tried is 30k... Fails at 60k. Theoretical vertex max of Oculus 1,000,000 / 12 --> 83.333k
 const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
+
+//TAO
+int niterations = 10;
+int nthreads = 1;
+
 
 // GL Debugging Wrapper -- no-op
 #define GL(func) func;
@@ -120,15 +126,32 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 
-void run_orb() {
-    ACE_DEBUG((LM_DEBUG, "Running Orb"));
-    orb->run();
+class Worker : public ACE_Task_Base
+{
+    public:
+        Worker(CORBA::ORB_ptr orb);
+        // Thread entry pool
+        virtual int svc();
+    private:
+        //Corba Orb
+        CORBA::ORB_var orb_;
+};
+
+Worker::Worker(CORBA::ORB_ptr orb) : orb_(CORBA::ORB::_duplicate(orb)) {
+
+}
+
+int Worker::svc(void) {
+    try {
+        this->orb_->run();
+    }
+    catch (const CORBA::Exception&) {}
+    return 0;
 }
 
 int main(int argc, char* argv[])
 {
-    try
-    {
+   
        orb =
         CORBA::ORB_init (argc, argv);
 
@@ -184,15 +207,9 @@ int main(int argc, char* argv[])
       ACE_OS::fclose (output_file);
 
       poa_manager->activate ();
-    std::thread(run_orb);
-    }
-    
- 
-    catch (const CORBA::Exception& ex)
-    {
-      ex._tao_print_exception ("Exception caught:");
-      return 1;
-    }
+      Worker worker(orb.in());
+      worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
+     
     
 
     // glfw: initialize and configure
@@ -406,6 +423,7 @@ int main(int argc, char* argv[])
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     */
+    worker.thr_mgr() -> wait();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
