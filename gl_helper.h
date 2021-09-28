@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 
 // 10.3 Walk Around
@@ -37,12 +38,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         lastY = ypos;
         firstMouse = false;
     }
+
+    std::cout << "XPOS:/t" << xpos << "\tYPOS:\t" << ypos << std::endl;
         
     float xoffset = xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-    float sensitivity = 0.1f;
+    float sensitivity = 2000.0f; //0.1f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     yaw += xoffset;

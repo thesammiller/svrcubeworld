@@ -217,8 +217,8 @@ int main(int argc, char* argv[])
 
     //TODO: Convert Mouse Input to Pose object
     //mouse input
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetCursorPosCallback(window, mouse_callback);
 
 
     // configure global opengl state
@@ -322,6 +322,7 @@ int main(int argc, char* argv[])
         // input
         // -----
         processInput(window);
+        mouse_callback(window, server_impl.data[0], server_impl.data[1]);
 
         // render
         // ------

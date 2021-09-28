@@ -18,6 +18,8 @@ Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::
 	      microsecond, time_in_micros,
 	      headpose[0], headpose[1], headpose[2], headpose[3],
 	      headpose[4], headpose[5], headpose[6]));
+  
+  memcpy(data, headpose, sizeof(float) * 7);
 
 
   
