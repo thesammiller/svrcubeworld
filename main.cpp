@@ -20,11 +20,11 @@
 #include <sys/resource.h>
 //TAO
 #include "test_i.h"
-#include <thread>
 #include "tao/IORTable/IORTable.h"
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_stdio.h"
 #include "ace/Task.h"
+#include "ServerWorker.h"
 
 
 
@@ -126,28 +126,9 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 
-class Worker : public ACE_Task_Base
-{
-    public:
-        Worker(CORBA::ORB_ptr orb);
-        // Thread entry pool
-        virtual int svc();
-    private:
-        //Corba Orb
-        CORBA::ORB_var orb_;
-};
 
-Worker::Worker(CORBA::ORB_ptr orb) : orb_(CORBA::ORB::_duplicate(orb)) {
 
-}
 
-int Worker::svc(void) {
-    try {
-        this->orb_->run();
-    }
-    catch (const CORBA::Exception&) {}
-    return 0;
-}
 
 int main(int argc, char* argv[])
 {

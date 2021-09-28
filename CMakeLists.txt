@@ -22,7 +22,7 @@ find_library(libACE SHARED ACE PATHS "${ACE_LIB}")
 message(STATUS "${ACE_LIB}")
 
 
-add_executable(${PROJECT_NAME} main.cpp testC.cpp  test_i.cpp  testS.cpp)
+add_executable(${PROJECT_NAME} main.cpp testC.cpp  test_i.cpp  testS.cpp ServerWorker.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 
 # OpenGL
