@@ -19,33 +19,22 @@
 int niterations = 10;
 int nthreads = 1;
 
-// GL Functions -- Resize Window Callback, ProcessInput
-//TODO I think this first one can be removed
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+//Function to catch escape key
 void processInput(svrAppl appl);
 
 // GL Window Settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-// TAO 
-//----------------------------------------------
-
-
 
 int main(int argc, char* argv[])
 {
-      //Server myServer;
-      //Initialize orb object
-      //myServer.createOrb();
-      //Spin off a worker
-      //myServer.configServer();
-      //myServer.createWorker()
    
     svrServer myServer = svrServer();
+    //Create orb
     myServer.createOrb(argc, argv);
-    myServer.createServer();
-     
+    //Create server implementation
+    myServer.createServer();     
     
     //Initialize the application
     svrAppl myAppl = svrAppl();
@@ -59,7 +48,9 @@ int main(int argc, char* argv[])
     // Create the GLM Matrices for Cameras, set camera position
     myAppl.createCamera();
 
+    //Create a worker thread to run asynchronously
     Worker worker(myServer.orb.in());
+    //Activate the worker thread
     worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
     
     // render loop
