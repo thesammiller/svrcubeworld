@@ -12,6 +12,11 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
+svrAppl::svrAppl() {
+    program = Shader("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
+
+}
+
 
 
 int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
@@ -41,6 +46,13 @@ int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
 }
 
 void svrAppl::init() {
+     glEnable(GL_DEPTH_TEST);
+
+    // build and compile our shader zprogram
+    // ------------------------------------
+
+
+
 }
 
 

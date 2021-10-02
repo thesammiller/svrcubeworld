@@ -1,17 +1,7 @@
-//Needed for extensions
-#define GL_GLEXT_PROTOTYPES
 
-//GLFW
-#include <GLFW/glfw3.h>
-//GLM
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 //GL Local
 #include "gl_helper.h"
-#include "shader_s.h"
-
 
 #include "svrAppl.h"
 
@@ -33,8 +23,6 @@
 #include "ace/OS_NS_stdio.h"
 #include "ace/Task.h"
 #include "ServerWorker.h"
-
-
 
 // CubeWorld Settings
 // Set Number of Cubes and Variety of Rotations
@@ -200,48 +188,21 @@ int main(int argc, char* argv[])
       worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
      
     
-    /*
-    // glfw: initialize and configure
-    // ------------------------------
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-
-    // glfw window creation
-    // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld", NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    */
-
+    //Initialize the application
     svrAppl myAppl = svrAppl();
     int valid = myAppl.createWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld");
+
     if (valid == 1) {
       std::cout << "Successfully created window" << std::endl;
     }
 
-    //TODO: Convert Mouse Input to Pose object
-    //mouse input
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    //glfwSetCursorPosCallback(window, mouse_callback);
-
-
     // configure global opengl state
     // -----------------------------
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader program("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
+    //Shader program("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
 
     
     //CubeWorld Setup
@@ -283,7 +244,7 @@ int main(int argc, char* argv[])
     //GL Bind to Buffers and Attribute Location
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBindVertexArray(vertexArrayObject);
-    glBindAttribLocation(program.ID, VERTEX_ATTRIBUTE_LOCATION_COLOR, "VertexColor");    
+    glBindAttribLocation(myAppl.program.ID, VERTEX_ATTRIBUTE_LOCATION_COLOR, "VertexColor");    
     
     //OVR Use the PackVertexAttribute function
     std::vector<uint8_t> packed;
@@ -325,7 +286,7 @@ int main(int argc, char* argv[])
     // Get the attribute for the instance transforms
     unsigned int InstanceTransformBuffer;
     unsigned int VertexTransformAttribute;
-    VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");
+    VertexTransformAttribute = glGetAttribLocation(myAppl.program.ID, "VertexTransform");
 
     float startTime = glfwGetTime();
 
@@ -342,7 +303,7 @@ int main(int argc, char* argv[])
 
         // render
         // ------
-        program.use();
+        myAppl.program.use();
 
         float time = glfwGetTime();
 
@@ -393,10 +354,10 @@ int main(int argc, char* argv[])
         // GLM Update Camera Postion
         // -------------------------
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
+        unsigned int viewLoc = glGetUniformLocation(myAppl.program.ID,"view");
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
-        unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
+        unsigned int projectionLoc = glGetUniformLocation(myAppl.program.ID, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
         // GL DRAW CALL
