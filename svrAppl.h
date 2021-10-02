@@ -39,7 +39,7 @@ class svrAppl {
 
     public:
         svrAppl();
-        void init();
+        void createShader();
         int createWindow(unsigned int width, unsigned int height, char *name);
         int createWorld();
         void render();

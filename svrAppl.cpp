@@ -71,13 +71,15 @@ int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    
+    glEnable(GL_DEPTH_TEST);
 
     return 1;
 
 }
 
-void svrAppl::init() {
-     glEnable(GL_DEPTH_TEST);
+void svrAppl::createShader() {
+     
 
     //build and compile shader
     program = Shader("shaders/vertexShader.vs", "shaders/fragmentShader.fs");

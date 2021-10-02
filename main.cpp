@@ -143,18 +143,12 @@ int main(int argc, char* argv[])
     
     //Initialize the application
     svrAppl myAppl = svrAppl();
-    int valid = myAppl.createWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld");
+    
+    myAppl.createWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld");
 
-    if (valid == 1) {
-      std::cout << "Successfully created window" << std::endl;
-    }
-
-    myAppl.init();
+    myAppl.createShader();
     myAppl.createWorld();
 
-
-    
-    
 
     // GLM MVP Matrices
     // -------------------
