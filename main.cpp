@@ -25,8 +25,6 @@
 int niterations = 10;
 int nthreads = 1;
 
-
-
 // GL Functions -- Resize Window Callback, ProcessInput
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(svrAppl appl);
@@ -143,10 +141,14 @@ int main(int argc, char* argv[])
         // input
         // -----
         processInput(myAppl);
+
+        // Take the server data and update the view based on controller input
         myAppl.updateView(server_impl.data[0], server_impl.data[1]);
         
         // Draw
         myAppl.render();
+
+        //TODO: Send drawing to client
 
     }
 
@@ -176,24 +178,5 @@ void processInput(svrAppl appl)
     {    
         glfwSetWindowShouldClose(appl.window, true);
     }
-    
-    const float cameraSpeed = 2.5f * appl.deltaTime; // adjust accordingly
-    
-
-    //TODO: THESE CONTROLS ARE BROKE
-    /*
-    if (glfwGetKey(appl.window, GLFW_KEY_W) == GLFW_PRESS) {
-      appl.cameraPos += cameraSpeed * appl.cameraFront;
-      //std::cout << "Forward" << std::endl;
-    }
-    if (glfwGetKey(appl.window, GLFW_KEY_S) == GLFW_PRESS) {
-      appl.cameraPos -= cameraSpeed * appl.cameraFront;
-    }
-    if (glfwGetKey(appl.window, GLFW_KEY_A) == GLFW_PRESS)
-       appl.cameraPos -= glm::normalize(glm::cross(appl.cameraFront, appl.cameraUp)) * cameraSpeed;
-       
-    if (glfwGetKey(appl.window, GLFW_KEY_D) == GLFW_PRESS)
-        appl.cameraPos += glm::normalize(glm::cross(appl.cameraFront, appl.cameraUp)) * cameraSpeed;
-    */
 
 }
