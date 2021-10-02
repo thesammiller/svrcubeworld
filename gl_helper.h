@@ -1,16 +1,19 @@
 
+#pragma once
 #define GL_GLEXT_PROTOTYPES
-#include <GLFW/glfw3.h>
 
+#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
 
 // 10.3 Walk Around
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -25,6 +28,7 @@ float fov   =  45.0f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
+
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     //std::cout << "Moving mouse" << std::endl;
@@ -34,12 +38,14 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
         lastY = ypos;
         firstMouse = false;
     }
+
+    std::cout << "XPOS:/t" << xpos << "\tYPOS:\t" << ypos << std::endl;
         
     float xoffset = xoffset = xpos - lastX;
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-    float sensitivity = 0.1f;
+    float sensitivity = 2000.0f; //0.1f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     yaw += xoffset;

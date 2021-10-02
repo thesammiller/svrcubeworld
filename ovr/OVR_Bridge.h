@@ -56,6 +56,8 @@ static const unsigned short cubeIndices[36] = {
 };
 
 
+
+
 void generate_random_rotations(ovrVector3f *Rotations, int NUM_ROTATIONS) {
     for (int i = 0; i < NUM_ROTATIONS; i++) {
             Rotations[i].x = RandomFloat();
@@ -95,6 +97,13 @@ void generate_random_locations(ovrVector3f *CubePositions, int *CubeRotations, i
             }
         }
 
+        
+        // For testing vertex maximum
+        //rx *= 2.0f;
+        //ry *= 2.0f;
+        //rz *= 2.0f;
+        
+        // Default for OVR
         //rx *= 0.1f;
         //ry *= 0.1f;
         //rz *= 0.1f;

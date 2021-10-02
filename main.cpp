@@ -1,41 +1,56 @@
-
+//Needed for extensions
 #define GL_GLEXT_PROTOTYPES
-#include <GLFW/glfw3.h>
 
+//GLFW
+#include <GLFW/glfw3.h>
+//GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
-
+//OVR
 #include "ovr/OVR_Bridge.h"
 #include "ovr/OVR_Math.h"
 #include "ovr/VrApi_Helpers.h"
-
+//GL Local
 #include "gl_helper.h"
-
 #include "shader_s.h"
-
+//STD
 #include <iostream>
 #include <vector>
 #include <sys/resource.h>
+//TAO
+#include "test_i.h"
+#include "tao/IORTable/IORTable.h"
+#include "ace/Get_Opt.h"
+#include "ace/OS_NS_stdio.h"
+#include "ace/Task.h"
+#include "ServerWorker.h"
 
 
+
+// CubeWorld Settings
+// Set Number of Cubes and Variety of Rotations
+// Highest I tried is 30k... Fails at 60k. Theoretical vertex max of Oculus 1,000,000 / 12 --> 83.333k
 const int NUM_INSTANCES = 1500;
 const int NUM_ROTATIONS = 16;
 
+//TAO
+int niterations = 10;
+int nthreads = 1;
 
+
+// GL Debugging Wrapper -- no-op
 #define GL(func) func;
 
+// GL Functions -- Resize Window Callback, ProcessInput
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 
-// settings
+// GL Window Settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-
-
+// OVR VertexAttributes 
 struct VertexAttribs {
     std::vector<OVR::Vector3f> position;
     std::vector<OVR::Vector3f> normal;
@@ -79,9 +94,105 @@ enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_ROTATION = 2
 };
 
+// TAO 
+//----------------------------------------------
+CORBA::ORB_var orb;
+const ACE_TCHAR *ior_output_file = ACE_TEXT("test.ior");
 
-int main()
+int
+parse_args (int argc, ACE_TCHAR *argv[])
 {
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("o:"));
+  int c;
+
+  while ((c = get_opts ()) != -1)
+    switch (c)
+      {
+      case 'o':
+        ior_output_file = get_opts.opt_arg ();
+        break;
+
+      case '?':
+      default:
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "usage:  %s "
+                           "-o <iorfile>"
+                           "\n",
+                           argv [0]),
+                          -1);
+      }
+  // Indicates successful parsing of the command line
+  return 0;
+}
+
+
+
+
+
+
+int main(int argc, char* argv[])
+{
+   
+       orb =
+        CORBA::ORB_init (argc, argv);
+
+      CORBA::Object_var poa_object =
+        orb->resolve_initial_references("RootPOA");
+
+      PortableServer::POA_var root_poa =
+        PortableServer::POA::_narrow (poa_object.in ());
+      if (CORBA::is_nil (root_poa.in ()))
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           " (%P|%t) Unable to initialize the POA.\n"),
+                          1);
+
+      PortableServer::POAManager_var poa_manager =
+        root_poa->the_POAManager ();
+
+      if (parse_args (argc, argv) != 0)
+        return 1;
+
+      Simple_Server_i server_impl (orb.in ());
+
+      PortableServer::ObjectId_var id =
+        root_poa->activate_object (&server_impl);
+
+      CORBA::Object_var object = root_poa->id_to_reference (id.in ());
+
+      Simple_Server_var server =
+        Simple_Server::_narrow (object.in ());
+
+      CORBA::String_var ior =
+        orb->object_to_string (server.in ());
+
+      CORBA::Object_var table_object =
+        orb->resolve_initial_references("IORTable");
+
+      IORTable::Table_var table =
+        IORTable::Table::_narrow (table_object.in ());
+      if (CORBA::is_nil (table.in ()))
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           " (%P|%t) Unable to initialize the IORTable.\n"),
+                          1);
+      table->bind ("Simple_Server", ior.in ());
+
+      ACE_DEBUG ((LM_DEBUG, "Activated as <%C>\n", ior.in ()));
+
+      FILE *output_file= ACE_OS::fopen (ior_output_file, "w");
+      if (output_file == 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "Cannot open output file for writing IOR: %s",
+                           ior_output_file),
+                          1);
+      ACE_OS::fprintf (output_file, "%s", ior.in ());
+      ACE_OS::fclose (output_file);
+
+      poa_manager->activate ();
+      Worker worker(orb.in());
+      worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
+     
+    
+
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -92,7 +203,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -102,9 +213,12 @@ int main()
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+
+    //TODO: Convert Mouse Input to Pose object
     //mouse input
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSetCursorPosCallback(window, mouse_callback);
+    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetCursorPosCallback(window, mouse_callback);
 
 
     // configure global opengl state
@@ -115,7 +229,9 @@ int main()
     // ------------------------------------
     Shader program("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
 
-
+    
+    //CubeWorld Setup
+    //Convert Vertex Struct to Vector of Vertexes
     int VERTICES_PER_OBJECT = 8; //8
     VertexAttribs attribs;
     attribs.position.resize(VERTICES_PER_OBJECT);
@@ -125,6 +241,7 @@ int main()
         attribs.color[i] = cubeVertices.colors[i];
     }
 
+    //Convert Index Struct to Vector if Indices
     std::vector<TriangleIndex> indices;
     int NUMBER_OF_INDICES = 36; //36
     indices.resize(NUMBER_OF_INDICES);
@@ -132,7 +249,7 @@ int main()
         indices[i] = cubeIndices[i];
     }
 
-    //GlGeometry Create Function
+    //Get size of new data structure
     int vertexCount = attribs.position.size();
     int indexCount = indices.size();
 
@@ -141,35 +258,36 @@ int main()
     std::vector<OVR::Vector3f> tangent;
     std::vector<OVR::Vector3f> binormal;
 
-    unsigned int vertexBuffer; //VBO
-    unsigned int indexBuffer, vertexArrayObject;
+    //GL Create the Vertex Buffer, IndexBuffer and VertexArrayObject
+    unsigned int vertexBuffer, indexBuffer, vertexArrayObject;
 
+    //GL Generate Buffer Pointers
     glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-
     glGenBuffers(1, &indexBuffer);
     glGenVertexArrays(1, &vertexArrayObject);
+    
+    //GL Bind to Buffers and Attribute Location
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBindVertexArray(vertexArrayObject);
-
     glBindAttribLocation(program.ID, VERTEX_ATTRIBUTE_LOCATION_COLOR, "VertexColor");    
     
+    //OVR Use the PackVertexAttribute function
     std::vector<uint8_t> packed;
     PackVertexAttribute(
         packed, attribs.position, VERTEX_ATTRIBUTE_LOCATION_POSITION, GL_FLOAT, 3);
 
     PackVertexAttribute(packed, attribs.color, VERTEX_ATTRIBUTE_LOCATION_COLOR, GL_FLOAT, 4);
 
-
+    //GL Add Data to the Buffers
     glBufferData(GL_ARRAY_BUFFER, packed.size() * sizeof(packed[0]), packed.data(), GL_DYNAMIC_DRAW);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-
     glBufferData(
         GL_ELEMENT_ARRAY_BUFFER,
         indices.size() * sizeof(indices[0]),
         indices.data(),
         GL_STATIC_DRAW);
 
+    //Unbind the Vertex Array
     glBindVertexArray(0);
 
     // GLM MVP Matrices
@@ -190,7 +308,7 @@ int main()
     generate_random_rotations(Rotations, NUM_ROTATIONS);
     generate_random_locations(CubePositions, CubeRotations, NUM_INSTANCES, Rotations, NUM_ROTATIONS);
     
-
+    // Get the attribute for the instance transforms
     unsigned int InstanceTransformBuffer;
     unsigned int VertexTransformAttribute;
     VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");
@@ -204,6 +322,7 @@ int main()
         // input
         // -----
         processInput(window);
+        mouse_callback(window, server_impl.data[0], server_impl.data[1]);
 
         // render
         // ------
@@ -286,6 +405,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     */
+    worker.thr_mgr() -> wait();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -314,6 +434,7 @@ void processInput(GLFWwindow *window)
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+       
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
