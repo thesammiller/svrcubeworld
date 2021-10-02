@@ -7,13 +7,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-//OVR
-#include "ovr/OVR_Bridge.h"
-#include "ovr/OVR_Math.h"
-#include "ovr/VrApi_Helpers.h"
+
 //GL Local
 #include "gl_helper.h"
 #include "shader_s.h"
+
+
+#include "svrAppl.h"
+
+//OVR
+#include "ovr/OVR_Math.h"
+#include "ovr/VrApi_Helpers.h"
+
+//OVR Local
+#include "ovr/OVR_Bridge.h"
+
 //STD
 #include <iostream>
 #include <vector>
@@ -192,7 +200,7 @@ int main(int argc, char* argv[])
       worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
      
     
-
+    /*
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -213,7 +221,13 @@ int main(int argc, char* argv[])
 
     glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    */
 
+    svrAppl myAppl = svrAppl();
+    int valid = myAppl.createWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld");
+    if (valid == 1) {
+      std::cout << "Successfully created window" << std::endl;
+    }
 
     //TODO: Convert Mouse Input to Pose object
     //mouse input
@@ -314,15 +328,17 @@ int main(int argc, char* argv[])
     VertexTransformAttribute = glGetAttribLocation(program.ID, "VertexTransform");
 
     float startTime = glfwGetTime();
+
+    
    
     // render loop
     // -----------
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(myAppl.window))
     {
         // input
         // -----
-        processInput(window);
-        mouse_callback(window, server_impl.data[0], server_impl.data[1]);
+        processInput(myAppl.window);
+        mouse_callback(myAppl.window, server_impl.data[0], server_impl.data[1]);
 
         // render
         // ------
@@ -394,7 +410,7 @@ int main(int argc, char* argv[])
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(myAppl.window);
         glfwPollEvents();
     }
 
@@ -439,13 +455,3 @@ void processInput(GLFWwindow *window)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
 }
-
-// glfw: whenever the window size changed (by OS or user resize) this callback function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    // make sure the viewport matches the new window dimensions; note that width and 
-    // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
-}
-
