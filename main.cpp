@@ -196,6 +196,8 @@ int main(int argc, char* argv[])
       std::cout << "Successfully created window" << std::endl;
     }
 
+    myAppl.init();
+
     // configure global opengl state
     // -----------------------------
     //glEnable(GL_DEPTH_TEST);
