@@ -1,5 +1,6 @@
 //Needed for extensions
 #define GL_GLEXT_PROTOTYPES
+
 //GLFW
 #include <GLFW/glfw3.h>
 //GLM
@@ -32,6 +33,12 @@ struct VertexAttribs {
 
 typedef uint16_t TriangleIndex;
 
+// CubeWorld Settings
+// Set Number of Cubes and Variety of Rotations
+// Highest I tried is 30k... Fails at 60k. Theoretical vertex max of Oculus 1,000,000 / 12 --> 83.333k
+const int NUM_INSTANCES = 1500;
+const int NUM_ROTATIONS = 16;
+
 class svrAppl {
     private:
         
@@ -42,9 +49,13 @@ class svrAppl {
         void createShader();
         int createWindow(unsigned int width, unsigned int height, char *name);
         int createWorld();
+        void createCamera();
+        void updateView(double xpos, double ypos);
         void render();
 
         GLFWwindow* window = 0;
+        unsigned int m_width;
+        unsigned int m_height;
         Shader program;
 
         unsigned int vertexBuffer;
@@ -53,7 +64,36 @@ class svrAppl {
 
         VertexAttribs attribs;
         std::vector<TriangleIndex> indices;
-        
+
+        unsigned int InstanceTransformBuffer;
+       unsigned int VertexTransformAttribute;
+
+        // GLM MVP Matrices
+        // -------------------
+        glm::mat4 model = glm::mat4(1.0f);    
+        glm::mat4 view = glm::mat4(1.0f);
+        glm::mat4 projection = glm::mat4(1.0f);
+
+        ovrVector3f CubePositions[NUM_INSTANCES];
+        ovrVector3f Rotations[NUM_ROTATIONS];
+        int CubeRotations[NUM_INSTANCES];
+
+        float startTime;
+
+        glm::vec3 cameraPos;
+        glm::vec3 cameraFront;
+        glm::vec3 cameraUp;
+
+
+        float deltaTime;
+        float lastFrame;
+
+        bool firstMouse;
+        float yaw;
+        float pitch;
+        float lastX;
+        float lastY;
+        float fov;
 
 
 };
