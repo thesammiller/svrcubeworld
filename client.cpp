@@ -170,7 +170,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     while (!glfwWindowShouldClose(window))
     {
 
-
+      Simple_Server::pixels_slice* p = server->sendImageData();
       renderBufferShader.use();
       
       glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
@@ -184,18 +184,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Renders fine when it's just a regular image loaded...
      
       
-      Simple_Server::pixels_slice* p = server->sendImageData();
+      
       memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
       
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-        glGenerateMipmap(GL_TEXTURE_2D);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+      //glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 
 

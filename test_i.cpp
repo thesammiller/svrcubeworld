@@ -9,10 +9,7 @@
 static ACE_Thread_Mutex m_mutex;
 
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
-    if (m_mutex.acquire_read() != -1 && dataSet) {
-      this->oldData = this->imageData;
-  }
-  return this->oldData;
+  return this->imageData;
 }
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
