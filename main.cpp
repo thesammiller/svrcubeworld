@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
     myAppl.createWorld();
     // Create the GLM Matrices for Cameras, set camera position
     myAppl.createCamera();
+    myAppl.createFramebuffer();
 
     //Create a worker thread to run asynchronously
     Worker worker(myServer.orb.in());

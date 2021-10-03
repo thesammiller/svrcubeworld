@@ -120,11 +120,16 @@ void svrAppl::createFramebuffer() {
     renderBufferShader.use();
 
     // OVR RENDER BUFFER LOGIC 
-    renderBufferShader.setInt("screenTexture", textureUnitIndex);
+    renderBufferShader.setInt("screenTexture", 0);
 
     glGenTextures(1, &textureColorbuffer);
     GLenum colorTextureTarget = GL_TEXTURE_2D;
     GL(glBindTexture(colorTextureTarget, textureColorbuffer));
+    
+    //NOTE: This below was missing from the OVR implementation
+    //Compared to working code here:
+    //https://stackoverflow.com/questions/28391548/opengl-framebuffer-not-rendering-off-screen
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
     GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
     GLfloat borderColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -149,6 +154,7 @@ void svrAppl::createFramebuffer() {
         rbo));
     GL(glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0));
+        
     GL(GLenum renderFramebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
     GL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
     if (renderFramebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
@@ -156,6 +162,112 @@ void svrAppl::createFramebuffer() {
     }
 
 }
+
+
+void svrAppl::render() {
+
+    // Bind to our new buffer
+    // Set the framebuffer as the current
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glEnable(GL_DEPTH_TEST);
+
+    // OVR CubeWorld Game Logic Updates -- update instance transforms
+    // ---------------------------------
+
+    program.use();
+    float time = glfwGetTime();
+    
+    glBindVertexArray(vertexArrayObject);
+
+    GL(glGenBuffers(1, &InstanceTransformBuffer));
+    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+    GL(glBufferData(
+        GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
+    
+    for (int i = 0; i < 4; i++) {
+        GL(glEnableVertexAttribArray(VertexTransformAttribute + i));
+        GL(glVertexAttribPointer(
+            VertexTransformAttribute + i,
+            4,
+            GL_FLOAT,
+            false,
+            4 * 4 * sizeof(float),
+            (void*)(i * 4 * sizeof(float))));
+        GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
+    }
+        
+    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+
+    GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
+    GL_ARRAY_BUFFER,
+    0,
+    NUM_INSTANCES * sizeof(ovrMatrix4f),
+    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
+
+    update_cube_rotations(startTime, time, Rotations, NUM_ROTATIONS, cubeTransforms, NUM_INSTANCES, CubeRotations, CubePositions); 
+    
+    GL(glUnmapBuffer(GL_ARRAY_BUFFER));
+
+    // GL Clear Screen and Prepare Draw
+    // --------------------------------
+    GL(glEnable(GL_SCISSOR_TEST));
+    GL(glDepthMask(GL_TRUE));
+    GL(glEnable(GL_DEPTH_TEST));
+    GL(glDepthFunc(GL_LEQUAL));
+    GL(glEnable(GL_CULL_FACE));
+    GL(glViewport(0, 0, m_width, m_height));
+    GL(glScissor(0, 0, m_width, m_height));
+    GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
+    GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
+    GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
+
+    // GLM Update Camera Postion
+    // -------------------------
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+
+    unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
+    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+    //BIND BIND BIND TO THE TEXTURE
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+    // GL DRAW CALL
+    // ------------------
+    GL(glBindVertexArray(vertexArrayObject));
+    GL(glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
+
+    //OVR LOGIC
+    GL(glActiveTexture(GL_TEXTURE0));
+    GL(glBindTexture(GL_TEXTURE_2D, 0));
+
+    GL(glBindVertexArray(0));
+    GL(glUseProgram(0));
+
+    // FRAMEBUFFER LOGIC
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+    glDisable(GL_DEPTH_TEST);
+
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    
+    renderBufferShader.use();
+    glBindVertexArray(quadVAO);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer); 
+
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+    // -------------------------------------------------------------------------------
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+
+}
+
+
 
 int svrAppl::createWorld() {
 
@@ -287,108 +399,4 @@ void svrAppl::updateView(double xpos, double ypos) {
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
-}
-
-void svrAppl::render() {
-
-    // Bind to our new buffer
-    // Set the framebuffer as the current
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glEnable(GL_DEPTH_TEST);
-
-    // OVR CubeWorld Game Logic Updates -- update instance transforms
-        // ---------------------------------
-
-    program.use();
-    float time = glfwGetTime();
-    
-    glBindVertexArray(vertexArrayObject);
-
-    GL(glGenBuffers(1, &InstanceTransformBuffer));
-    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
-    GL(glBufferData(
-        GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
-    
-    for (int i = 0; i < 4; i++) {
-        GL(glEnableVertexAttribArray(VertexTransformAttribute + i));
-        GL(glVertexAttribPointer(
-            VertexTransformAttribute + i,
-            4,
-            GL_FLOAT,
-            false,
-            4 * 4 * sizeof(float),
-            (void*)(i * 4 * sizeof(float))));
-        GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
-    }
-        
-    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
-
-    GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
-        GL_ARRAY_BUFFER,
-        0,
-        NUM_INSTANCES * sizeof(ovrMatrix4f),
-        GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
-
-        update_cube_rotations(startTime, time, Rotations, NUM_ROTATIONS, cubeTransforms, NUM_INSTANCES, CubeRotations, CubePositions); 
-        
-        GL(glUnmapBuffer(GL_ARRAY_BUFFER));
-
-        // GL Clear Screen and Prepare Draw
-        // --------------------------------
-        GL(glEnable(GL_SCISSOR_TEST));
-        GL(glDepthMask(GL_TRUE));
-        GL(glEnable(GL_DEPTH_TEST));
-        GL(glDepthFunc(GL_LEQUAL));
-        GL(glEnable(GL_CULL_FACE));
-        GL(glViewport(0, 0, m_width, m_height));
-        GL(glScissor(0, 0, m_width, m_height));
-        GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
-        GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
-        GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
-
-        // GLM Update Camera Postion
-        // -------------------------
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-
-        unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-        //BIND BIND BIND TO THE TEXTURE
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
-
-        // GL DRAW CALL
-        // ------------------
-        GL(glBindVertexArray(vertexArrayObject));
-        GL(glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
-
-        //OVR LOGIC
-        GL(glActiveTexture(GL_TEXTURE0));
-        GL(glBindTexture(GL_TEXTURE_2D, 0));
-
-        GL(glBindVertexArray(0));
-        GL(glUseProgram(0));
-
-
-        // FRAMEBUFFER LOGIC
-        glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-        glDisable(GL_DEPTH_TEST);
-
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        
-        renderBufferShader.use();
-        glBindVertexArray(quadVAO);
-        glBindTexture(GL_TEXTURE_2D, textureColorbuffer); 
-
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-
-        // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-        // -------------------------------------------------------------------------------
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-
 }
