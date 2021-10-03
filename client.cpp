@@ -87,25 +87,8 @@ private:
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  try
-    {
-      CORBA::ORB_var orb =
-        CORBA::ORB_init (argc, argv);
 
-      if (parse_args (argc, argv) != 0)
-        return 1;
 
-      Worker worker (orb.in ());
-
-      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "(%P|%t) Cannot activate worker threads\n"),
-                          1);
-
-      ACE_Time_Value tv (5, 0);
-
-      orb->run (tv);
-      
 
       //OPENGL
       
@@ -152,6 +135,28 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+  try
+    {
+      CORBA::ORB_var orb =
+        CORBA::ORB_init (argc, argv);
+
+      if (parse_args (argc, argv) != 0)
+        return 1;
+
+      Worker worker (orb.in ());
+
+      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "(%P|%t) Cannot activate worker threads\n"),
+                          1);
+
+      ACE_Time_Value tv (5, 0);
+
+      orb->run (tv);
+
+    
+      
+
     while (!glfwWindowShouldClose(window))
     {
 
@@ -180,14 +185,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     worker.thr_mgr ()->wait ();
 
       orb->destroy ();
+    
+
+  return 0;
+
     }
   catch (const CORBA::Exception& ex)
     {
       ex._tao_print_exception ("Exception caught in main:");
       return 1;
     }
-
-  return 0;
 }
 
 // ****************************************************************

@@ -73,7 +73,10 @@ int main(int argc, char* argv[])
         myAppl.render();
 
         //TODO: Send drawing to client
-        //myServer.sendDrawing();
+
+        unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+        myAppl.createImage(pixels);
+        
 
     }
 

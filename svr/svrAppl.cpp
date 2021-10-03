@@ -58,6 +58,14 @@ svrAppl::svrAppl() {
 
 }
 
+void svrAppl::createImage(unsigned char* pixels) {
+    int             i, j, k;
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+
+
+}
+
 
 
 int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {

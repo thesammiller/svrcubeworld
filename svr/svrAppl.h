@@ -56,6 +56,7 @@ class svrAppl {
         void createFramebuffer();
         void updateView(double xpos, double ypos);
         void render();
+        void createImage(unsigned char* pixels);
 
         GLFWwindow* window = 0;
         unsigned int m_width;
