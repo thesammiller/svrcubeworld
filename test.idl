@@ -3,5 +3,11 @@ interface Simple_Server
   typedef float HeadPoseArray[7];
 
   oneway void send_data(in long microsecond, in HeadPoseArray headpose);
+
+  typedef octet pixels[1440000];
+
+  pixels sendImageData();
     
+  
+
 };

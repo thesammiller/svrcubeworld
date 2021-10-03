@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 
         unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
         myAppl.createImage(pixels);
-        
+        myServer.sendImage(pixels);
 
     }
 

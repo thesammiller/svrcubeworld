@@ -4,6 +4,17 @@
 #include "test_i.inl"
 #endif /* __ACE_INLINE__ */
 
+#include <iostream>
+
+Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
+  std::cout << "Sending image data" << std::endl;
+  return this->imageData;
+}
+
+void Simple_Server_i::setImageData(unsigned char* iData) {
+  this->imageData = iData;
+}
+
 
 void
 Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose)
