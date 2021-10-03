@@ -1,6 +1,6 @@
-# OVR CubeWorld Linux Port
+# Oculus VR Mobile SDK - Cloud VR Server
 
-This is a port of the Oculus Mobile SDK sample program Cube World.
+This project implements a Cloud VR pipeline using the Oculus Mobile SDK sample project, "CubeWorld" and TAO, a CORBA service for distributed communication based on the ACE C++ framework. 
 
 # Original Copyright #
 Created		:	March, 2015    
@@ -17,4 +17,5 @@ OR
 Run `./full.sh` to run through all steps and tests
 
 # Related Repositories
+- Oculus Mobile SDK Client Software (repo to come)
 - Server and Client samples from previous work: https://github.com/thesammiller/tao-oculus-servers.git
