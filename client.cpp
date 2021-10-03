@@ -154,7 +154,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       orb->run (tv);
 
-    
+    unsigned int pixelTexture;
+    glGenTextures(1, &pixelTexture);
+
+     CORBA::Object_var object =
+        orb->string_to_object (ior);
+
+      Simple_Server_var server =
+        Simple_Server::_narrow (object.in ());
+
+        unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+
       
 
     while (!glfwWindowShouldClose(window))
@@ -172,18 +182,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
       //Renders fine when it's just a regular image loaded...
-      CORBA::Object_var object =
-        orb->string_to_object (ior);
-
-      Simple_Server_var server =
-        Simple_Server::_narrow (object.in ());
-
-      unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+     
+      
       Simple_Server::pixels_slice* p = server->sendImageData();
       memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
-      unsigned int pixelTexture;
-    glGenTextures(1, &pixelTexture);
+      
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
         glGenerateMipmap(GL_TEXTURE_2D);
