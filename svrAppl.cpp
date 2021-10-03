@@ -2,6 +2,16 @@
 #include <iostream>
 
 
+//For framebuffer
+float quadVertices[] = {
+        // positions  //texcoords
+        -1.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f,
+        1.0f, -1.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f,
+        1.0f, -1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 1.0f, 1.0f     };
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -85,12 +95,72 @@ void svrAppl::createShader() {
      
 
     //build and compile shader
-    program = Shader("shaders/vertexShader.vs", "shaders/fragmentShader.fs");
+    program = Shader("./shaders/vertexShader.vs", "./shaders/fragmentShader.fs");
 
 
 }
 
+void svrAppl::createFramebuffer() {
+
+    renderBufferShader = Shader("./shaders/renderBuffer.vs", "./shaders/renderBuffer.fs");
+
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    // position attribute
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+
+    // texture coord attribute
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+
+    renderBufferShader.use();
+    
+    //framebuffer configuration
+    glGenFramebuffers(1, &framebuffer);
+    glBindBuffer(GL_FRAMEBUFFER, framebuffer);
+    //create color attachment
+    //generate texture
+    glGenTextures(1, &textureColorbuffer);
+    textureUnitIndex = 0;
+    glActiveTexture(GL_TEXTURE0 + textureUnitIndex);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    //create texture with NULL for data
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    renderBufferShader.setInt("screenTexture", textureUnitIndex);
+
+
+    //create a renderbuffer object --> 
+    // remember we're creating it as a depth and stencil attachment renderbuffer object
+    // we set its internal format to GL_DEPTH24_STENCIL8 
+    
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_width, m_height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    //final step before completing frame buffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {    
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    
+
+}
+
 int svrAppl::createWorld() {
+
+    //Reset back to default, regular shader 
+    program.use();
 
     //CubeWorld Setup
     //Convert Vertex Struct to Vector of Vertexes
@@ -220,6 +290,11 @@ void svrAppl::updateView(double xpos, double ypos) {
 }
 
 void svrAppl::render() {
+
+    // Bind to our new buffer
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glEnable(GL_DEPTH_TEST);
+
     // OVR CubeWorld Game Logic Updates -- update instance transforms
         // ---------------------------------
 
@@ -262,9 +337,9 @@ void svrAppl::render() {
         GL(glViewport(0, 0, m_width, m_height));
         GL(glScissor(0, 0, m_width, m_height));
         GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
-        GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
+        //GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
+        //GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 
         // GLM Update Camera Postion
         // -------------------------
@@ -275,6 +350,9 @@ void svrAppl::render() {
         unsigned int projectionLoc = glGetUniformLocation(program.ID, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+        //BIND BIND BIND TO THE TEXTURE
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
         // GL DRAW CALL
         // ------------------
         GL(glBindVertexArray(vertexArrayObject));
@@ -282,6 +360,20 @@ void svrAppl::render() {
 
         GL(glBindVertexArray(0));
         GL(glUseProgram(0));
+
+
+        // FRAMEBUFFER LOGIC
+        glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+        glDisable(GL_DEPTH_TEST);
+
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+        
+        renderBufferShader.use();
+        glBindVertexArray(quadVAO);
+        glBindTexture(GL_TEXTURE_2D, textureColorbuffer); 
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
