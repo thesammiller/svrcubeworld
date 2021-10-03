@@ -377,7 +377,7 @@ void svrAppl::createCamera() {
 
 }
 
-void svrAppl::updateView(double xpos, double ypos) {
+int svrAppl::updateView(double xpos, double ypos) {
 
     //std::cout << "Moving mouse" << std::endl;
     if (firstMouse)
@@ -385,7 +385,9 @@ void svrAppl::updateView(double xpos, double ypos) {
         lastX = xpos;
         lastY = ypos;
         firstMouse = false;
+        return 0;
     }
+    if (lastX != xpos && lastY != ypos) {
 
     //std::cout << "XPOS:/t" << xpos << "\tYPOS:\t" << ypos << std::endl;
         
@@ -407,4 +409,7 @@ void svrAppl::updateView(double xpos, double ypos) {
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
+    return 1;
+    }
+    return 0;
 }

@@ -54,7 +54,7 @@ class svrAppl {
         int createWorld();
         void createCamera();
         void createFramebuffer();
-        void updateView(double xpos, double ypos);
+        int updateView(double xpos, double ypos);
         void render();
         void createImage(unsigned char* pixels);
 
@@ -112,6 +112,7 @@ class svrAppl {
         float lastX;
         float lastY;
         float fov;
+
 
 
 };

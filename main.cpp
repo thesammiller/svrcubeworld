@@ -13,6 +13,8 @@
 
 #include "svr/svrServer.h"
 
+static ACE_Thread_Mutex _mutex;
+
 
 
 //TAO
@@ -53,6 +55,8 @@ int main(int argc, char* argv[])
     Worker worker(myServer.orb.in());
     //Activate the worker thread
     worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
+
+    unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
     
     // render loop
     // -----------
@@ -67,16 +71,12 @@ int main(int argc, char* argv[])
         //myServer.getData();
 
         // Take the server data and update the view based on controller input
-        myAppl.updateView(myServer.server_impl.data[0], myServer.server_impl.data[1]);
+        if (myAppl.updateView(myServer.server_impl.data[0], myServer.server_impl.data[1]) == 1) {
+            myAppl.render();
+            myAppl.createImage(pixels);
+            myServer.sendImage(pixels);
+        };
         
-        // Draw
-        myAppl.render();
-
-        //TODO: Send drawing to client
-
-        unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
-        myAppl.createImage(pixels);
-        myServer.sendImage(pixels);
 
     }
 

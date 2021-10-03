@@ -1,5 +1,7 @@
 #include "svr/svrServer.h"
 
+static ACE_Thread_Mutex mutex;
+
 int svrServer::parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("o:"));
@@ -95,7 +97,11 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 
 
 void svrServer::sendImage(unsigned char *pixels) {
+  mutex.acquire();
   server_impl.setImageData(pixels);
+  mutex.release();
+  mutex.acquire();
   server_impl.sendImageData();
+  mutex.release();
 
 }
