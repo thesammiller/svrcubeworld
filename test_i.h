@@ -39,6 +39,8 @@ private:
   /// The ORB
   CORBA::ORB_var orb_;
   Simple_Server::pixels_slice* imageData;
+  Simple_Server::pixels_slice* oldData;
+  bool dataSet = false;
 };
 
 #if defined(__ACE_INLINE__)

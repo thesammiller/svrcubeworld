@@ -6,15 +6,18 @@
 
 #include <iostream>
 
+static ACE_Thread_Mutex m_mutex;
+
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
-  std::cout << "Sending image data" << std::endl;
-  return this->imageData;
+    if (m_mutex.acquire_read() != -1 && dataSet) {
+      this->oldData = this->imageData;
+  }
+  return this->oldData;
 }
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
   this->imageData = iData;
 }
-
 
 void
 Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose)
