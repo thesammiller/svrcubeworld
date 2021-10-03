@@ -58,8 +58,7 @@ svrAppl::svrAppl() {
 
 }
 
-void svrAppl::createImage(unsigned char* pixels) {
-    int             i, j, k;
+void svrAppl::createImage() {
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 
@@ -272,6 +271,9 @@ void svrAppl::render() {
     // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    //Get the image from the end of the Render
+    createImage();
 
 }
 

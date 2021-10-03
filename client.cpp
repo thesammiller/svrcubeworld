@@ -26,6 +26,10 @@ const unsigned int SCR_HEIGHT = 600;
 
 unsigned int loadTexture(const char *path);
 
+ACE_Thread_Mutex m_mutex;
+Simple_Server::pixels_slice* p;
+
+
 
 const ACE_TCHAR *ior = ACE_TEXT("file://test.ior");
 int niterations = 10;
@@ -170,7 +174,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     while (!glfwWindowShouldClose(window))
     {
 
-      Simple_Server::pixels_slice* p = server->sendImageData();
       renderBufferShader.use();
       
       glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
@@ -181,12 +184,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
-      //Renders fine when it's just a regular image loaded...
-     
       
-      
+      m_mutex.acquire();
       memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-
+      m_mutex.release();
       
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
@@ -197,14 +198,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-
-
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       glfwSwapBuffers(window);
-          glfwPollEvents();
+        glfwPollEvents();
 
     }
 
@@ -258,28 +257,35 @@ Worker::run_test (void)
       Simple_Server_var server =
         Simple_Server::_narrow (object.in ());
 
-	  std::cout<< "Running" <<std::endl;
+      std::cout<< "Running" <<std::endl;
 
-	  for (;;) {
-	  std::fstream in("sample_controller.txt");
-	  std::string line;
-	  std::vector<std::vector<float>> v;
-	  int i=0;
-	  while(std::getline(in, line)) {
-	      float value;
-	      std::stringstream ss(line);
-	      float values[9];
-	      // -1161455114	-1161488748		-0.101638 -0.008850 0.042846 0.993859	-0.004179 1.231212 -0.337064
-	      
-	      for (int j=0; j < 9; j++) {
-		ss >> values[j];
-	      }
-	      
-	      std::cout << values[0]  << std::endl;
-	      float outArray[7] = {values[2], values[3], values[4], values[5], values[6], values[7], values[8]};
-	      server->send_data(1234567, outArray);
-	      ++i;
-	      usleep(100000);
+      for (;;) {
+        std::fstream in("sample_controller.txt");
+        std::string line;
+        std::vector<std::vector<float>> v;
+        int i=0;
+        while(std::getline(in, line)) {
+            float value;
+            std::stringstream ss(line);
+            float values[9];
+            // -1161455114	-1161488748		-0.101638 -0.008850 0.042846 0.993859	-0.004179 1.231212 -0.337064
+            
+            for (int j=0; j < 9; j++) {
+                ss >> values[j];
+            }
+            
+            //std::cout << values[0]  << std::endl;
+            float outArray[7] = {values[2], values[3], values[4], values[5], values[6], values[7], values[8]};
+            server->send_data(1234567, outArray);
+            ++i;
+            //Sleep is not a best practice.
+            //But there should be some sort of synchronous use with send_data();
+            usleep(100000);
+            m_mutex.acquire();
+            p = server->sendImageData();
+            m_mutex.release();
+            
+
 	  }
 	  }
     

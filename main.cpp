@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     //Activate the worker thread
     worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
 
-    unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    
     
     // render loop
     // -----------
@@ -76,9 +76,7 @@ int main(int argc, char* argv[])
 
         //TODO: Send drawing to client
 
-        
-        myAppl.createImage(pixels);
-        myServer.sendImage(pixels);
+        myServer.setImage(myAppl.pixels);
 
     }
 

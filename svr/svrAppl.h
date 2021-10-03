@@ -56,7 +56,7 @@ class svrAppl {
         void createFramebuffer();
         void updateView(double xpos, double ypos);
         void render();
-        void createImage(unsigned char* pixels);
+        void createImage();
 
         GLFWwindow* window = 0;
         unsigned int m_width;
@@ -72,6 +72,7 @@ class svrAppl {
         unsigned int rbo;
         int textureUnitIndex;
 
+        unsigned char *pixels = (unsigned char *) malloc (800 * 600 * 3);
 
 
 

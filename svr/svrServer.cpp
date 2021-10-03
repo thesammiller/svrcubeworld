@@ -94,7 +94,7 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 }
 
 
-void svrServer::sendImage(unsigned char *pixels) {
+void svrServer::setImage(unsigned char *pixels) {
   server_impl.setImageData(pixels);
 
 }
