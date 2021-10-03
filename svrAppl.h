@@ -33,6 +33,9 @@ struct VertexAttribs {
 
 typedef uint16_t TriangleIndex;
 
+
+
+
 // CubeWorld Settings
 // Set Number of Cubes and Variety of Rotations
 // Highest I tried is 30k... Fails at 60k. Theoretical vertex max of Oculus 1,000,000 / 12 --> 83.333k
@@ -50,6 +53,7 @@ class svrAppl {
         int createWindow(unsigned int width, unsigned int height, char *name);
         int createWorld();
         void createCamera();
+        void createFramebuffer();
         void updateView(double xpos, double ypos);
         void render();
 
@@ -58,6 +62,19 @@ class svrAppl {
         unsigned int m_height;
         Shader program;
 
+        //Framebuffer
+        Shader renderBufferShader;
+        unsigned int quadVBO;
+        unsigned int quadVAO;
+        unsigned int framebuffer;
+        unsigned int textureColorbuffer;
+        unsigned int rbo;
+        int textureUnitIndex;
+
+
+
+
+        //World
         unsigned int vertexBuffer;
         unsigned int indexBuffer;
         unsigned int vertexArrayObject;
