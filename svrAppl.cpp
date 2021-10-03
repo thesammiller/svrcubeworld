@@ -337,9 +337,9 @@ void svrAppl::render() {
         GL(glViewport(0, 0, m_width, m_height));
         GL(glScissor(0, 0, m_width, m_height));
         GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
-        //GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
+        GL(glEnable(GL_FRAMEBUFFER_SRGB_EXT));
         GL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-        //GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
+        GL(glDisable(GL_FRAMEBUFFER_SRGB_EXT));
 
         // GLM Update Camera Postion
         // -------------------------
