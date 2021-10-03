@@ -74,9 +74,12 @@ int main(int argc, char* argv[])
         // Draw
         myAppl.render();
 
-        //TODO: Send drawing to client
+        //TODO: SAVE RENDER TO PIXELS ON THE SERVER
+        // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
+        unsigned char* m_pixels = (unsigned char*) malloc (800 * 600 * 3);
 
-        myServer.setImage(myAppl.pixels);
+        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
+        myServer.setImage(m_pixels);
 
     }
 
