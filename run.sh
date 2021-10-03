@@ -1,4 +1,4 @@
 #!/bin/sh
 
-./out/build/svr_cubeworld &
-./out/build/client
+./out/build/svr_cubeworld
+
