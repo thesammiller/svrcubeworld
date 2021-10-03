@@ -42,6 +42,11 @@ include_directories(${TAO_ROOT})
 
 target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${TAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
+add_executable(
+  client
+  client.cpp testC.cpp
+  )
+target_link_libraries(client OpenGL::GL glfw glm "${TAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 enable_testing()
 
