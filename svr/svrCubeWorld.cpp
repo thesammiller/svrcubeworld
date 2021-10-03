@@ -1,6 +1,6 @@
 
 
-#include "svrCubeWorld.h"
+#include "svr/svrCubeWorld.h"
 
 using OVR::Vector3f;
 using OVR::Vector4f;

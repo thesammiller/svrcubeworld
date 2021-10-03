@@ -4,7 +4,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_stdio.h"
 #include "ace/Task.h"
-#include "ServerWorker.h"
+#include "svr/svrWorker.h"
 
 
 class svrServer {

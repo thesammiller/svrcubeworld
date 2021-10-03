@@ -1,4 +1,4 @@
-#include "svrServer.h"
+#include "svr/svrServer.h"
 
 int svrServer::parse_args (int argc, ACE_TCHAR *argv[])
 {

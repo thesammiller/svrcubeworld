@@ -1,6 +1,6 @@
 
 
-#include "svrAppl.h"
+#include "svr/svrAppl.h"
 
 //OVR
 #include "ovr/OVR_Math.h"
@@ -11,7 +11,7 @@
 #include <vector>
 #include <sys/resource.h>
 
-#include "svrServer.h"
+#include "svr/svrServer.h"
 
 
 

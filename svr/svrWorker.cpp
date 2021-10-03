@@ -1,4 +1,4 @@
-#include "ServerWorker.h"
+#include "svr/svrWorker.h"
 
 Worker::Worker(CORBA::ORB_ptr orb) : orb_(CORBA::ORB::_duplicate(orb)) {
 
