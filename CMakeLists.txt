@@ -44,7 +44,7 @@ target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${TAO_IORTable}" "${l
 
 add_executable(
   client
-  client.cpp testC.cpp
+  client.cpp testC.cpp shader_s.cpp
   )
 target_link_libraries(client OpenGL::GL glfw glm "${TAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
