@@ -118,42 +118,42 @@ void svrAppl::createFramebuffer() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     renderBufferShader.use();
-    
-    //framebuffer configuration
-    glGenFramebuffers(1, &framebuffer);
-    glBindBuffer(GL_FRAMEBUFFER, framebuffer);
-    //create color attachment
-    //generate texture
-    glGenTextures(1, &textureColorbuffer);
-    textureUnitIndex = 0;
-    glActiveTexture(GL_TEXTURE0 + textureUnitIndex);
-    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
-    //create texture with NULL for data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    // OVR RENDER BUFFER LOGIC 
     renderBufferShader.setInt("screenTexture", textureUnitIndex);
 
+    glGenTextures(1, &textureColorbuffer);
+    GLenum colorTextureTarget = GL_TEXTURE_2D;
+    GL(glBindTexture(colorTextureTarget, textureColorbuffer));
+    GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
+    GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
+    GLfloat borderColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
+    GL(glTexParameterfv(colorTextureTarget, GL_TEXTURE_BORDER_COLOR, borderColor));
+    GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    GL(glBindTexture(colorTextureTarget, 0));
 
-    //create a renderbuffer object --> 
-    // remember we're creating it as a depth and stencil attachment renderbuffer object
-    // we set its internal format to GL_DEPTH24_STENCIL8 
-    
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, m_width, m_height);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    // Create depth buffer.
+    GL(glGenRenderbuffers(1, &rbo));
+    GL(glBindRenderbuffer(GL_RENDERBUFFER, rbo));
+    GL(glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_width, m_height));
+    GL(glBindRenderbuffer(GL_RENDERBUFFER, 0));
 
-    //final step before completing frame buffer
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {    
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    // Create the frame buffer.
+    GL(glGenFramebuffers(1, &framebuffer));
+    GL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer));
+    GL(glFramebufferRenderbuffer(
+        GL_DRAW_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_RENDERBUFFER,
+        rbo));
+    GL(glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0));
+    GL(GLenum renderFramebufferStatus = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER));
+    GL(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0));
+    if (renderFramebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "Incomplete frame buffer object: " << std::endl;
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    
 
 }
 
@@ -292,41 +292,42 @@ void svrAppl::updateView(double xpos, double ypos) {
 void svrAppl::render() {
 
     // Bind to our new buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glEnable(GL_DEPTH_TEST);
+    // Set the framebuffer as the current
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glEnable(GL_DEPTH_TEST);
 
     // OVR CubeWorld Game Logic Updates -- update instance transforms
         // ---------------------------------
 
-        program.use();
-        float time = glfwGetTime();
-        
-        glBindVertexArray(vertexArrayObject);
+    program.use();
+    float time = glfwGetTime();
+    
+    glBindVertexArray(vertexArrayObject);
 
-        GL(glGenBuffers(1, &InstanceTransformBuffer));
-        GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
-        GL(glBufferData(
-            GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
+    GL(glGenBuffers(1, &InstanceTransformBuffer));
+    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+    GL(glBufferData(
+        GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
+    
+    for (int i = 0; i < 4; i++) {
+        GL(glEnableVertexAttribArray(VertexTransformAttribute + i));
+        GL(glVertexAttribPointer(
+            VertexTransformAttribute + i,
+            4,
+            GL_FLOAT,
+            false,
+            4 * 4 * sizeof(float),
+            (void*)(i * 4 * sizeof(float))));
+        GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
+    }
         
-        for (int i = 0; i < 4; i++) {
-            GL(glEnableVertexAttribArray(VertexTransformAttribute + i));
-            GL(glVertexAttribPointer(
-                VertexTransformAttribute + i,
-                4,
-                GL_FLOAT,
-                false,
-                4 * 4 * sizeof(float),
-                (void*)(i * 4 * sizeof(float))));
-            GL(glVertexAttribDivisor(VertexTransformAttribute + i, 1));
-        }
-            
-        GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
+    GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
 
-        GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
-            GL_ARRAY_BUFFER,
-            0,
-            NUM_INSTANCES * sizeof(ovrMatrix4f),
-            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
+    GL(ovrMatrix4f* cubeTransforms = (ovrMatrix4f*)glMapBufferRange(
+        GL_ARRAY_BUFFER,
+        0,
+        NUM_INSTANCES * sizeof(ovrMatrix4f),
+        GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT));
 
         update_cube_rotations(startTime, time, Rotations, NUM_ROTATIONS, cubeTransforms, NUM_INSTANCES, CubeRotations, CubePositions); 
         
@@ -334,6 +335,11 @@ void svrAppl::render() {
 
         // GL Clear Screen and Prepare Draw
         // --------------------------------
+        GL(glEnable(GL_SCISSOR_TEST));
+        GL(glDepthMask(GL_TRUE));
+        GL(glEnable(GL_DEPTH_TEST));
+        GL(glDepthFunc(GL_LEQUAL));
+        GL(glEnable(GL_CULL_FACE));
         GL(glViewport(0, 0, m_width, m_height));
         GL(glScissor(0, 0, m_width, m_height));
         GL(glClearColor(0.016f, 0.0f, 0.016f, 1.0f));
@@ -357,6 +363,10 @@ void svrAppl::render() {
         // ------------------
         GL(glBindVertexArray(vertexArrayObject));
         GL(glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, NULL, NUM_INSTANCES));
+
+        //OVR LOGIC
+        GL(glActiveTexture(GL_TEXTURE0));
+        GL(glBindTexture(GL_TEXTURE_2D, 0));
 
         GL(glBindVertexArray(0));
         GL(glUseProgram(0));
