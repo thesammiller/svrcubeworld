@@ -152,20 +152,29 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    renderBufferShader.use();
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-    glDisable(GL_DEPTH_TEST);
+    while (!glfwWindowShouldClose(window))
+    {
 
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    
-    renderBufferShader.use();
-    glBindVertexArray(quadVAO);
-    //Renders fine when it's just a regular image loaded...
-    glBindTexture(GL_TEXTURE_2D, texture2); 
 
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+      renderBufferShader.use();
+      
+      glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+      glDisable(GL_DEPTH_TEST);
+
+      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT);
+      
+      renderBufferShader.use();
+      glBindVertexArray(quadVAO);
+      //Renders fine when it's just a regular image loaded...
+      glBindTexture(GL_TEXTURE_2D, texture2); 
+
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+
+      glfwSwapBuffers(window);
+          glfwPollEvents();
+
+    }
 
 
     worker.thr_mgr ()->wait ();
