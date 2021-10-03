@@ -1,8 +1,8 @@
 
 
 
-#include "ovr/VrApi_Helpers.h"
-#include "ovr/OVR_Math.h"
+#include "../ovr/VrApi_Helpers.h"
+#include "../ovr/OVR_Math.h"
 
 using OVR::Vector3f;
 using OVR::Vector4f;

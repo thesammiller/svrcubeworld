@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../svrCubeWorld.h"
+#include "../svr/svrCubeWorld.h"
 
 TEST(RandomFloatTest, BasicAssertions) {
   float random_a = RandomFloat();
