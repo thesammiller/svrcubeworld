@@ -26,10 +26,13 @@ const unsigned int SCR_HEIGHT = 600;
 
 unsigned int loadTexture(const char *path);
 
+static ACE_Thread_Mutex m_mutex;
+unsigned char *pixels = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+
 
 const ACE_TCHAR *ior = ACE_TEXT("file://test.ior");
 int niterations = 10;
-int nthreads = 1;
+int nthreads = 3;
 int do_shutdown = 0;
 
 int
@@ -83,6 +86,24 @@ private:
   CORBA::ORB_var orb_;
   // The ORB reference
 };
+
+class GLWorker : public ACE_Task_Base
+{
+public:
+  GLWorker (CORBA::ORB_ptr orb);
+  // Constructor
+
+  virtual void run_test (void);
+  // The actual implementation of the test
+
+  // = The Task_Base methods
+  virtual int svc ();
+
+private:
+  CORBA::ORB_var orb_;
+  // The ORB reference
+};
+
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -145,7 +166,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       Worker worker (orb.in ());
 
+      GLWorker worker2 (orb.in());
+
+
       if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "(%P|%t) Cannot activate worker threads\n"),
+                          1);
+
+      if (worker2.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
                            "(%P|%t) Cannot activate worker threads\n"),
                           1);
@@ -154,7 +183,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       orb->run (tv);
 
-    
+    unsigned int pixelTexture;
+    glGenTextures(1, &pixelTexture);
+
+  
+
       
 
     while (!glfwWindowShouldClose(window))
@@ -172,20 +205,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
       //Renders fine when it's just a regular image loaded...
-      CORBA::Object_var object =
-        orb->string_to_object (ior);
+      
 
-      Simple_Server_var server =
-        Simple_Server::_narrow (object.in ());
+      
 
-      unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
-      Simple_Server::pixels_slice* p = server->sendImageData();
-      memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-
-      unsigned int pixelTexture;
-    glGenTextures(1, &pixelTexture);
+      
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
+      m_mutex.acquire();
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        m_mutex.release();
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -227,6 +255,11 @@ Worker::Worker (CORBA::ORB_ptr orb)
 {
 }
 
+GLWorker::GLWorker (CORBA::ORB_ptr orb)
+  :  orb_ (CORBA::ORB::_duplicate (orb))
+{
+}
+
 int
 Worker::svc (void)
 {
@@ -242,6 +275,22 @@ Worker::svc (void)
   return 0;
 }
 
+int
+GLWorker::svc (void)
+{
+  try
+    {
+      this->run_test ();
+    }
+  catch (const CORBA::Exception& ex)
+    {
+      ex._tao_print_exception ("Exception caught in thread (%t)\n");
+    }
+
+  return 0;
+}
+
+
 void
 Worker::run_test (void)
 {
@@ -254,7 +303,7 @@ Worker::run_test (void)
       Simple_Server_var server =
         Simple_Server::_narrow (object.in ());
 
-	  std::cout<< "Running" <<std::endl;
+	  std::cout<< "Running Controller worker" <<std::endl;
 
 	  for (;;) {
 	  std::fstream in("sample_controller.txt");
@@ -268,16 +317,37 @@ Worker::run_test (void)
 	      // -1161455114	-1161488748		-0.101638 -0.008850 0.042846 0.993859	-0.004179 1.231212 -0.337064
 	      
 	      for (int j=0; j < 9; j++) {
-		ss >> values[j];
+	        	ss >> values[j];
 	      }
 	      
-	      std::cout << values[0]  << std::endl;
 	      float outArray[7] = {values[2], values[3], values[4], values[5], values[6], values[7], values[8]};
 	      server->send_data(1234567, outArray);
 	      ++i;
 	      usleep(100000);
 	  }
 	  }
+    
+
+}
+
+void
+GLWorker::run_test (void)
+{
+
+    //Get the GL Data from the server
+      m_mutex.acquire();
+      CORBA::Object_var object =
+        orb_->string_to_object (ior);
+
+      Simple_Server_var server =
+        Simple_Server::_narrow (object.in ());
+
+      Simple_Server::pixels_slice* p = server->sendImageData();
+      
+      memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
+      m_mutex.release();
+
+
     
 
 }

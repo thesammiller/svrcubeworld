@@ -6,13 +6,21 @@
 
 #include <iostream>
 
+static ACE_Thread_Mutex m_mutex;
+
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
-  std::cout << "Sending image data" << std::endl;
-  return this->imageData;
+  //std::cout << "Sending image data" << std::endl;
+  if (m_mutex.acquire_read() != -1) {
+    memcpy(oldData, imageData, sizeof(unsigned char) * 800 * 600);
+    return this->imageData;
+  }
+  return oldData;
 }
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
+  m_mutex.acquire();
   this->imageData = iData;
+  m_mutex.release();
 }
 
 

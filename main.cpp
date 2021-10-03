@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <sys/resource.h>
+#include <unistd.h>
 
 #include "svr/svrServer.h"
 
@@ -57,6 +58,7 @@ int main(int argc, char* argv[])
     worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
 
     unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+   
     
     // render loop
     // -----------
@@ -71,11 +73,13 @@ int main(int argc, char* argv[])
         //myServer.getData();
 
         // Take the server data and update the view based on controller input
-        if (myAppl.updateView(myServer.server_impl.data[0], myServer.server_impl.data[1]) == 1) {
-            myAppl.render();
-            myAppl.createImage(pixels);
-            myServer.sendImage(pixels);
-        };
+        myAppl.updateView(myServer.server_impl.data[0], myServer.server_impl.data[1]);
+        
+        myAppl.render();
+        myAppl.createImage(pixels);
+        myServer.sendImage(pixels);
+        
+        
         
 
     }

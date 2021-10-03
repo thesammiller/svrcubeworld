@@ -97,11 +97,7 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 
 
 void svrServer::sendImage(unsigned char *pixels) {
-  mutex.acquire();
   server_impl.setImageData(pixels);
-  mutex.release();
-  mutex.acquire();
-  server_impl.sendImageData();
-  mutex.release();
+
 
 }
