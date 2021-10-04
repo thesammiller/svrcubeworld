@@ -10,9 +10,6 @@
 static ACE_Thread_Mutex m_mutex;
 
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
-  std::cout << "request made" << std::endl;
-  //while (m_mutex.tryacquire() == -1);
-  std::cout << "request accepted" << std::endl;
   Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
   memcpy(value, this->imageData, sizeof(unsigned char) * 800 * 600 *3);
   return value;

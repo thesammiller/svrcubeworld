@@ -95,7 +95,36 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       //OPENGL
-      
+   
+
+  try
+    {
+      CORBA::ORB_var orb =
+        CORBA::ORB_init (argc, argv);
+
+      if (parse_args (argc, argv) != 0)
+        return 1;
+
+      Worker worker (orb.in ());
+
+      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "(%P|%t) Cannot activate worker threads\n"),
+                          1);
+
+      ACE_Time_Value tv (5, 0);
+
+      orb->run (tv);
+
+    
+
+     CORBA::Object_var object =
+        orb->string_to_object (ior);
+
+      Simple_Server_var server =
+        Simple_Server::_narrow (object.in ());
+
+           
        // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -139,33 +168,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-  try
-    {
-      CORBA::ORB_var orb =
-        CORBA::ORB_init (argc, argv);
-
-      if (parse_args (argc, argv) != 0)
-        return 1;
-
-      Worker worker (orb.in ());
-
-      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "(%P|%t) Cannot activate worker threads\n"),
-                          1);
-
-      ACE_Time_Value tv (5, 0);
-
-      orb->run (tv);
-
-    
-
-     CORBA::Object_var object =
-        orb->string_to_object (ior);
-
-      Simple_Server_var server =
-        Simple_Server::_narrow (object.in ());
-
       unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
 
       
@@ -183,7 +185,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
-      sleep(1);
       
       unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
       local_pixels = server->sendImageData();
@@ -262,8 +263,7 @@ Worker::run_test (void)
       Simple_Server_var server =
         Simple_Server::_narrow (object.in ());
 
-      std::cout<< "Running" <<std::endl;
-
+      
       for (;;) {
         std::fstream in("sample_controller.txt");
         std::string line;
