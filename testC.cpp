@@ -41,6 +41,7 @@
 #include "tao/AnyTypeCode/Any_Impl_T.h"
 #include "tao/AnyTypeCode/Any_Array_Impl_T.h"
 #include "cstring"
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "testC.inl"
@@ -308,6 +309,7 @@ static TAO::TypeCode::Alias<char const *,
 ::Simple_Server::pixels_slice *
 Simple_Server::sendImageData ()
 {
+  std::cout << "Making request for data" << std::endl;
   if (!this->is_evaluated ())
     {
       ::CORBA::Object::tao_object_initialize (this);

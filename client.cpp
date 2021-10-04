@@ -27,7 +27,7 @@ const unsigned int SCR_HEIGHT = 600;
 unsigned int loadTexture(const char *path);
 
 ACE_Thread_Mutex m_mutex;
-Simple_Server::pixels_slice* p;
+Simple_Server::pixels_slice* p = Simple_Server::pixels_alloc();
 
 
 
@@ -158,8 +158,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       orb->run (tv);
 
-    unsigned int pixelTexture;
-    glGenTextures(1, &pixelTexture);
+    
 
      CORBA::Object_var object =
         orb->string_to_object (ior);
@@ -167,7 +166,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       Simple_Server_var server =
         Simple_Server::_narrow (object.in ());
 
-        unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+      unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
 
       
 
@@ -184,14 +183,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
+      sleep(1);
       
-      m_mutex.acquire();
+      unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+      local_pixels = server->sendImageData();
+
+      memcpy(p, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
       memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-      m_mutex.release();
+
+      unsigned int pixelTexture;
+      glGenTextures(1, &pixelTexture);
       
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-      //glGenerateMipmap(GL_TEXTURE_2D);
+      glGenerateMipmap(GL_TEXTURE_2D);
 
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -281,10 +286,6 @@ Worker::run_test (void)
             //Sleep is not a best practice.
             //But there should be some sort of synchronous use with send_data();
             usleep(100000);
-            m_mutex.acquire();
-            p = server->sendImageData();
-            m_mutex.release();
-            
 
 	  }
 	  }

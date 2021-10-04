@@ -24,4 +24,5 @@ class svrServer {
         PortableServer::POA_var root_poa = NULL;
         PortableServer::POAManager_var poa_manager = NULL;
         Simple_Server_i server_impl = NULL;
+        
         };
