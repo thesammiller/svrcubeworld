@@ -16,6 +16,7 @@ class svrServer {
         int createServer();
         void startWorker(Worker *worker, int nthreads);
         int parse_args(int argc, char *argv[]);
+        void setImage(unsigned char *pixels);
         void wait();
 
         CORBA::ORB_var orb;
@@ -23,4 +24,5 @@ class svrServer {
         PortableServer::POA_var root_poa = NULL;
         PortableServer::POAManager_var poa_manager = NULL;
         Simple_Server_i server_impl = NULL;
+        
         };

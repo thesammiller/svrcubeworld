@@ -58,6 +58,14 @@ svrAppl::svrAppl() {
 
 }
 
+void svrAppl::createImage() {
+    unsigned char* p = (unsigned char*) malloc (800 * 600 * 3);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
+    memcpy(pixels, p, sizeof(unsigned char) * 800 * 600 *3);
+
+}
+
 
 
 int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
@@ -264,6 +272,9 @@ void svrAppl::render() {
     // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
+
+    //Get the image from the end of the Render
+    createImage();
 
 }
 

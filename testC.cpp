@@ -41,6 +41,7 @@
 #include "tao/AnyTypeCode/Any_Impl_T.h"
 #include "tao/AnyTypeCode/Any_Array_Impl_T.h"
 #include "cstring"
+#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "testC.inl"
@@ -210,6 +211,132 @@ Simple_Server::send_data (
     );
 
   _tao_call.invoke (nullptr, 0);
+}
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_array/array_cs.cpp:94
+
+Simple_Server::pixels_slice *
+Simple_Server::pixels_dup (const Simple_Server::pixels_slice *_tao_src_array)
+{
+  Simple_Server::pixels_slice *_tao_dup_array = Simple_Server::pixels_alloc ();
+  
+  if (_tao_dup_array)
+    {
+      Simple_Server::pixels_copy (_tao_dup_array, _tao_src_array);
+    }
+  
+  return _tao_dup_array;
+}
+
+Simple_Server::pixels_slice *
+Simple_Server::pixels_alloc ()
+{
+  Simple_Server::pixels_slice *retval {};
+  ACE_NEW_RETURN (retval, ::CORBA::Octet[1440000], nullptr);
+  return retval;
+}
+
+void
+Simple_Server::pixels_free (Simple_Server::pixels_slice *_tao_slice)
+{
+  delete [] _tao_slice;
+}
+
+void
+Simple_Server::pixels_copy (
+    Simple_Server::pixels_slice * _tao_to,
+    const Simple_Server::pixels_slice *_tao_from)
+{
+  // Copy each individual element.
+  for ( ::CORBA::ULong i0 = 0; i0 < 1440000; ++i0)
+    {
+      _tao_to[i0] = _tao_from[i0];
+    }
+}
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_typecode/alias_typecode.cpp:49
+
+
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_typecode/typecode_defn.cpp:298
+
+
+#ifndef _TAO_TYPECODE_Simple_Server_pixels_GUARD
+#define _TAO_TYPECODE_Simple_Server_pixels_GUARD
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace TAO
+{
+  namespace TypeCode
+  {
+    namespace
+    {
+      TAO::TypeCode::Sequence< ::CORBA::TypeCode_ptr const *,
+                              TAO::Null_RefCount_Policy>
+        Simple_Server_pixels_1440000 (
+          ::CORBA::tk_array,
+          &CORBA::_tc_octet,
+          1440000U);
+        
+      ::CORBA::TypeCode_ptr const tc_Simple_Server_pixels =
+        &Simple_Server_pixels_1440000;
+    }
+  }
+}
+
+TAO_END_VERSIONED_NAMESPACE_DECL
+
+#endif /* _TAO_TYPECODE_Simple_Server_pixels_GUARD */
+static TAO::TypeCode::Alias<char const *,
+                            ::CORBA::TypeCode_ptr const *,
+                            TAO::Null_RefCount_Policy>
+  _tao_tc_Simple_Server_pixels (
+    ::CORBA::tk_alias,
+    "IDL:Simple_Server/pixels:1.0",
+    "pixels",
+    &TAO::TypeCode::tc_Simple_Server_pixels);
+  
+::CORBA::TypeCode_ptr const Simple_Server::_tc_pixels =
+  &_tao_tc_Simple_Server_pixels;
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_cs.cpp:88
+
+::Simple_Server::pixels_slice *
+Simple_Server::sendImageData ()
+{
+  if (!this->is_evaluated ())
+    {
+      ::CORBA::Object::tao_object_initialize (this);
+    }
+  
+  TAO::Arg_Traits< ::Simple_Server::pixels_tag>::ret_val _tao_retval;
+
+  TAO::Argument *_the_tao_operation_signature [] =
+    {
+      std::addressof(_tao_retval)
+    };
+
+  TAO::Invocation_Adapter _tao_call (
+      this,
+      _the_tao_operation_signature,
+      1,
+      "sendImageData",
+      13,
+      TAO::TAO_CO_NONE | TAO::TAO_CO_THRU_POA_STRATEGY,
+      TAO::TAO_TWOWAY_INVOCATION
+      ,
+      TAO::TAO_SYNCHRONOUS_INVOCATION,
+      false
+    );
+
+  _tao_call.invoke (nullptr, 0);
+
+  return _tao_retval.retn ();
 }
 
 Simple_Server::Simple_Server ()
@@ -414,6 +541,50 @@ TAO_END_VERSIONED_NAMESPACE_DECL
 
 
 // TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_array/any_op_cs.cpp:37
+
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+void operator<<= (
+    ::CORBA::Any &_tao_any,
+    const Simple_Server::pixels_forany &_tao_elem
+  )
+{
+  TAO::Any_Array_Impl_T<
+      Simple_Server::pixels_slice,
+      Simple_Server::pixels_forany
+    >::insert (
+        _tao_any,
+        Simple_Server::pixels_forany::_tao_any_destructor,
+        Simple_Server::_tc_pixels,
+        _tao_elem.nocopy ()
+          ? _tao_elem.ptr ()
+          : Simple_Server::pixels_dup (_tao_elem.in ())
+      );
+}
+
+::CORBA::Boolean operator>>= (
+    const ::CORBA::Any &_tao_any,
+    Simple_Server::pixels_forany &_tao_elem
+  )
+{
+  return
+    TAO::Any_Array_Impl_T<
+        Simple_Server::pixels_slice,
+        Simple_Server::pixels_forany
+      >::extract (
+          _tao_any,
+          Simple_Server::pixels_forany::_tao_any_destructor,
+          Simple_Server::_tc_pixels,
+          _tao_elem.out ()
+        );
+}
+TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+// TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp:163
 
 
@@ -435,6 +606,34 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
   return strm.read_float_array (
       reinterpret_cast <ACE_CDR::Float *> (_tao_array.out ()),
       7);
+}
+
+TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_array/cdr_op_cs.cpp:163
+
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+::CORBA::Boolean operator<< (
+    TAO_OutputCDR &strm,
+    const Simple_Server::pixels_forany &_tao_array)
+{
+  return strm.write_octet_array (
+      reinterpret_cast <const ACE_CDR::Octet *> (_tao_array.in ()),
+      1440000);
+}
+
+::CORBA::Boolean operator>> (
+    TAO_InputCDR &strm,
+    Simple_Server::pixels_forany &_tao_array)
+{
+  return strm.read_octet_array (
+      reinterpret_cast <ACE_CDR::Octet *> (_tao_array.out ()),
+      1440000);
 }
 
 TAO_END_VERSIONED_NAMESPACE_DECL

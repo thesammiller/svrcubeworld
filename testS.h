@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:451
 
-#ifndef _TAO_IDL_TESTS_S9NUUF_H_
-#define _TAO_IDL_TESTS_S9NUUF_H_
+#ifndef _TAO_IDL_TESTS_JQRCDK_H_
+#define _TAO_IDL_TESTS_JQRCDK_H_
 
 
 #include "testC.h"
@@ -89,6 +89,17 @@ namespace TAO
           >
   {
   };
+
+  template<>
+  class SArg_Traits< ::Simple_Server::pixels_tag>
+    : public
+        Fixed_Array_SArg_Traits_T<
+            ::Simple_Server::pixels_var,
+            ::Simple_Server::pixels_forany,
+            TAO::Any_Insert_Policy_Stream
+          >
+  {
+  };
 }
 
 TAO_END_VERSIONED_NAMESPACE_DECL
@@ -134,6 +145,16 @@ public:
     const ::Simple_Server::HeadPoseArray headpose) = 0;
 
   static void send_data_skel (
+      TAO_ServerRequest &server_request,
+      TAO::Portable_Server::Servant_Upcall *servant_upcall,
+      TAO_ServantBase *servant);
+
+  // TAO_IDL - Generated from
+  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_sh.cpp:36
+
+  virtual ::Simple_Server::pixels_slice * sendImageData () = 0;
+
+  static void sendImageData_skel (
       TAO_ServerRequest &server_request,
       TAO::Portable_Server::Servant_Upcall *servant_upcall,
       TAO_ServantBase *servant);

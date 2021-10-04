@@ -29,12 +29,19 @@ public:
 
   // = The Simple_Server methods.
   void send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose );
-
+  Simple_Server::pixels_slice* sendImageData();
+  
+  void setImageData(unsigned char* iData);
+  
   void shutdown (void);
 
 private:
   /// The ORB
   CORBA::ORB_var orb_;
+  Simple_Server::pixels_slice* imageData;
+  Simple_Server::pixels_slice* oldData;
+  bool dataSet = false;
+  
 };
 
 #if defined(__ACE_INLINE__)
