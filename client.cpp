@@ -27,7 +27,6 @@ const unsigned int SCR_HEIGHT = 600;
 unsigned int loadTexture(const char *path);
 
 ACE_Thread_Mutex m_mutex;
-Simple_Server::pixels_slice* p = Simple_Server::pixels_alloc();
 
 
 
@@ -132,7 +131,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "ClientCubeWorld", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -152,7 +151,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         1.0f, -1.0f, 1.0f, 0.0f,
         1.0f, 1.0f, 1.0f, 1.0f     };
 
-    unsigned int texture2 = loadTexture("container.jpg");
+    //unsigned int texture2 = loadTexture("container.jpg");
 
     unsigned int quadVBO, quadVAO;
     glGenVertexArrays(1, &quadVAO);
@@ -169,12 +168,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     
-   
-      
-
     while (!glfwWindowShouldClose(window))
     {
-
+      Simple_Server::pixels_slice* p = Simple_Server::pixels_alloc();
       unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
       renderBufferShader.use();
       
@@ -215,6 +211,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       delete(pixels);
       delete(local_pixels);
+      delete(p);
       glDeleteTextures(1, &pixelTexture);
 
 
