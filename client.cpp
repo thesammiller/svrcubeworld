@@ -163,10 +163,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
+    unsigned int pixelTexture;
+    glGenTextures(1, &pixelTexture);
     
     while (!glfwWindowShouldClose(window))
     {
-      Simple_Server::pixels_slice* p = Simple_Server::pixels_alloc();
       unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
       renderBufferShader.use();
       
@@ -183,11 +184,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       local_pixels = server->sendImageData();
 
       //TODO: Is this safe?
-      memcpy(p, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-      memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
+      memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
+      //memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
-      unsigned int pixelTexture;
-      glGenTextures(1, &pixelTexture);
+      
 
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
@@ -207,7 +207,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       delete(pixels);
       delete(local_pixels);
-      delete(p);
       glDeleteTextures(1, &pixelTexture);
 
 
