@@ -169,6 +169,8 @@ void svrAppl::createFramebuffer() {
         std::cout << "Incomplete frame buffer object: " << std::endl;
     }
 
+    GL(glGenBuffers(1, &InstanceTransformBuffer));
+
 }
 
 
@@ -187,7 +189,7 @@ void svrAppl::render() {
     
     glBindVertexArray(vertexArrayObject);
 
-    GL(glGenBuffers(1, &InstanceTransformBuffer));
+    
     GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
     GL(glBufferData(
         GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
