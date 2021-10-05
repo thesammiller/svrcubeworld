@@ -183,10 +183,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
     
-      local_pixels = server->sendImageData();
+      pixels = server->sendImageData();
 
       //TODO: Is this safe?
-      memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
+      //memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
       pixelTexture = loadTexture(pixels);
 
