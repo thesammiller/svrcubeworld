@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
         memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
         myServer.setImage(m_pixels);
 
+        delete(m_pixels);
+
         
 
 
