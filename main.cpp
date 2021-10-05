@@ -50,9 +50,9 @@ int main(int argc, char* argv[])
     myAppl.createFramebuffer();
 
     //Create a worker thread to run asynchronously
-    Worker worker(myServer.orb.in());
+    //Worker worker(myServer.orb.in());
     //Activate the worker thread
-    worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
+    //worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
 
     
     
@@ -60,6 +60,11 @@ int main(int argc, char* argv[])
     // -----------
     while (!glfwWindowShouldClose(myAppl.window))
     {
+        if (myServer.orb->work_pending()) {
+            myServer.orb->perform_work();
+
+        }
+        
         // input
         // -----
         //This just checks for the escape key (which should trigger window should close)
@@ -69,17 +74,24 @@ int main(int argc, char* argv[])
         //myServer.getData();
 
         // Take the server data and update the view based on controller input
-        myAppl.updateView(myServer.server_impl.data[0], myServer.server_impl.data[1]);
+        float in_data[7];
+        myServer.server_impl.get_data(in_data);
+        myAppl.updateView(in_data[0], in_data[1]);
         
         // Draw
         myAppl.render();
-
+        myAppl.createImage();
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
         unsigned char* m_pixels = (unsigned char*) malloc (800 * 600 * 3);
-
+        
         memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
         myServer.setImage(m_pixels);
+
+        delete(m_pixels);
+
+        
+
 
     }
 
@@ -92,7 +104,7 @@ int main(int argc, char* argv[])
     */
 
     //TODO: This causes a hang, need to fix.
-    worker.thr_mgr() -> wait();
+    //worker.thr_mgr() -> wait();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------

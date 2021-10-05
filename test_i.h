@@ -29,6 +29,7 @@ public:
 
   // = The Simple_Server methods.
   void send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose );
+  void get_data(float *in_pose);
   Simple_Server::pixels_slice* sendImageData();
   
   void setImageData(unsigned char* iData);

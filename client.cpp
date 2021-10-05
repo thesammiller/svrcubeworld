@@ -24,12 +24,9 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 
-unsigned int loadTexture(const char *path);
+unsigned int loadTexture(unsigned char *data);
 
 ACE_Thread_Mutex m_mutex;
-Simple_Server::pixels_slice* p = Simple_Server::pixels_alloc();
-
-
 
 const ACE_TCHAR *ior = ACE_TEXT("file://test.ior");
 int niterations = 10;
@@ -132,7 +129,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "LearnOpenGL", NULL, NULL);
+     GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "ClientCubeWorld", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -152,8 +149,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         1.0f, -1.0f, 1.0f, 0.0f,
         1.0f, 1.0f, 1.0f, 1.0f     };
 
-    unsigned int texture2 = loadTexture("container.jpg");
-
     unsigned int quadVBO, quadVAO;
     glGenVertexArrays(1, &quadVAO);
     glGenBuffers(1, &quadVBO);
@@ -168,13 +163,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-      unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    unsigned int pixelTexture;
+    glGenTextures(1, &pixelTexture);
 
-      
-
+    unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    
     while (!glfwWindowShouldClose(window))
     {
-
+      
       renderBufferShader.use();
       
       glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
@@ -185,31 +182,35 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
-      
-      unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    
       local_pixels = server->sendImageData();
 
-      memcpy(p, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-      memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
+      //TODO: Is this safe?
+      memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
-      unsigned int pixelTexture;
-      glGenTextures(1, &pixelTexture);
-      
-      glBindTexture(GL_TEXTURE_2D, pixelTexture);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-      glGenerateMipmap(GL_TEXTURE_2D);
+      pixelTexture = loadTexture(pixels);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      //glBindTexture(GL_TEXTURE_2D, pixelTexture);
+      //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+      //glGenerateMipmap(GL_TEXTURE_2D);
+
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       glfwSwapBuffers(window);
-        glfwPollEvents();
+      glfwPollEvents();
+
+      //delete(pixels);
+      //delete(local_pixels);
+      glDeleteTextures(1, &pixelTexture);
+      glFinish();
+
 
     }
 
@@ -270,7 +271,6 @@ Worker::run_test (void)
         std::vector<std::vector<float>> v;
         int i=0;
         while(std::getline(in, line)) {
-            float value;
             std::stringstream ss(line);
             float values[9];
             // -1161455114	-1161488748		-0.101638 -0.008850 0.042846 0.993859	-0.004179 1.231212 -0.337064
@@ -279,40 +279,32 @@ Worker::run_test (void)
                 ss >> values[j];
             }
             
-            //std::cout << values[0]  << std::endl;
             float outArray[7] = {values[2], values[3], values[4], values[5], values[6], values[7], values[8]};
             server->send_data(1234567, outArray);
             ++i;
             //Sleep is not a best practice.
-            //But there should be some sort of synchronous use with send_data();
             usleep(100000);
 
-	  }
+	      }
+        in.close();
+        
 	  }
     
 
 }
 
 
-unsigned int loadTexture(char const * path)
+unsigned int loadTexture(unsigned char* data)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
     int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    //unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data)
     {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -320,12 +312,12 @@ unsigned int loadTexture(char const * path)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        stbi_image_free(data);
+        delete(data);
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
+        std::cout << "Texture failed to load" << std::endl;
+        delete(data);
     }
 
     return textureID;

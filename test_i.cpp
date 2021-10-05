@@ -8,15 +8,20 @@
 #include <unistd.h>
 
 static ACE_Thread_Mutex m_mutex;
+static ACE_Thread_Mutex m_mutex_pose;
 
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
+  m_mutex.acquire();
   Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
   memcpy(value, this->imageData, sizeof(unsigned char) * 800 * 600 *3);
+  m_mutex.release();
   return value;
 }
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
+  m_mutex.acquire();
   this->imageData = iData;
+  m_mutex.release();
 }
 
 void
@@ -33,9 +38,19 @@ Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::
 	      headpose[0], headpose[1], headpose[2], headpose[3],
 	      headpose[4], headpose[5], headpose[6]));
   
+
+  m_mutex_pose.acquire();
   memcpy(data, headpose, sizeof(float) * 7);
+  m_mutex_pose.release();
 
 
+  
+}
+
+void Simple_Server_i::get_data(float* in_data) {
+  m_mutex_pose.acquire();
+  memcpy(in_data, data, sizeof(float) * 7);
+  m_mutex_pose.release();
   
 }
 

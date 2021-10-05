@@ -98,5 +98,6 @@ void svrServer::setImage(unsigned char *pixels) {
   unsigned char* p = (unsigned char*) malloc (800 * 600 * 3);
   memcpy(p, pixels, sizeof(unsigned char) * 800 * 600 *3);
   server_impl.setImageData(p);
+  delete(p);
 
 }
