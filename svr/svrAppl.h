@@ -18,6 +18,7 @@
 #include "shader_s.h"
 
 
+
 // OVR VertexAttributes 
 struct VertexAttribs {
     std::vector<OVR::Vector3f> position;

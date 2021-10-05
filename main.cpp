@@ -73,13 +73,15 @@ int main(int argc, char* argv[])
         
         // Draw
         myAppl.render();
-
+        myAppl.createImage();
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
         unsigned char* m_pixels = (unsigned char*) malloc (800 * 600 * 3);
-
+        
         memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
         myServer.setImage(m_pixels);
+        
+
 
     }
 

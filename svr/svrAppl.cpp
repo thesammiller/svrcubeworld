@@ -134,10 +134,8 @@ void svrAppl::createFramebuffer() {
     GLenum colorTextureTarget = GL_TEXTURE_2D;
     GL(glBindTexture(colorTextureTarget, textureColorbuffer));
     
-    //NOTE: This below was missing from the OVR implementation
-    //Compared to working code here:
-    //https://stackoverflow.com/questions/28391548/opengl-framebuffer-not-rendering-off-screen
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
     GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER));
     GL(glTexParameteri(colorTextureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER));
     GLfloat borderColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -274,7 +272,7 @@ void svrAppl::render() {
     glfwPollEvents();
 
     //Get the image from the end of the Render
-    createImage();
+    //createImage();
 
 }
 

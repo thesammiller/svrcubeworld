@@ -189,6 +189,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
       local_pixels = server->sendImageData();
 
+      //TODO: Is this safe?
       memcpy(p, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
       memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
