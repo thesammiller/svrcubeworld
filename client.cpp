@@ -169,8 +169,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     
-    unsigned int pixelTexture;
-    glGenTextures(1, &pixelTexture);
+   
       
 
     while (!glfwWindowShouldClose(window))
@@ -195,6 +194,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       memcpy(p, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
       memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
+      unsigned int pixelTexture;
+      glGenTextures(1, &pixelTexture);
+
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
       glGenerateMipmap(GL_TEXTURE_2D);
@@ -213,6 +215,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       delete(pixels);
       delete(local_pixels);
+      glDeleteTextures(1, &pixelTexture);
 
 
     }
