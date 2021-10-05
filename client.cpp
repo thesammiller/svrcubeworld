@@ -28,8 +28,6 @@ unsigned int loadTexture(const char *path);
 
 ACE_Thread_Mutex m_mutex;
 
-
-
 const ACE_TCHAR *ior = ACE_TEXT("file://test.ior");
 int niterations = 10;
 int nthreads = 1;
@@ -150,8 +148,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         -1.0f, 1.0f, 0.0f, 1.0f,
         1.0f, -1.0f, 1.0f, 0.0f,
         1.0f, 1.0f, 1.0f, 1.0f     };
-
-    //unsigned int texture2 = loadTexture("container.jpg");
 
     unsigned int quadVBO, quadVAO;
     glGenVertexArrays(1, &quadVAO);
@@ -274,7 +270,6 @@ Worker::run_test (void)
         std::vector<std::vector<float>> v;
         int i=0;
         while(std::getline(in, line)) {
-            float value;
             std::stringstream ss(line);
             float values[9];
             // -1161455114	-1161488748		-0.101638 -0.008850 0.042846 0.993859	-0.004179 1.231212 -0.337064
@@ -283,15 +278,15 @@ Worker::run_test (void)
                 ss >> values[j];
             }
             
-            //std::cout << values[0]  << std::endl;
             float outArray[7] = {values[2], values[3], values[4], values[5], values[6], values[7], values[8]};
             server->send_data(1234567, outArray);
             ++i;
             //Sleep is not a best practice.
-            //But there should be some sort of synchronous use with send_data();
             usleep(100000);
 
-	  }
+	      }
+        in.close();
+        
 	  }
     
 
