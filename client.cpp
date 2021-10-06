@@ -194,12 +194,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       taoBuff = server->sendImageData();
       //memcpy(jpegBuff, taoBuff, sizeof(unsigned char) * _jpegSize);
       jpegBuff = (*taoBuff).get_buffer();
-
-
-
-      FILE *file = fopen("in.jpg", "wb");
-      fwrite(jpegBuff, _jpegSize, 1, file);
-      fclose(file);
       
       int jpegSubsamp;
       int width = 800;
