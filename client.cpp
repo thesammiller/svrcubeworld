@@ -175,6 +175,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     
     while (!glfwWindowShouldClose(window))
     {
+      long unsigned int _jpegSize = server->sendJpegSize();
+      Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
+      taoBuff = server->sendImageData();
+
       unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
       renderBufferShader.use();
       
@@ -188,22 +192,24 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glBindVertexArray(quadVAO);
 
       //Get the size of the JPEG from the server
-      long unsigned int _jpegSize = server->sendJpegSize();
-      //Allocate size for the buffer for TAO
-      Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
-      //Get the TAO data handler
-      taoBuff = server->sendImageData();
-      //Get the image data from the buffer and store into jpegBuffer
-      unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
-      jpegBuff = (*taoBuff).get_buffer();
       
+      //Allocate size for the buffer for TAO
+      
+      //Get the TAO data handler
+      
+      
+      int pitch = 800 * 3;
       int jpegSubsamp;
       int width = 800;
       int height = 600;
 
+
+      //Get the image data from the buffer and store into jpegBuffer
+      unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
+      jpegBuff = (*taoBuff).get_buffer();
       //Get the necessary headers
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
-      int pitch = 800 * 3;
+      
       
 
       tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT);      
@@ -231,7 +237,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //1,000,000 / 16 = 16,666
       // 1/2 of that is 8333
 
-      usleep(8333);
+      usleep(16333);
       
   }
 

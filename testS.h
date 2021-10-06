@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:451
 
-#ifndef _TAO_IDL_TESTS_VZUZJW_H_
-#define _TAO_IDL_TESTS_VZUZJW_H_
+#ifndef _TAO_IDL_TESTS_L7UCJN_H_
+#define _TAO_IDL_TESTS_L7UCJN_H_
 
 
 #include "testC.h"
