@@ -101,7 +101,7 @@ void svrAppl::createImage() {
     tjhandle _jpegDecompressor = tjInitDecompress();
     tjDecompressHeader2(_jpegDecompressor, pixels, _jpegSize, &_width, &_height, &jpegDecomp);
     
-    std::cout << "SERVER \t JpegSize \t" << jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << "\t SubsampDecomp\t" << jpegDecomp << std::endl;
+    //std::cout << "SERVER \t JpegSize \t" << jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << "\t SubsampDecomp\t" << jpegDecomp << std::endl;
 
     //memcpy(pixels, jpegBuf, sizeof(unsigned char) * _jpegSize);
     

@@ -168,69 +168,77 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    
 
-
+    //Decompression handle
     tjhandle handle = tjInitDecompress();
+
+    CORBA::Octet* uncompressedBuffer;
+    CORBA::Octet* jpegBuff;
+    
     
     while (!glfwWindowShouldClose(window))
     {
-      long unsigned int _jpegSize = server->sendJpegSize();
-      Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
-      taoBuff = server->sendImageData();
-
-      unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
-      renderBufferShader.use();
       
-      glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+      //Get the size of the JPEG from the server
+      long unsigned int _jpegSize = server->sendJpegSize();      
+      //Allocate size for the buffer for TAO
+      Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
+      //Get the TAO data handler     
+      taoBuff = server->sendImageData();
+      //Create the uncompressedBuffer for JPEG Decompression
+      
+      jpegBuff = (unsigned char*) malloc (_jpegSize);
+      uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+      
+      
+      //Select the GL Shader for Framebuffer
+      renderBufferShader.use();
+      // Default framebuffer
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glDisable(GL_DEPTH_TEST);
-
+      //Clear screen (to white)
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
-      
-      renderBufferShader.use();
+      //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
 
-      //Get the size of the JPEG from the server
-      
-      //Allocate size for the buffer for TAO
-      
-      //Get the TAO data handler
-      
-      
-      int pitch = 800 * 3;
-      int jpegSubsamp;
-      int width = 800;
-      int height = 600;
 
+      int COLOR_COMPONENTS = 3; //RGB
+      int jpegSubsamp;
+      int width = (int) SCR_WIDTH;
+      int height = (int) SCR_HEIGHT;
+      int pitch = width * COLOR_COMPONENTS;
 
       //Get the image data from the buffer and store into jpegBuffer
-      unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
       jpegBuff = (*taoBuff).get_buffer();
-      //Get the necessary headers
+
+      //JPEG_TURBO DECOMPRESSION
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
-      
-      
-
       tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT);      
-
+      
+      //OPENGL TEXTURE LOAD AND DRAW
       pixelTexture = loadTexture(uncompressedBuffer);
-
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
-
       glDrawArrays(GL_TRIANGLES, 0, 6);
-
+      
+      //PSwap framebuffer to front buffer
       glfwSwapBuffers(window);
       glfwPollEvents();
 
+      //Release TAO data
       delete(taoBuff);
-      uncompressedBuffer = NULL;
+      //This data has been released... 
+      //Errors if there's another delete -- double free
+      delete(uncompressedBuffer);
       jpegBuff = NULL;
-
+      //Release GL data
       glDeleteTextures(1, &pixelTexture);
       glFinish();
       glFlush();
 
+      //SLEEP
+      //-----
+      //This helps...
       //TODO: NOT OPTIMAL
       //But trying 120 frames per second
       //usleep -- > 1 sec = 1,000,000
@@ -339,12 +347,11 @@ unsigned int loadTexture(unsigned char* data)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        delete(data); //-- when it was a local variable
+        //delete(data); 
     }
     else
     {
         std::cout << "Texture failed to load" << std::endl;
-        delete(data);
     }
 
     return textureID;
