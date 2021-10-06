@@ -168,6 +168,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
+    
+
 
     tjhandle handle = tjInitDecompress();
     
@@ -187,7 +189,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       long unsigned int _jpegSize = server->sendJpegSize();
 
-      unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+      
       unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
       
       Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
@@ -200,21 +202,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       int height = 600;
 
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
-      std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
+      //std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
 
       
-
+      unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
       //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, //TJFLAG_FASTDCT
-      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, 0);
-
-      //Write frame to file -- confirm JPEG compression is working
-
-      
-
-      //FILE *unfile = fopen("uncompressed.bmp", "wb");
-      //fwrite(uncompressedBuffer, 800 * 600 * 3, 1, unfile);
-
-      
+      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, 0);      
 
       pixelTexture = loadTexture(uncompressedBuffer);
 
@@ -225,15 +218,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glfwSwapBuffers(window);
       glfwPollEvents();
 
-      //delete(pixels);
-      //delete(local_pixels);
+
+      delete(taoBuff);
+      delete(uncompressedBuffer);
+
       glDeleteTextures(1, &pixelTexture);
       glFinish();
 
-      //delete(jpegBuff);
-      //delete(uncompressedBuffer);
-      delete(taoBuff);
-    }
+      
+  }
 
 
     worker.thr_mgr ()->wait ();
@@ -333,7 +326,7 @@ unsigned int loadTexture(unsigned char* data)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        delete(data);
+        //delete(data) -- when it was a local variable
     }
     else
     {
