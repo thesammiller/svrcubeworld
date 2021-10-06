@@ -197,7 +197,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       int width = 800;
       int height = 600;
 
-      tjDecompressHeader2(_jpegDecompressor, p, _jpegSize, &width, &height, &jpegSubsamp);
+      tjDecompressHeader(_jpegDecompressor, p, _jpegSize, &width, &height);
       //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, 
       tjDecompress2(_jpegDecompressor, p, _jpegSize, local_pixels, width, 0/*pitch*/, height, TJPF_RGB, TJFLAG_FASTDCT);
       tjDestroy(_jpegDecompressor);
