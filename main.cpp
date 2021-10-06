@@ -86,10 +86,10 @@ int main(int argc, char* argv[])
         myServer.server_impl.setJpegSize(myAppl.jpegSize);
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
-        unsigned char* m_pixels = (unsigned char*) malloc (myAppl.jpegSize);
+        unsigned char* m_pixels = (unsigned char*) malloc (200000);
         
-        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * myAppl.jpegSize);
-        myServer.setImage(m_pixels, myAppl.jpegSize);
+        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 200000);
+        myServer.setImage(m_pixels);
 
         delete(m_pixels);
 

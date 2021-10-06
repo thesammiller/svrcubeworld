@@ -62,18 +62,20 @@ svrAppl::svrAppl() {
 }
 
 void svrAppl::createImage() {
+    //Uncompressed image buffer
     unsigned char* p = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
+    //Read pixels from the GL Draw
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
     
 
+    //
     const int JPEG_QUALITY = 75;
     const int COLOR_COMPONENTS = 3;
     int _width = 800;
     int _height = 600;
     long unsigned int _jpegSize = 0;
     unsigned char* _compressedImage = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
-    //unsigned char buffer[_width*_height*COLOR_COMPONENTS]; //!< Contains the uncompressed image
 
     tjhandle _jpegCompressor = tjInitCompress();
 
@@ -85,6 +87,9 @@ void svrAppl::createImage() {
 
 
     memcpy(pixels, _jpegCompressor, sizeof(unsigned char) * _jpegSize);
+    for (int i = jpegSize; i < 200000; i++) {
+        pixels[i] = 0x00;
+    }
 
     jpegSize = _jpegSize;
 

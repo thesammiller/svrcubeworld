@@ -191,17 +191,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       p = server->sendImageData();
       memcpy(pixels, p, sizeof(unsigned char) * _jpegSize);
-
       tjhandle _jpegDecompressor = tjInitDecompress();
 
       int jpegSubsamp;
       int width = 800;
       int height = 600;
 
-      tjDecompressHeader2(_jpegDecompressor, pixels, _jpegSize, &width, &height, &jpegSubsamp);
-
-      tjDecompress2(_jpegDecompressor, pixels, _jpegSize, local_pixels, SCR_WIDTH, 0/*pitch*/, SCR_HEIGHT, TJPF_RGB, 2048);
-
+      tjDecompressHeader2(_jpegDecompressor, p, _jpegSize, &width, &height, &jpegSubsamp);
+      //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, 
+      tjDecompress2(_jpegDecompressor, p, _jpegSize, local_pixels, width, 0/*pitch*/, height, TJPF_RGB, TJFLAG_FASTDCT);
       tjDestroy(_jpegDecompressor);
 
       pixelTexture = loadTexture(local_pixels);
@@ -217,6 +215,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //delete(local_pixels);
       glDeleteTextures(1, &pixelTexture);
       glFinish();
+
+      delete(pixels);
+      delete(p);
 
 
     }
