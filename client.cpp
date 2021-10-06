@@ -175,7 +175,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     
     while (!glfwWindowShouldClose(window))
     {
-      
+      unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
       renderBufferShader.use();
       
       glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
@@ -187,28 +187,26 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
 
+      //Get the size of the JPEG from the server
       long unsigned int _jpegSize = server->sendJpegSize();
-
-      
-      unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
-      
+      //Allocate size for the buffer for TAO
       Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
+      //Get the TAO data handler
       taoBuff = server->sendImageData();
-      //memcpy(jpegBuff, taoBuff, sizeof(unsigned char) * _jpegSize);
+      //Get the image data from the buffer and store into jpegBuffer
+      unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
       jpegBuff = (*taoBuff).get_buffer();
       
       int jpegSubsamp;
       int width = 800;
       int height = 600;
 
+      //Get the necessary headers
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
-      //std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
-
       int pitch = 800 * 3;
+      
 
-      unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
-      //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, //TJFLAG_FASTDCT
-      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, 0);      
+      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT);      
 
       pixelTexture = loadTexture(uncompressedBuffer);
 
@@ -218,7 +216,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       glfwSwapBuffers(window);
       glfwPollEvents();
-
 
       delete(taoBuff);
       uncompressedBuffer = NULL;
@@ -230,7 +227,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       //TODO: NOT OPTIMAL
       //But gettig something like 60 frames/second
-      usleep(166660);
+      usleep(16666);
       
   }
 

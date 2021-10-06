@@ -87,13 +87,14 @@ int main(int argc, char* argv[])
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
         unsigned char* m_pixels = (unsigned char*) malloc (myAppl.jpegSize);
-        
         memcpy(m_pixels, myAppl.pixels, myAppl.jpegSize);
-        
-
         myServer.setImage(m_pixels);
 
         delete(m_pixels);
+
+        //TODO: NOT OPTIMAL
+        //But something like 60 frames per second
+        usleep(16666);
 
 
     }

@@ -91,7 +91,7 @@ void svrAppl::createImage() {
 
     tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
             &pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
-            0);
+            TJFLAG_FASTDCT);
 
     jpegSize = _jpegSize;
 
