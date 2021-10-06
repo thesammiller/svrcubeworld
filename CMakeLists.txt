@@ -4,6 +4,10 @@ project(svr_cubeworld)
 include(ExternalProject)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_FLAGS "-Wall -Wextra")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O1")
+
 set(ACE_ROOT "extern/ACE_wrappers/build/default")
 set(TAO_ROOT "${ACE_ROOT}/TAO")
 

@@ -204,10 +204,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
       //std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
 
-      
+      int pitch = 800 * 3;
+
       unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
       //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, //TJFLAG_FASTDCT
-      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, 0);      
+      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, 0);      
 
       pixelTexture = loadTexture(uncompressedBuffer);
 
