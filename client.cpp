@@ -226,8 +226,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFlush();
 
       //TODO: NOT OPTIMAL
-      //But gettig something like 60 frames/second
-      usleep(16666);
+      //But trying 120 frames per second
+      //usleep -- > 1 sec = 1,000,000
+      //1,000,000 / 16 = 16,666
+      // 1/2 of that is 8333
+
+      usleep(8333);
       
   }
 

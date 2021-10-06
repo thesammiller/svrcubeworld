@@ -62,10 +62,8 @@ int main(int argc, char* argv[])
     {
         if (myServer.orb->work_pending()) {
             myServer.orb->perform_work();
-
         }
 
-        
         
         // input
         // -----
@@ -93,8 +91,8 @@ int main(int argc, char* argv[])
         delete(m_pixels);
 
         //TODO: NOT OPTIMAL
-        //But something like 60 frames per second
-        usleep(16666);
+        //But something like 120 frames per second
+        usleep(8333);
 
 
     }
