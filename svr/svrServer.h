@@ -17,6 +17,7 @@ class svrServer {
         void startWorker(Worker *worker, int nthreads);
         int parse_args(int argc, char *argv[]);
         void setImage(unsigned char *pixels);
+        void setJpegSize(long unsigned int js);
         void wait();
 
         CORBA::ORB_var orb;
@@ -25,4 +26,5 @@ class svrServer {
         PortableServer::POAManager_var poa_manager = NULL;
         Simple_Server_i server_impl = NULL;
         
-        };
+        long unsigned int jpegSize;
+};

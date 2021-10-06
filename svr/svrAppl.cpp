@@ -1,5 +1,6 @@
 #include "svr/svrAppl.h"
 #include <iostream>
+#include <unistd.h>
 
 #include "extern/libjpeg-turbo/turbojpeg.h"
 
@@ -63,10 +64,17 @@ svrAppl::svrAppl() {
 
 void svrAppl::createImage() {
     //Uncompressed image buffer
-    unsigned char* p = (unsigned char*) malloc (m_width * m_height * 3);
+    unsigned char* srcBuf = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     //Read pixels from the GL Draw
-    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
+    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
+
+    //TurboJpeg
+    tjhandle handle = tjInitCompress();
+    if (handle == NULL)
+    {
+        std::cout << "TJ ERROR!" << std::endl;
+    }
     
 
     //
@@ -75,31 +83,42 @@ void svrAppl::createImage() {
     int _width = 800;
     int _height = 600;
     long unsigned int _jpegSize = 0;
-    unsigned char* _compressedImage = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
+    pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
+    int pitch = _width * COLOR_COMPONENTS;
+    int pixelFormat = TJPF_RGB;
+    int jpegSubsamp = TJSAMP_444;
+    int flags = 0; //TJFLAG_FASTDCT
 
-    tjhandle _jpegCompressor = tjInitCompress();
-
-    tjCompress2(_jpegCompressor, p, _width, 0, _height, TJPF_RGB,
-            &_compressedImage, &_jpegSize, TJSAMP_444, JPEG_QUALITY,
-            TJFLAG_FASTDCT);
-
-    //std::cout << _jpegSize << std::endl;
-
-
-    memcpy(pixels, _jpegCompressor, sizeof(unsigned char) * _jpegSize);
-    for (int i = jpegSize; i < 200000; i++) {
-        pixels[i] = 0x00;
-    }
+    tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
+            &pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
+            0);
 
     jpegSize = _jpegSize;
 
-    tjDestroy(_jpegCompressor);
+
+    // TESTING THE DATA
+    int jpegDecomp;
+    tjhandle _jpegDecompressor = tjInitDecompress();
+    tjDecompressHeader2(_jpegDecompressor, pixels, _jpegSize, &_width, &_height, &jpegDecomp);
+    std::cout << "SERVER \t JpegSize \t" << jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << "\t SubsampDecomp\t" << jpegDecomp << std::endl;
+
+    //memcpy(pixels, jpegBuf, sizeof(unsigned char) * _jpegSize);
+    
+    //Write frame to file -- confirm JPEG compression is working
+    //FILE *file = fopen("out.jpg", "wb");
+    //fwrite(jpegBuf, _jpegSize, 1, file);
+
+    //for (int i = jpegSize; i < 200000; i++) {
+    //    pixels[i] = 0x00;
+    //}
+
+    tjDestroy(handle);
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:
-    tjFree(_compressedImage);
+    //tjFree(jpegBuf);
 
-    delete(p);
+    delete(srcBuf);
 
 }
 

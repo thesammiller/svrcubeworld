@@ -168,7 +168,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    unsigned char* uncompressedBuffer = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
     
     while (!glfwWindowShouldClose(window))
     {
@@ -186,23 +186,39 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       long unsigned int _jpegSize = server->sendJpegSize();
 
-      unsigned char *p = (unsigned char*)malloc(200000);
-      unsigned char* pixels = (unsigned char*)malloc(_jpegSize);
+      unsigned char *taoBuff = (unsigned char*)malloc(200000);
+      unsigned char* jpegBuff = (unsigned char*)malloc(_jpegSize);
 
-      p = server->sendImageData();
-      memcpy(pixels, p, sizeof(unsigned char) * _jpegSize);
-      tjhandle _jpegDecompressor = tjInitDecompress();
+      taoBuff = server->sendImageData();
+      memcpy(jpegBuff, taoBuff, sizeof(unsigned char) * _jpegSize);
+
+      FILE *file = fopen("out.jpg", "wb");
+      fwrite(jpegBuff, _jpegSize, 1, file);
+
+
+      tjhandle handle = tjInitDecompress();
 
       int jpegSubsamp;
       int width = 800;
       int height = 600;
 
-      tjDecompressHeader(_jpegDecompressor, p, _jpegSize, &width, &height);
-      //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, 
-      tjDecompress2(_jpegDecompressor, p, _jpegSize, local_pixels, width, 0/*pitch*/, height, TJPF_RGB, TJFLAG_FASTDCT);
-      tjDestroy(_jpegDecompressor);
+      tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
+      std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
 
-      pixelTexture = loadTexture(local_pixels);
+
+      //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, 
+      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, TJFLAG_FASTDCT);
+
+      //Write frame to file -- confirm JPEG compression is working
+
+      
+
+      //FILE *unfile = fopen("uncompressed.bmp", "wb");
+      //fwrite(uncompressedBuffer, 800 * 600 * 3, 1, unfile);
+
+      tjDestroy(handle);
+
+      pixelTexture = loadTexture(uncompressedBuffer);
 
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
@@ -216,8 +232,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glDeleteTextures(1, &pixelTexture);
       glFinish();
 
-      delete(pixels);
-      delete(p);
+      delete(jpegBuff);
+      delete(taoBuff);
 
 
     }
