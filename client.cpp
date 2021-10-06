@@ -173,7 +173,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     tjhandle handle = tjInitDecompress();
 
     CORBA::Octet* uncompressedBuffer;
-    CORBA::Octet* jpegBuff;
+    //CORBA::Octet* jpegBuff;
     
     
     while (!glfwWindowShouldClose(window))
@@ -187,7 +187,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       taoBuff = server->sendImageData();
       //Create the uncompressedBuffer for JPEG Decompression
       
-      jpegBuff = (unsigned char*) malloc (_jpegSize);
+      //jpegBuff = (unsigned char*) malloc (_jpegSize);
       uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
       
       
@@ -209,10 +209,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       int height = (int) SCR_HEIGHT;
       int pitch = width * COLOR_COMPONENTS;
 
-      //Get the image data from the buffer and store into jpegBuffer
-      jpegBuff = (*taoBuff).get_buffer();
-
+      CORBA::Octet* jpegBuff = (*taoBuff).get_buffer(true);
       //JPEG_TURBO DECOMPRESSION
+      //Send the TAO Buffer in directly 
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
       tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT);      
       
@@ -226,11 +225,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glfwPollEvents();
 
       //Release TAO data
-      delete(taoBuff);
-      //This data has been released... 
-      //Errors if there's another delete -- double free
+      (*taoBuff).freebuf(jpegBuff);
       delete(uncompressedBuffer);
-      jpegBuff = NULL;
+      delete(taoBuff);
       //Release GL data
       glDeleteTextures(1, &pixelTexture);
       glFinish();
@@ -334,7 +331,7 @@ unsigned int loadTexture(unsigned char* data)
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    int width, height, nrComponents;
+    //int width, height, nrComponents;
     //unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data)
     {
