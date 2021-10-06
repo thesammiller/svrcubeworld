@@ -78,7 +78,7 @@ void svrAppl::createImage() {
     
 
     //
-    const int JPEG_QUALITY = 75;
+    const int JPEG_QUALITY = 90;
     const int COLOR_COMPONENTS = 3;
     int _width = 800;
     int _height = 600;

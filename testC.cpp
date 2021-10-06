@@ -227,7 +227,7 @@ Simple_Server::pixels::pixels (
     ::CORBA::ULong length,
     ::CORBA::Octet * buffer,
     ::CORBA::Boolean release)
-  : ::TAO::bounded_value_sequence< ::CORBA::Octet,200000>
+  : ::TAO::bounded_value_sequence< ::CORBA::Octet,700000>
     (length, buffer, release)
 {}
 
@@ -266,13 +266,13 @@ namespace TAO
     {
       TAO::TypeCode::Sequence< ::CORBA::TypeCode_ptr const *,
                               TAO::Null_RefCount_Policy>
-        Simple_Server_pixels_200000 (
+        Simple_Server_pixels_700000 (
           ::CORBA::tk_sequence,
           &CORBA::_tc_octet,
-          200000U);
+          700000U);
         
-      ::CORBA::TypeCode_ptr const tc_Simple_Server_pixels_200000 =
-        &Simple_Server_pixels_200000;
+      ::CORBA::TypeCode_ptr const tc_Simple_Server_pixels_700000 =
+        &Simple_Server_pixels_700000;
     }
   }
 }
@@ -288,7 +288,7 @@ static TAO::TypeCode::Alias<char const *,
     ::CORBA::tk_alias,
     "IDL:Simple_Server/pixels:1.0",
     "pixels",
-    &TAO::TypeCode::tc_Simple_Server_pixels_200000);
+    &TAO::TypeCode::tc_Simple_Server_pixels_700000);
   
 ::CORBA::TypeCode_ptr const Simple_Server::_tc_pixels =
   &_tao_tc_Simple_Server_pixels;
