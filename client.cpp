@@ -220,10 +220,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       delete(taoBuff);
-      delete(uncompressedBuffer);
+      uncompressedBuffer = NULL;
+      jpegBuff = NULL;
 
       glDeleteTextures(1, &pixelTexture);
       glFinish();
+      glFlush();
 
       
   }
@@ -326,7 +328,7 @@ unsigned int loadTexture(unsigned char* data)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        //delete(data) -- when it was a local variable
+        delete(data); //-- when it was a local variable
     }
     else
     {
