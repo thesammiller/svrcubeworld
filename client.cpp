@@ -170,6 +170,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     unsigned char* uncompressedBuffer = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
     
+
+    tjhandle handle = tjInitDecompress();
+    
     while (!glfwWindowShouldClose(window))
     {
       
@@ -186,18 +189,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       long unsigned int _jpegSize = server->sendJpegSize();
 
-      unsigned char *taoBuff = (unsigned char*)malloc(200000);
+      
       unsigned char* jpegBuff = (unsigned char*)malloc(_jpegSize);
-
+      
+      Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
       taoBuff = server->sendImageData();
-      memcpy(jpegBuff, taoBuff, sizeof(unsigned char) * _jpegSize);
+      //memcpy(jpegBuff, taoBuff, sizeof(unsigned char) * _jpegSize);
+      jpegBuff = (*taoBuff).get_buffer();
 
-      FILE *file = fopen("out.jpg", "wb");
+
+
+      FILE *file = fopen("in.jpg", "wb");
       fwrite(jpegBuff, _jpegSize, 1, file);
-
-
-      tjhandle handle = tjInitDecompress();
-
+      
       int jpegSubsamp;
       int width = 800;
       int height = 600;
@@ -206,8 +210,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
 
 
-      //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, 
-      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, TJFLAG_FASTDCT);
+      //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, //TJFLAG_FASTDCT
+      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, 0);
 
       //Write frame to file -- confirm JPEG compression is working
 
@@ -216,7 +220,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //FILE *unfile = fopen("uncompressed.bmp", "wb");
       //fwrite(uncompressedBuffer, 800 * 600 * 3, 1, unfile);
 
-      tjDestroy(handle);
+      
 
       pixelTexture = loadTexture(uncompressedBuffer);
 
@@ -233,9 +237,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
 
       delete(jpegBuff);
-      delete(taoBuff);
-
-
     }
 
 

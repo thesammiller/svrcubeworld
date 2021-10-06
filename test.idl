@@ -4,7 +4,7 @@ interface Simple_Server
 
   oneway void send_data(in long microsecond, in HeadPoseArray headpose);
 
-  typedef octet pixels[200000];
+  typedef sequence<octet, 200000> pixels;
 
   pixels sendImageData();
 

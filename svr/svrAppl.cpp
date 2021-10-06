@@ -58,7 +58,7 @@ enum VertexAttributeLocation {
 
 
 svrAppl::svrAppl() {
-    pixels = (unsigned char *) malloc (200000);
+    //pixels = (unsigned char *) malloc (200000);
 
 }
 
@@ -100,25 +100,20 @@ void svrAppl::createImage() {
     int jpegDecomp;
     tjhandle _jpegDecompressor = tjInitDecompress();
     tjDecompressHeader2(_jpegDecompressor, pixels, _jpegSize, &_width, &_height, &jpegDecomp);
+    
     std::cout << "SERVER \t JpegSize \t" << jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << "\t SubsampDecomp\t" << jpegDecomp << std::endl;
 
     //memcpy(pixels, jpegBuf, sizeof(unsigned char) * _jpegSize);
     
-    //Write frame to file -- confirm JPEG compression is working
-    //FILE *file = fopen("out.jpg", "wb");
-    //fwrite(jpegBuf, _jpegSize, 1, file);
-
-    //for (int i = jpegSize; i < 200000; i++) {
-    //    pixels[i] = 0x00;
-    //}
 
     tjDestroy(handle);
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:
-    //tjFree(jpegBuf);
+    tjFree(pixels);
 
     delete(srcBuf);
+    
 
 }
 

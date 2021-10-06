@@ -26,8 +26,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:635
 
-#ifndef _TAO_IDL_TESTS_DP8RNO_CPP_
-#define _TAO_IDL_TESTS_DP8RNO_CPP_
+#ifndef _TAO_IDL_TESTS_NRFJOM_CPP_
+#define _TAO_IDL_TESTS_NRFJOM_CPP_
 
 
 #include "testS.h"
@@ -263,8 +263,8 @@ public:
 
   void execute () override
   {
-    TAO::SArg_Traits< ::Simple_Server::pixels_tag>::ret_arg_type retval =
-      TAO::Portable_Server::get_ret_arg< ::Simple_Server::pixels_tag> (
+    TAO::SArg_Traits< ::Simple_Server::pixels>::ret_arg_type retval =
+      TAO::Portable_Server::get_ret_arg< ::Simple_Server::pixels> (
         this->operation_details_,
         this->args_);
     
@@ -285,7 +285,7 @@ void POA_Simple_Server::sendImageData_skel (
   TAO_ServerRequest & server_request,
   TAO::Portable_Server::Servant_Upcall *TAO_INTERCEPTOR (servant_upcall),
   TAO_ServantBase *servant)
-{TAO::SArg_Traits< ::Simple_Server::pixels_tag>::ret_val retval;
+{TAO::SArg_Traits< ::Simple_Server::pixels>::ret_val retval;
 
   TAO::Argument * const args[] =
     {

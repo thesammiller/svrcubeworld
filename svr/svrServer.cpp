@@ -1,4 +1,5 @@
 #include "svr/svrServer.h"
+#include <iostream>
 
 int svrServer::parse_args (int argc, ACE_TCHAR *argv[])
 {
@@ -95,8 +96,8 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 
 
 void svrServer::setImage(unsigned char *pixels) {
-  unsigned char* p = (unsigned char*) malloc (200000);
-  memcpy(p, pixels, 200000);
+  unsigned char* p = (unsigned char*) malloc (jpegSize);
+  memcpy(p, pixels, jpegSize);
   server_impl.setImageData(p);
   delete(p);
 

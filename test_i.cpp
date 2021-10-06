@@ -1,5 +1,6 @@
 #include "test_i.h"
 #include "time.h"
+#include "ace/ACE.h"
 #if !defined(__ACE_INLINE__)
 #include "test_i.inl"
 #endif /* __ACE_INLINE__ */
@@ -10,17 +11,26 @@
 static ACE_Thread_Mutex m_mutex;
 static ACE_Thread_Mutex m_mutex_pose;
 
-Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
+Simple_Server::pixels* Simple_Server_i::sendImageData() {
   m_mutex.acquire();
-  Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
-  memcpy(value, this->imageData, 200000);
+  Simple_Server::pixels* value = 0;
+
+  //Write frame to file -- confirm JPEG compression is working
+  FILE *file = fopen("out1.jpg", "wb");
+  fwrite(this->imageData, jpegSize, 1, file);
+  fclose(file);
+
+  ACE_NEW_THROW_EX(value, Simple_Server::pixels(jpegSize, this->imageData), CORBA::NO_MEMORY());
+  
+  //memcpy(value, this->imageData, jpegSize);
   m_mutex.release();
   return value;
 }
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
   m_mutex.acquire();
-  this->imageData = iData;
+  this->imageData = (CORBA::Octet*) malloc (jpegSize);
+  memcpy(this->imageData, iData, jpegSize); 
   m_mutex.release();
 }
 

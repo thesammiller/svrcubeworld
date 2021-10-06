@@ -30,7 +30,7 @@ public:
   // = The Simple_Server methods.
   void send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose );
   void get_data(float *in_pose);
-  Simple_Server::pixels_slice* sendImageData();
+  Simple_Server::pixels* sendImageData();
   
   void setImageData(unsigned char* iData);
   
@@ -41,8 +41,8 @@ public:
 private:
   /// The ORB
   CORBA::ORB_var orb_;
-  Simple_Server::pixels_slice* imageData;
-  Simple_Server::pixels_slice* oldData;
+  CORBA::Octet* imageData;
+  //CORBA::Octet* oldData;
   bool dataSet = false;
   CORBA::Long jpegSize;
   

@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:451
 
-#ifndef _TAO_IDL_TESTS_RFEKKP_H_
-#define _TAO_IDL_TESTS_RFEKKP_H_
+#ifndef _TAO_IDL_TESTS_RQXWGO_H_
+#define _TAO_IDL_TESTS_RQXWGO_H_
 
 
 #include "testC.h"
@@ -90,12 +90,14 @@ namespace TAO
   {
   };
 
+  // TAO_IDL - Generated from
+  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_arg_traits.cpp:683
+
   template<>
-  class SArg_Traits< ::Simple_Server::pixels_tag>
+  class SArg_Traits< ::Simple_Server::pixels>
     : public
-        Fixed_Array_SArg_Traits_T<
-            ::Simple_Server::pixels_var,
-            ::Simple_Server::pixels_forany,
+        Var_Size_SArg_Traits_T<
+            ::Simple_Server::pixels,
             TAO::Any_Insert_Policy_Stream
           >
   {
@@ -152,7 +154,7 @@ public:
   // TAO_IDL - Generated from
   // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_sh.cpp:36
 
-  virtual ::Simple_Server::pixels_slice * sendImageData () = 0;
+  virtual ::Simple_Server::pixels * sendImageData () = 0;
 
   static void sendImageData_skel (
       TAO_ServerRequest &server_request,
