@@ -168,8 +168,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    unsigned char* uncompressedBuffer = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
-    
 
     tjhandle handle = tjInitDecompress();
     
@@ -189,8 +187,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       long unsigned int _jpegSize = server->sendJpegSize();
 
-      
-      unsigned char* jpegBuff = (unsigned char*)malloc(_jpegSize);
+      unsigned char* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+      unsigned char* jpegBuff = (unsigned char*) malloc (_jpegSize);
       
       Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
       taoBuff = server->sendImageData();
@@ -201,6 +199,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       FILE *file = fopen("in.jpg", "wb");
       fwrite(jpegBuff, _jpegSize, 1, file);
+      fclose(file);
       
       int jpegSubsamp;
       int width = 800;
@@ -209,6 +208,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
       std::cout << "CLIENT \t jpegSize \t" << _jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << std::endl;
 
+      
 
       //          API function, jpeg img, jpeg size, uncompressed buffer, width, pitch, height, //TJFLAG_FASTDCT
       tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, 0/*pitch*/, height, TJPF_RGB, 0);
@@ -236,7 +236,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glDeleteTextures(1, &pixelTexture);
       glFinish();
 
-      delete(jpegBuff);
+      //delete(jpegBuff);
+      //delete(uncompressedBuffer);
+      delete(taoBuff);
     }
 
 
