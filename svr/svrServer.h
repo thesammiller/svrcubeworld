@@ -16,7 +16,7 @@ class svrServer {
         int createServer();
         void startWorker(Worker *worker, int nthreads);
         int parse_args(int argc, char *argv[]);
-        void setImage(unsigned char *pixels, unsigned int jpegSize);
+        void setImage(unsigned char *pixels, long unsigned int jpegSize);
         void wait();
 
         CORBA::ORB_var orb;

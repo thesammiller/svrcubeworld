@@ -57,12 +57,12 @@ enum VertexAttributeLocation {
 
 
 svrAppl::svrAppl() {
-    pixels = (unsigned char *) malloc (800 * 600 * 3);
+    pixels = (unsigned char *) malloc (200000);
 
 }
 
 void svrAppl::createImage() {
-    unsigned char* p = (unsigned char*) malloc (800 * 600 * 3);
+    unsigned char* p = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
     

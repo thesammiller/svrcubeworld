@@ -13,7 +13,10 @@ static ACE_Thread_Mutex m_mutex_pose;
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
   m_mutex.acquire();
   Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
-  memcpy(value, this->imageData, sizeof(unsigned char) * 800 * 600 *3);
+  memcpy(value, this->imageData, jpegSize);
+  for (int i = jpegSize; i < 200000; i++) {
+    value[i] = 0x00;
+  }
   m_mutex.release();
   return value;
 }

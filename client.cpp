@@ -184,12 +184,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
 
-      long unsigned int _jpegSize = (long unsigned int) server->sendJpegSize();
+      long unsigned int _jpegSize = server->sendJpegSize();
 
-      unsigned char *pixels = (unsigned char*)malloc(_jpegSize);
-    
-      pixels = server->sendImageData();
-      //get the size of the jpeg data
+      unsigned char *p = (unsigned char*)malloc(200000);
+      unsigned char* pixels = (unsigned char*)malloc(_jpegSize);
+
+      p = server->sendImageData();
+      memcpy(pixels, p, sizeof(unsigned char) * _jpegSize);
 
       tjhandle _jpegDecompressor = tjInitDecompress();
 
@@ -203,19 +204,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       tjDestroy(_jpegDecompressor);
 
-      //TODO: Is this safe?
-      //memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-
       pixelTexture = loadTexture(local_pixels);
-
-      //glBindTexture(GL_TEXTURE_2D, pixelTexture);
-      //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-      //glGenerateMipmap(GL_TEXTURE_2D);
-
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
