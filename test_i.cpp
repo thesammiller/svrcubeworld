@@ -21,7 +21,7 @@ Simple_Server::pixels* Simple_Server_i::sendImageData() {
   fclose(file);
 
   ACE_NEW_THROW_EX(value, Simple_Server::pixels(jpegSize, this->imageData), CORBA::NO_MEMORY());
-  
+
   //memcpy(value, this->imageData, jpegSize);
   m_mutex.release();
   return value;
@@ -29,6 +29,7 @@ Simple_Server::pixels* Simple_Server_i::sendImageData() {
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
   m_mutex.acquire();
+  free(this->imageData);
   this->imageData = (CORBA::Octet*) malloc (jpegSize);
   memcpy(this->imageData, iData, jpegSize); 
   m_mutex.release();
