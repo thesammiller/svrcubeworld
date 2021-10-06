@@ -228,6 +228,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
       glFlush();
 
+      //TODO: NOT OPTIMAL
+      //But gettig something like 60 frames/second
+      usleep(166660);
       
   }
 

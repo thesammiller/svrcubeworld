@@ -15,11 +15,6 @@ Simple_Server::pixels* Simple_Server_i::sendImageData() {
   m_mutex.acquire();
   Simple_Server::pixels* value = 0;
 
-  //Write frame to file -- confirm JPEG compression is working
-  FILE *file = fopen("out1.jpg", "wb");
-  fwrite(this->imageData, jpegSize, 1, file);
-  fclose(file);
-
   ACE_NEW_THROW_EX(value, Simple_Server::pixels(jpegSize, this->imageData), CORBA::NO_MEMORY());
 
   //memcpy(value, this->imageData, jpegSize);
