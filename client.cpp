@@ -182,9 +182,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Get the size of the JPEG from the server
       long unsigned int _jpegSize = server->sendJpegSize();      
       //Allocate size for the buffer for TAO
-      Simple_Server::pixels* taoBuff = (Simple_Server::pixels *) malloc (_jpegSize);
+      Simple_Server::pixels* taoBuff = server->sendImageData();
       //Get the TAO data handler     
-      taoBuff = server->sendImageData();
       //Create the uncompressedBuffer for JPEG Decompression
       
       //jpegBuff = (unsigned char*) malloc (_jpegSize);
