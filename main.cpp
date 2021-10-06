@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     //Activate the worker thread
     //worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
 
-    
+    float startTime = glfwGetTime();
     
     // render loop
     // -----------
@@ -64,6 +64,8 @@ int main(int argc, char* argv[])
             myServer.orb->perform_work();
 
         }
+
+        
         
         // input
         // -----
@@ -81,12 +83,13 @@ int main(int argc, char* argv[])
         // Draw
         myAppl.render();
         myAppl.createImage();
+        myServer.server_impl.setJpegSize(myAppl.jpegSize);
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
-        unsigned char* m_pixels = (unsigned char*) malloc (800 * 600 * 3);
+        unsigned char* m_pixels = (unsigned char*) malloc (myAppl.jpegSize);
         
-        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
-        myServer.setImage(m_pixels);
+        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * myAppl.jpegSize);
+        myServer.setImage(m_pixels, myAppl.jpegSize);
 
         delete(m_pixels);
 

@@ -41,7 +41,6 @@
 #include "tao/AnyTypeCode/Any_Impl_T.h"
 #include "tao/AnyTypeCode/Any_Array_Impl_T.h"
 #include "cstring"
-#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "testC.inl"
@@ -327,6 +326,42 @@ Simple_Server::sendImageData ()
       1,
       "sendImageData",
       13,
+      TAO::TAO_CO_NONE | TAO::TAO_CO_THRU_POA_STRATEGY,
+      TAO::TAO_TWOWAY_INVOCATION
+      ,
+      TAO::TAO_SYNCHRONOUS_INVOCATION,
+      false
+    );
+
+  _tao_call.invoke (nullptr, 0);
+
+  return _tao_retval.retn ();
+}
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_cs.cpp:88
+
+::CORBA::Long
+Simple_Server::sendJpegSize ()
+{
+  if (!this->is_evaluated ())
+    {
+      ::CORBA::Object::tao_object_initialize (this);
+    }
+  
+  TAO::Arg_Traits< ::CORBA::Long>::ret_val _tao_retval;
+
+  TAO::Argument *_the_tao_operation_signature [] =
+    {
+      std::addressof(_tao_retval)
+    };
+
+  TAO::Invocation_Adapter _tao_call (
+      this,
+      _the_tao_operation_signature,
+      1,
+      "sendJpegSize",
+      12,
       TAO::TAO_CO_NONE | TAO::TAO_CO_THRU_POA_STRATEGY,
       TAO::TAO_TWOWAY_INVOCATION
       ,

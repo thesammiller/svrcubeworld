@@ -7,7 +7,7 @@ interface Simple_Server
   typedef octet pixels[1440000];
 
   pixels sendImageData();
-    
-  
+
+  long sendJpegSize();
 
 };

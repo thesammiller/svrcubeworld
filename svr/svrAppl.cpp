@@ -1,6 +1,8 @@
 #include "svr/svrAppl.h"
 #include <iostream>
 
+#include "extern/libjpeg-turbo/turbojpeg.h"
+
 
 //For framebuffer
 float quadVertices[] = {
@@ -63,7 +65,35 @@ void svrAppl::createImage() {
     unsigned char* p = (unsigned char*) malloc (800 * 600 * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
-    memcpy(pixels, p, sizeof(unsigned char) * 800 * 600 *3);
+    
+
+    const int JPEG_QUALITY = 75;
+    const int COLOR_COMPONENTS = 3;
+    int _width = 800;
+    int _height = 600;
+    long unsigned int _jpegSize = 0;
+    unsigned char* _compressedImage = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
+    //unsigned char buffer[_width*_height*COLOR_COMPONENTS]; //!< Contains the uncompressed image
+
+    tjhandle _jpegCompressor = tjInitCompress();
+
+    tjCompress2(_jpegCompressor, p, _width, 0, _height, TJPF_RGB,
+            &_compressedImage, &_jpegSize, TJSAMP_444, JPEG_QUALITY,
+            TJFLAG_FASTDCT);
+
+    //std::cout << _jpegSize << std::endl;
+
+
+    memcpy(pixels, _jpegCompressor, sizeof(unsigned char) * _jpegSize);
+
+    jpegSize = _jpegSize;
+
+    tjDestroy(_jpegCompressor);
+
+    //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
+    //or by the Compress/Decompress) after you are done working on it:
+    tjFree(_compressedImage);
+
     delete(p);
 
 }

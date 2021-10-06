@@ -20,6 +20,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "extern/libjpeg-turbo/turbojpeg.h"
+
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
@@ -166,7 +168,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
     unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
     
     while (!glfwWindowShouldClose(window))
@@ -182,13 +183,30 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
+
+      long unsigned int _jpegSize = (long unsigned int) server->sendJpegSize();
+
+      unsigned char *pixels = (unsigned char*)malloc(_jpegSize);
     
       pixels = server->sendImageData();
+      //get the size of the jpeg data
+
+      tjhandle _jpegDecompressor = tjInitDecompress();
+
+      int jpegSubsamp;
+      int width = 800;
+      int height = 600;
+
+      tjDecompressHeader2(_jpegDecompressor, pixels, _jpegSize, &width, &height, &jpegSubsamp);
+
+      tjDecompress2(_jpegDecompressor, pixels, _jpegSize, local_pixels, SCR_WIDTH, 0/*pitch*/, SCR_HEIGHT, TJPF_RGB, 2048);
+
+      tjDestroy(_jpegDecompressor);
 
       //TODO: Is this safe?
       //memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
 
-      pixelTexture = loadTexture(pixels);
+      pixelTexture = loadTexture(local_pixels);
 
       //glBindTexture(GL_TEXTURE_2D, pixelTexture);
       //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);

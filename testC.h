@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:149
 
-#ifndef _TAO_IDL_TESTC_LKNG4V_H_
-#define _TAO_IDL_TESTC_LKNG4V_H_
+#ifndef _TAO_IDL_TESTC_V5RR4Q_H_
+#define _TAO_IDL_TESTC_V5RR4Q_H_
 
 
 #include /**/ "ace/config-all.h"
@@ -218,6 +218,8 @@ public:
   static ::CORBA::TypeCode_ptr const _tc_pixels;
 
   virtual ::Simple_Server::pixels_slice * sendImageData ();
+
+  virtual ::CORBA::Long sendJpegSize ();
 
   // TAO_IDL - Generated from
   // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_interface/interface_ch.cpp:137

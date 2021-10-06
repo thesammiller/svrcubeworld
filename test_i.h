@@ -35,6 +35,8 @@ public:
   void setImageData(unsigned char* iData);
   
   void shutdown (void);
+  CORBA::Long sendJpegSize();
+  void setJpegSize(long unsigned int js);
 
 private:
   /// The ORB
@@ -42,6 +44,7 @@ private:
   Simple_Server::pixels_slice* imageData;
   Simple_Server::pixels_slice* oldData;
   bool dataSet = false;
+  CORBA::Long jpegSize;
   
 };
 

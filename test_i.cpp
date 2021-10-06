@@ -54,6 +54,14 @@ void Simple_Server_i::get_data(float* in_data) {
   
 }
 
+CORBA::Long Simple_Server_i::sendJpegSize() {
+  return jpegSize;
+}
+
+void Simple_Server_i::setJpegSize(long unsigned int js) {
+  jpegSize = js;
+}
+
 void
 Simple_Server_i::shutdown (void)
 {

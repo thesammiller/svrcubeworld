@@ -114,5 +114,7 @@ class svrAppl {
         float lastY;
         float fov;
 
+        long unsigned int jpegSize;
+
 
 };
