@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
         
         // Draw
         myAppl.render();
-        myAppl.createImage();
+        //myAppl.createImage();
         myServer.setJpegSize(myAppl.jpegSize);
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE

@@ -57,7 +57,8 @@ enum VertexAttributeLocation {
 };
 
 
-svrAppl::svrAppl() {}
+svrAppl::svrAppl() {
+}
 
 /*
 svrAppl::createImage()
@@ -222,6 +223,7 @@ void svrAppl::createFramebuffer() {
 
 /*
 Render Vertex Data to OpenGL Framebuffer
+- Will also CreateImage, right before drawing to screen
 
 */
 void svrAppl::render() {
@@ -237,9 +239,9 @@ void svrAppl::render() {
     program.use();
     float time = glfwGetTime();
     
+    //Make sure we bind to the VertexArrayObject
     glBindVertexArray(vertexArrayObject);
 
-    
     GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
     GL(glBufferData(
         GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
@@ -318,16 +320,19 @@ void svrAppl::render() {
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer); 
     
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    //****************************************************************************
+    //Create the image to send before we swap the buffers
+    //This improves performance in reading the pixels with the off-screen buffer
+    //****************************************************************************
     createImage();
 
+    //TODO: CREATE HEADLESS OPENGL MODE
+    //Commenting out the below improves the performance.
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
-
-    //Get the image from the end of the Render
-    //createImage();
-
 }
 
 
