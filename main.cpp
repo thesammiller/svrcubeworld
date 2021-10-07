@@ -96,11 +96,11 @@ int main(int argc, char* argv[])
 
         delete(m_pixels);
 
-        std::cout << "SERVER FRAME " << ++frame << std::endl;
+        std::cout << "SERVER FRAME " << ++frame << glfwGetTime() << std::endl;
 
         //TODO: NOT OPTIMAL
-        //But something like 120 frames per second
-        usleep(100333);
+        //But something like 120 frames per secon
+        usleep(32666);
         
 
 

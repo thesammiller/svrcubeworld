@@ -182,7 +182,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glGenTextures(1, &pixelTexture);
 
 
-
     CORBA::Octet* uncompressedBuffer;
     //CORBA::Octet* jpegBuff;
     
@@ -234,10 +233,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
       glFlush();
 
-      m_mutex.acquire();
       delete(uncompressedBuffer);
       textureBufferList.erase(textureBufferList.begin());
-      m_mutex.release();
 
       //SLEEP
       //-----
@@ -248,7 +245,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //1,000,000 / 16 = 16,666
       // 1/2 of that is 8333
 
-      //usleep(16333);
+     
       
   }
 
@@ -367,7 +364,6 @@ FrameWorker::run_test (void)
         //Decompression handle
         tjhandle handle = tjInitDecompress();
 
-        
         //Get the size of the JPEG from the server
         long unsigned int _jpegSize = server->sendJpegSize();      
         //Allocate size for the buffer for TAO
@@ -390,13 +386,20 @@ FrameWorker::run_test (void)
         tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
         tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT); 
 
+        if (textureBufferList.size() > 16) {
+          m_mutex.acquire();
+          std::cout << "Clearing Texture Buffer List" << std::endl;
+          textureBufferList.erase(textureBufferList.begin(), textureBufferList.end());
+          m_mutex.release();
+        }
+
         textureBufferList.push_back(uncompressedBuffer); 
 
         //Release TAO data
         (*taoBuff).freebuf(jpegBuff);
         delete(taoBuff);
 
-        std::cout << "Frame stashed" << std::endl;
+        std::cout << "Frame stashed " << glfwGetTime() << std::endl;
       }
 
 	  }
