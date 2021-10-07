@@ -5,7 +5,7 @@
 #include "extern/libjpeg-turbo/turbojpeg.h"
 
 
-//For framebuffer
+//Square (two triangles) for framebuffer to hold texture
 float quadVertices[] = {
         // positions  //texcoords
         -1.0f, 1.0f, 0.0f, 1.0f,
@@ -26,7 +26,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
-
+//OVR Helper Application for converting OVR Type to Vertex Array for GL
 template <typename _attrib_type_>
 void PackVertexAttribute(
     std::vector<uint8_t>& packed,
@@ -49,7 +49,7 @@ void PackVertexAttribute(
     }
 }
 
-
+//Used by OpenGL for Vertex information
 enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
     VERTEX_ATTRIBUTE_LOCATION_COLOR = 1,
@@ -57,44 +57,46 @@ enum VertexAttributeLocation {
 };
 
 
-svrAppl::svrAppl() {
-    //pixels = (unsigned char *) malloc (200000);
+svrAppl::svrAppl() {}
 
-}
-
+/*
+svrAppl::createImage()
+- Reads pixels from OpenGL 
+- Compressed pixels into JPEG
+- Stores Pixels and Size in svrAppl object
+*/
 void svrAppl::createImage() {
-    //Uncompressed image buffer
+    //OPEN GL
+    //Read uncompressed image buffer as source
     unsigned char* srcBuf = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     //Read pixels from the GL Draw
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
 
-    //TurboJpeg
+    //COMPRESSION -- TURBO JPEG
     tjhandle handle = tjInitCompress();
     if (handle == NULL)
     {
         std::cout << "TJ ERROR!" << std::endl;
     }
-    
-
-    //
+    //TURBO JPEG VALUES
     const int JPEG_QUALITY = 10;
     const int COLOR_COMPONENTS = 3;
-    int _width = 800;
-    int _height = 600;
+    int _width = m_width; //TODO
+    int _height = m_height; //TODO
     long unsigned int _jpegSize = 0;
     pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
     int pitch = _width * COLOR_COMPONENTS;
     int pixelFormat = TJPF_RGB;
     int jpegSubsamp = TJSAMP_444;
-    int flags = 0; //TJFLAG_FASTDCT
+    int flags = TJFLAG_FASTDCT;
 
+    //Compress Image
     tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
             &pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
-            TJFLAG_FASTDCT);
+            flags);
 
     jpegSize = _jpegSize;
-
 
     // TESTING THE DATA
     int jpegDecomp;
