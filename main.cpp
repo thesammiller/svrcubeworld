@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     float startTime = glfwGetTime();
 
     int frame = 0;
-    float old_time;
+    float old_time = 0;
     
     // render loop
     // -----------
@@ -78,22 +78,26 @@ int main(int argc, char* argv[])
         //TODO: This just kills the world... the hanging thread below needs to be fixed.
         processInput(myAppl);
 
+        //Controller Input
+        // -----------------
         // Take the server data and update the view based on controller input
         float in_data[7];
         myServer.server_impl.get_data(in_data);
         myAppl.updateView(in_data[0], in_data[1]);
         
-        // Draw
+        // OpenGL Draw & Create Image
+        // --------------
         myAppl.render();
+
+        // TAO Server Set Data
+        // --------------------
+        //Take the data from OpenGL and set Server Data
         //TODO: Are the classes in an appropriate relationship?
         myServer.setJpegSize(myAppl.jpegSize);
-        //unsigned char* m_pixels = (unsigned char*) malloc (myAppl.jpegSize);
-        //memcpy(m_pixels, myAppl.pixels, myAppl.jpegSize);
         myServer.setImage(myAppl.pixels);
 
-        //delete(m_pixels);
-
-        //std::cout << "SERVER FRAME \t" << ++frame << " TIME \t" << glfwGetTime() << std::endl;
+        // Calculate Frame Rate
+        // -------------------
         if ( (old_time + 1) < glfwGetTime() ) {
             std::cout << "FPS " << frame << std::endl;
             frame = 0;
@@ -101,25 +105,13 @@ int main(int argc, char* argv[])
         }
         ++frame;
        
-
-        //TODO: NOT OPTIMAL
-        //But something like 120 frames per secon
+        //TODO: Adjust and synchronize frame rate with client
+        //NOTE: Using sleep is not optimal
+        //Will be about 25-30 FPS at this rate
+        //Anything more adds artifacts/glitches to the client
         usleep(32666);
-        
-
 
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    
-    /*
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    */
-
-    //TODO: This causes a hang, need to fix.
-    //worker.thr_mgr() -> wait();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
