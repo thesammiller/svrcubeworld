@@ -82,8 +82,8 @@ void svrAppl::createImage() {
     //TURBO JPEG VALUES
     const int JPEG_QUALITY = 10;
     const int COLOR_COMPONENTS = 3;
-    int _width = m_width; //TODO
-    int _height = m_height; //TODO
+    int _width = m_width; //convert to signed integer
+    int _height = m_height; 
     long unsigned int _jpegSize = 0;
     pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
     int pitch = _width * COLOR_COMPONENTS;
@@ -92,35 +92,25 @@ void svrAppl::createImage() {
     int flags = TJFLAG_FASTDCT;
 
     //Compress Image
+    //pixels is a class property field
     tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
             &pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
             flags);
 
     jpegSize = _jpegSize;
 
-    // TESTING THE DATA
-    int jpegDecomp;
-    tjhandle _jpegDecompressor = tjInitDecompress();
-    tjDecompressHeader2(_jpegDecompressor, pixels, _jpegSize, &_width, &_height, &jpegDecomp);
-    
-    //std::cout << "SERVER \t JpegSize \t" << jpegSize << "\t jpegSubsamp \t" << jpegSubsamp << "\t SubsampDecomp\t" << jpegDecomp << std::endl;
-
-    //memcpy(pixels, jpegBuf, sizeof(unsigned char) * _jpegSize);
-    
-
     tjDestroy(handle);
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:
     tjFree(pixels);
-
     delete(srcBuf);
-    
-
 }
 
 
-
+/*
+Create the OpenGL Window
+*/
 int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
     m_height = height;
     m_width = width;
@@ -152,6 +142,9 @@ int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
 
 }
 
+/*
+Create OpenGL Shader
+*/
 void svrAppl::createShader() {
      
 
@@ -161,6 +154,9 @@ void svrAppl::createShader() {
 
 }
 
+/*
+Create OpenGL Framebuffer
+*/
 void svrAppl::createFramebuffer() {
 
     renderBufferShader = Shader("./shaders/renderBuffer.vs", "./shaders/renderBuffer.fs");
@@ -224,7 +220,10 @@ void svrAppl::createFramebuffer() {
 
 }
 
+/*
+Render Vertex Data to OpenGL Framebuffer
 
+*/
 void svrAppl::render() {
 
     // Bind to our new buffer
@@ -317,9 +316,9 @@ void svrAppl::render() {
     renderBufferShader.use();
     glBindVertexArray(quadVAO);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer); 
-
+    
     glDrawArrays(GL_TRIANGLES, 0, 6);
-
+    createImage();
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
