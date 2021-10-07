@@ -25,6 +25,8 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+std::vector<CORBA::Octet*> textureBufferList;
+
 
 unsigned int loadTexture(unsigned char *data);
 
@@ -70,6 +72,23 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+class FrameWorker : public ACE_Task_Base
+{
+public:
+  FrameWorker (CORBA::ORB_ptr orb);
+  // Constructor
+
+  virtual void run_test (void);
+  // The actual implementation of the test
+
+  // = The Task_Base methods
+  virtual int svc ();
+
+private:
+  CORBA::ORB_var orb_;
+  // The ORB reference
+};
+
 class Worker : public ACE_Task_Base
 {
 public:
@@ -91,11 +110,6 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 
-
-
-      //OPENGL
-   
-
   try
     {
       CORBA::ORB_var orb =
@@ -115,8 +129,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       orb->run (tv);
 
-    
-
+  
      CORBA::Object_var object =
         orb->string_to_object (ior);
 
@@ -169,27 +182,30 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glGenTextures(1, &pixelTexture);
 
 
-    //Decompression handle
-    tjhandle handle = tjInitDecompress();
 
     CORBA::Octet* uncompressedBuffer;
     //CORBA::Octet* jpegBuff;
     
-    
+    int frame = 0;
+
+    FrameWorker frameWorker(orb.in());
+
+    if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "(%P|%t) Cannot activate worker threads\n"),
+                          1);
+
+
+
+
     while (!glfwWindowShouldClose(window))
     {
+      if (textureBufferList.size() < 1) {
+        continue;
+      }
       
-      //Get the size of the JPEG from the server
-      long unsigned int _jpegSize = server->sendJpegSize();      
-      //Allocate size for the buffer for TAO
-      Simple_Server::pixels* taoBuff = server->sendImageData();
-      //Get the TAO data handler     
-      //Create the uncompressedBuffer for JPEG Decompression
-      
-      //jpegBuff = (unsigned char*) malloc (_jpegSize);
-      uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
-      
-      
+      std::cout << "CLIENT FRAME " << ++frame << std::endl;
+
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
       // Default framebuffer
@@ -201,19 +217,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
 
+      CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
 
-      int COLOR_COMPONENTS = 3; //RGB
-      int jpegSubsamp;
-      int width = (int) SCR_WIDTH;
-      int height = (int) SCR_HEIGHT;
-      int pitch = width * COLOR_COMPONENTS;
-
-      CORBA::Octet* jpegBuff = (*taoBuff).get_buffer(true);
-      //JPEG_TURBO DECOMPRESSION
-      //Send the TAO Buffer in directly 
-      tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
-      tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT);      
-      
       //OPENGL TEXTURE LOAD AND DRAW
       pixelTexture = loadTexture(uncompressedBuffer);
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
@@ -223,14 +228,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glfwSwapBuffers(window);
       glfwPollEvents();
 
-      //Release TAO data
-      (*taoBuff).freebuf(jpegBuff);
-      delete(uncompressedBuffer);
-      delete(taoBuff);
+      
       //Release GL data
       glDeleteTextures(1, &pixelTexture);
       glFinish();
       glFlush();
+
+      m_mutex.acquire();
+      delete(uncompressedBuffer);
+      textureBufferList.erase(textureBufferList.begin());
+      m_mutex.release();
 
       //SLEEP
       //-----
@@ -241,7 +248,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //1,000,000 / 16 = 16,666
       // 1/2 of that is 8333
 
-      usleep(16333);
+      //usleep(16333);
       
   }
 
@@ -286,9 +293,6 @@ Worker::svc (void)
 void
 Worker::run_test (void)
 {
-
-
-
       CORBA::Object_var object =
         orb_->string_to_object (ior);
 
@@ -324,6 +328,80 @@ Worker::run_test (void)
 
 }
 
+FrameWorker::FrameWorker (CORBA::ORB_ptr orb)
+  :  orb_ (CORBA::ORB::_duplicate (orb))
+{
+}
+
+int
+FrameWorker::svc (void)
+{
+  try
+    {
+      this->run_test ();
+    }
+  catch (const CORBA::Exception& ex)
+    {
+      ex._tao_print_exception ("FrameException caught in thread (%t)\n");
+    }
+
+  return 0;
+}
+
+
+void
+FrameWorker::run_test (void)
+{
+      CORBA::Object_var object =
+        orb_->string_to_object (ior);
+
+      Simple_Server_var server =
+        Simple_Server::_narrow (object.in ());
+
+        
+
+      
+      while(true) {
+
+        std::cout << "Frame Thread" << std::endl;
+        //Decompression handle
+        tjhandle handle = tjInitDecompress();
+
+        
+        //Get the size of the JPEG from the server
+        long unsigned int _jpegSize = server->sendJpegSize();      
+        //Allocate size for the buffer for TAO
+        Simple_Server::pixels* taoBuff = server->sendImageData();
+        //Get the TAO data handler     
+        //Create the uncompressedBuffer for JPEG Decompression
+        
+        //jpegBuff = (unsigned char*) malloc (_jpegSize);
+        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+
+        int COLOR_COMPONENTS = 3; //RGB
+        int jpegSubsamp;
+        int width = (int) SCR_WIDTH;
+        int height = (int) SCR_HEIGHT;
+        int pitch = width * COLOR_COMPONENTS;
+
+        CORBA::Octet* jpegBuff = (*taoBuff).get_buffer(true);
+        //JPEG_TURBO DECOMPRESSION
+        //Send the TAO Buffer in directly 
+        tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
+        tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT); 
+
+        textureBufferList.push_back(uncompressedBuffer); 
+
+        //Release TAO data
+        (*taoBuff).freebuf(jpegBuff);
+        delete(taoBuff);
+
+        std::cout << "Frame stashed" << std::endl;
+      }
+
+	  }
+
+
 
 unsigned int loadTexture(unsigned char* data)
 {
@@ -352,3 +430,4 @@ unsigned int loadTexture(unsigned char* data)
 
     return textureID;
 }
+

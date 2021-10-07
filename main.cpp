@@ -27,8 +27,12 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 
+
+
 int main(int argc, char* argv[])
 {
+
+    
    
     svrServer myServer = svrServer();
     //Create orb
@@ -55,6 +59,8 @@ int main(int argc, char* argv[])
     //worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
 
     float startTime = glfwGetTime();
+
+    int frame = 0;
     
     // render loop
     // -----------
@@ -90,9 +96,12 @@ int main(int argc, char* argv[])
 
         delete(m_pixels);
 
+        std::cout << "SERVER FRAME " << ++frame << std::endl;
+
         //TODO: NOT OPTIMAL
         //But something like 120 frames per second
-        usleep(8333);
+        usleep(100333);
+        
 
 
     }
