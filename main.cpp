@@ -27,8 +27,13 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
 
+
+
+
 int main(int argc, char* argv[])
 {
+
+    
    
     svrServer myServer = svrServer();
     //Create orb
@@ -54,7 +59,10 @@ int main(int argc, char* argv[])
     //Activate the worker thread
     //worker.activate(THR_NEW_LWP | THR_JOINABLE, nthreads);
 
-    
+    float startTime = glfwGetTime();
+
+    int frame = 0;
+    float old_time = 0;
     
     // render loop
     // -----------
@@ -62,49 +70,48 @@ int main(int argc, char* argv[])
     {
         if (myServer.orb->work_pending()) {
             myServer.orb->perform_work();
-
         }
-        
+
         // input
         // -----
         //This just checks for the escape key (which should trigger window should close)
         //TODO: This just kills the world... the hanging thread below needs to be fixed.
         processInput(myAppl);
 
-        //myServer.getData();
-
+        //Controller Input
+        // -----------------
         // Take the server data and update the view based on controller input
         float in_data[7];
         myServer.server_impl.get_data(in_data);
         myAppl.updateView(in_data[0], in_data[1]);
         
-        // Draw
+        // OpenGL Draw & Create Image
+        // --------------
         myAppl.render();
-        myAppl.createImage();
-        //TODO: SAVE RENDER TO PIXELS ON THE SERVER
-        // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
-        unsigned char* m_pixels = (unsigned char*) malloc (800 * 600 * 3);
-        
-        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
-        myServer.setImage(m_pixels);
 
-        delete(m_pixels);
+        // TAO Server Set Data
+        // --------------------
+        //Take the data from OpenGL and set Server Data
+        //TODO: Are the classes in an appropriate relationship?
+        myServer.setJpegSize(myAppl.jpegSize);
+        myServer.setImage(myAppl.pixels);
 
-        
-
+        // Calculate Frame Rate
+        // -------------------
+        if ( (old_time + 1) < glfwGetTime() ) {
+            std::cout << "FPS " << frame << std::endl;
+            frame = 0;
+            old_time = glfwGetTime();
+        }
+        ++frame;
+       
+        //TODO: Adjust and synchronize frame rate with client
+        //NOTE: Using sleep is not optimal
+        //Will be about 25-30 FPS at this rate
+        //Anything more adds artifacts/glitches to the client
+        usleep(32666);
 
     }
-
-    // optional: de-allocate all resources once they've outlived their purpose:
-    // ------------------------------------------------------------------------
-    
-    /*
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    */
-
-    //TODO: This causes a hang, need to fix.
-    //worker.thr_mgr() -> wait();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------

@@ -20,8 +20,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "extern/libjpeg-turbo/turbojpeg.h"
+
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+std::vector<CORBA::Octet*> textureBufferList;
 
 
 unsigned int loadTexture(unsigned char *data);
@@ -68,6 +72,23 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
+class FrameWorker : public ACE_Task_Base
+{
+public:
+  FrameWorker (CORBA::ORB_ptr orb);
+  // Constructor
+
+  virtual void run_test (void);
+  // The actual implementation of the test
+
+  // = The Task_Base methods
+  virtual int svc ();
+
+private:
+  CORBA::ORB_var orb_;
+  // The ORB reference
+};
+
 class Worker : public ACE_Task_Base
 {
 public:
@@ -89,11 +110,6 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 
-
-
-      //OPENGL
-   
-
   try
     {
       CORBA::ORB_var orb =
@@ -113,8 +129,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       orb->run (tv);
 
-    
-
+  
      CORBA::Object_var object =
         orb->string_to_object (ior);
 
@@ -166,53 +181,73 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
-    unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+
+    CORBA::Octet* uncompressedBuffer;
+    //CORBA::Octet* jpegBuff;
     
+    int frame = 0;
+
+    FrameWorker frameWorker(orb.in());
+
+    if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "(%P|%t) Cannot activate worker threads\n"),
+                          1);
+
+
+
+
     while (!glfwWindowShouldClose(window))
     {
+      if (textureBufferList.size() < 1) {
+        continue;
+      }
       
-      renderBufferShader.use();
-      
-      glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-      glDisable(GL_DEPTH_TEST);
+      std::cout << "CLIENT FRAME " << ++frame << std::endl;
 
+      //Select the GL Shader for Framebuffer
+      renderBufferShader.use();
+      // Default framebuffer
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glDisable(GL_DEPTH_TEST);
+      //Clear screen (to white)
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
-      
-      renderBufferShader.use();
+      //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
-    
-      pixels = server->sendImageData();
 
-      //TODO: Is this safe?
-      //memcpy(pixels, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
+      CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
 
-      pixelTexture = loadTexture(pixels);
-
-      //glBindTexture(GL_TEXTURE_2D, pixelTexture);
-      //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-      //glGenerateMipmap(GL_TEXTURE_2D);
-
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+      //OPENGL TEXTURE LOAD AND DRAW
+      pixelTexture = loadTexture(uncompressedBuffer);
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
-
       glDrawArrays(GL_TRIANGLES, 0, 6);
-
+      
+      //PSwap framebuffer to front buffer
       glfwSwapBuffers(window);
       glfwPollEvents();
 
-      //delete(pixels);
-      //delete(local_pixels);
+      
+      //Release GL data
       glDeleteTextures(1, &pixelTexture);
       glFinish();
+      glFlush();
 
+      delete(uncompressedBuffer);
+      textureBufferList.erase(textureBufferList.begin());
 
-    }
+      //SLEEP
+      //-----
+      //This helps...
+      //TODO: NOT OPTIMAL
+      //But trying 120 frames per second
+      //usleep -- > 1 sec = 1,000,000
+      //1,000,000 / 16 = 16,666
+      // 1/2 of that is 8333
+
+     
+      
+  }
 
 
     worker.thr_mgr ()->wait ();
@@ -255,9 +290,6 @@ Worker::svc (void)
 void
 Worker::run_test (void)
 {
-
-
-
       CORBA::Object_var object =
         orb_->string_to_object (ior);
 
@@ -293,13 +325,93 @@ Worker::run_test (void)
 
 }
 
+FrameWorker::FrameWorker (CORBA::ORB_ptr orb)
+  :  orb_ (CORBA::ORB::_duplicate (orb))
+{
+}
+
+int
+FrameWorker::svc (void)
+{
+  try
+    {
+      this->run_test ();
+    }
+  catch (const CORBA::Exception& ex)
+    {
+      ex._tao_print_exception ("FrameException caught in thread (%t)\n");
+    }
+
+  return 0;
+}
+
+
+void
+FrameWorker::run_test (void)
+{
+      CORBA::Object_var object =
+        orb_->string_to_object (ior);
+
+      Simple_Server_var server =
+        Simple_Server::_narrow (object.in ());
+
+        
+
+      
+      while(true) {
+
+        std::cout << "Frame Thread" << std::endl;
+        //Decompression handle
+        tjhandle handle = tjInitDecompress();
+
+        //Get the size of the JPEG from the server
+        long unsigned int _jpegSize = server->sendJpegSize();      
+        //Allocate size for the buffer for TAO
+        Simple_Server::pixels* taoBuff = server->sendImageData();
+        //Get the TAO data handler     
+        //Create the uncompressedBuffer for JPEG Decompression
+        
+        //jpegBuff = (unsigned char*) malloc (_jpegSize);
+        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+
+        int COLOR_COMPONENTS = 3; //RGB
+        int jpegSubsamp;
+        int width = (int) SCR_WIDTH;
+        int height = (int) SCR_HEIGHT;
+        int pitch = width * COLOR_COMPONENTS;
+
+        CORBA::Octet* jpegBuff = (*taoBuff).get_buffer(true);
+        //JPEG_TURBO DECOMPRESSION
+        //Send the TAO Buffer in directly 
+        tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
+        tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT); 
+
+        if (textureBufferList.size() > 16) {
+          m_mutex.acquire();
+          std::cout << "Clearing Texture Buffer List" << std::endl;
+          textureBufferList.erase(textureBufferList.begin(), textureBufferList.end());
+          m_mutex.release();
+        }
+
+        textureBufferList.push_back(uncompressedBuffer); 
+
+        //Release TAO data
+        (*taoBuff).freebuf(jpegBuff);
+        delete(taoBuff);
+
+        std::cout << "Frame stashed " << glfwGetTime() << std::endl;
+      }
+
+	  }
+
+
 
 unsigned int loadTexture(unsigned char* data)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    int width, height, nrComponents;
+    //int width, height, nrComponents;
     //unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data)
     {
@@ -312,13 +424,13 @@ unsigned int loadTexture(unsigned char* data)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        delete(data);
+        //delete(data); 
     }
     else
     {
         std::cout << "Texture failed to load" << std::endl;
-        delete(data);
     }
 
     return textureID;
 }
+

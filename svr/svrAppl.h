@@ -58,6 +58,7 @@ class svrAppl {
         void updateView(double xpos, double ypos);
         void render();
         void createImage();
+        
 
         GLFWwindow* window = 0;
         unsigned int m_width;
@@ -113,6 +114,8 @@ class svrAppl {
         float lastX;
         float lastY;
         float fov;
+
+        long unsigned int jpegSize;
 
 
 };

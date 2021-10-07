@@ -78,60 +78,6 @@ TAO_END_VERSIONED_NAMESPACE_DECL
 
 
 // TAO_IDL - Generated from
-// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_array/array_ci.cpp:147
-
-TAO_BEGIN_VERSIONED_NAMESPACE_DECL
-
-
-ACE_INLINE
-void
-TAO::Array_Traits<Simple_Server::pixels_forany>::free (
-    Simple_Server::pixels_slice * _tao_slice)
-{
-  Simple_Server::pixels_free (_tao_slice);
-}
-
-ACE_INLINE
-Simple_Server::pixels_slice *
-TAO::Array_Traits<Simple_Server::pixels_forany>::dup (
-    const Simple_Server::pixels_slice * _tao_slice)
-{
-  return Simple_Server::pixels_dup (_tao_slice);
-}
-
-ACE_INLINE
-void
-TAO::Array_Traits<Simple_Server::pixels_forany>::copy (
-    Simple_Server::pixels_slice * _tao_to,
-    const Simple_Server::pixels_slice * _tao_from)
-{
-  Simple_Server::pixels_copy (_tao_to, _tao_from);
-}
-
-ACE_INLINE
-void
-TAO::Array_Traits<Simple_Server::pixels_forany>::zero (
-    Simple_Server::pixels_slice * _tao_slice)
-{
-  // Zero each individual element.
-  for ( ::CORBA::ULong i0 = 0; i0 < 1440000; ++i0)
-    {
-      _tao_slice[i0] = ::CORBA::Octet ();
-    }
-}
-
-ACE_INLINE
-Simple_Server::pixels_slice *
-TAO::Array_Traits<Simple_Server::pixels_forany>::alloc ()
-{
-  return Simple_Server::pixels_alloc ();
-}
-
-
-TAO_END_VERSIONED_NAMESPACE_DECL
-
-
-// TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_interface/interface_ci.cpp:59
 
 ACE_INLINE

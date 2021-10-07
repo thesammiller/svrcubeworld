@@ -1,8 +1,11 @@
 #include "svr/svrAppl.h"
 #include <iostream>
+#include <unistd.h>
+
+#include "extern/libjpeg-turbo/turbojpeg.h"
 
 
-//For framebuffer
+//Square (two triangles) for framebuffer to hold texture
 float quadVertices[] = {
         // positions  //texcoords
         -1.0f, 1.0f, 0.0f, 1.0f,
@@ -23,7 +26,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 }
 
 
-
+//OVR Helper Application for converting OVR Type to Vertex Array for GL
 template <typename _attrib_type_>
 void PackVertexAttribute(
     std::vector<uint8_t>& packed,
@@ -46,7 +49,7 @@ void PackVertexAttribute(
     }
 }
 
-
+//Used by OpenGL for Vertex information
 enum VertexAttributeLocation {
     VERTEX_ATTRIBUTE_LOCATION_POSITION = 0,
     VERTEX_ATTRIBUTE_LOCATION_COLOR = 1,
@@ -55,21 +58,60 @@ enum VertexAttributeLocation {
 
 
 svrAppl::svrAppl() {
-    pixels = (unsigned char *) malloc (800 * 600 * 3);
-
 }
 
+/*
+svrAppl::createImage()
+- Reads pixels from OpenGL 
+- Compressed pixels into JPEG
+- Stores Pixels and Size in svrAppl object
+*/
 void svrAppl::createImage() {
-    unsigned char* p = (unsigned char*) malloc (800 * 600 * 3);
+    //OPEN GL
+    //Read uncompressed image buffer as source
+    unsigned char* srcBuf = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
-    memcpy(pixels, p, sizeof(unsigned char) * 800 * 600 *3);
-    delete(p);
+    //Read pixels from the GL Draw
+    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
 
+    //COMPRESSION -- TURBO JPEG
+    tjhandle handle = tjInitCompress();
+    if (handle == NULL)
+    {
+        std::cout << "TJ ERROR!" << std::endl;
+    }
+    //TURBO JPEG VALUES
+    const int JPEG_QUALITY = 25;
+    const int COLOR_COMPONENTS = 3;
+    int _width = m_width; //convert to signed integer
+    int _height = m_height; 
+    long unsigned int _jpegSize = 0;
+    pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
+    int pitch = _width * COLOR_COMPONENTS;
+    int pixelFormat = TJPF_RGB;
+    int jpegSubsamp = TJSAMP_444;
+    int flags = TJFLAG_FASTDCT;
+
+    //Compress Image
+    //pixels is a class property field
+    tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
+            &pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
+            flags);
+
+    jpegSize = _jpegSize;
+
+    tjDestroy(handle);
+
+    //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
+    //or by the Compress/Decompress) after you are done working on it:
+    tjFree(pixels);
+    delete(srcBuf);
 }
 
 
-
+/*
+Create the OpenGL Window
+*/
 int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
     m_height = height;
     m_width = width;
@@ -101,6 +143,9 @@ int svrAppl::createWindow(unsigned int width, unsigned int height, char *name) {
 
 }
 
+/*
+Create OpenGL Shader
+*/
 void svrAppl::createShader() {
      
 
@@ -110,6 +155,9 @@ void svrAppl::createShader() {
 
 }
 
+/*
+Create OpenGL Framebuffer
+*/
 void svrAppl::createFramebuffer() {
 
     renderBufferShader = Shader("./shaders/renderBuffer.vs", "./shaders/renderBuffer.fs");
@@ -173,7 +221,11 @@ void svrAppl::createFramebuffer() {
 
 }
 
+/*
+Render Vertex Data to OpenGL Framebuffer
+- Will also CreateImage, right before drawing to screen
 
+*/
 void svrAppl::render() {
 
     // Bind to our new buffer
@@ -187,9 +239,9 @@ void svrAppl::render() {
     program.use();
     float time = glfwGetTime();
     
+    //Make sure we bind to the VertexArrayObject
     glBindVertexArray(vertexArrayObject);
 
-    
     GL(glBindBuffer(GL_ARRAY_BUFFER, InstanceTransformBuffer));
     GL(glBufferData(
         GL_ARRAY_BUFFER, NUM_INSTANCES * 4 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW));
@@ -266,18 +318,21 @@ void svrAppl::render() {
     renderBufferShader.use();
     glBindVertexArray(quadVAO);
     glBindTexture(GL_TEXTURE_2D, textureColorbuffer); 
-
+    
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
+    //****************************************************************************
+    //Create the image to send before we swap the buffers
+    //This improves performance in reading the pixels with the off-screen buffer
+    //****************************************************************************
+    createImage();
 
+    //TODO: CREATE HEADLESS OPENGL MODE
+    //Commenting out the below improves the performance.
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
-
-    //Get the image from the end of the Render
-    //createImage();
-
 }
 
 
