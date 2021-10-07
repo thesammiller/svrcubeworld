@@ -29,6 +29,7 @@ const unsigned int SCR_HEIGHT = 600;
 
 
 
+
 int main(int argc, char* argv[])
 {
 
@@ -61,6 +62,7 @@ int main(int argc, char* argv[])
     float startTime = glfwGetTime();
 
     int frame = 0;
+    float old_time;
     
     // render loop
     // -----------
@@ -96,7 +98,14 @@ int main(int argc, char* argv[])
 
         delete(m_pixels);
 
-        std::cout << "SERVER FRAME " << ++frame << glfwGetTime() << std::endl;
+        //std::cout << "SERVER FRAME \t" << ++frame << " TIME \t" << glfwGetTime() << std::endl;
+        if ( (old_time + 1) < glfwGetTime() ) {
+            std::cout << "FPS " << frame << std::endl;
+            frame = 0;
+            old_time = glfwGetTime();
+        }
+        ++frame;
+       
 
         //TODO: NOT OPTIMAL
         //But something like 120 frames per secon
