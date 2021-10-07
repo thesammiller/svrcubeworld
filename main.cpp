@@ -72,14 +72,11 @@ int main(int argc, char* argv[])
             myServer.orb->perform_work();
         }
 
-        
         // input
         // -----
         //This just checks for the escape key (which should trigger window should close)
         //TODO: This just kills the world... the hanging thread below needs to be fixed.
         processInput(myAppl);
-
-        //myServer.getData();
 
         // Take the server data and update the view based on controller input
         float in_data[7];
@@ -88,15 +85,13 @@ int main(int argc, char* argv[])
         
         // Draw
         myAppl.render();
-        //myAppl.createImage();
+        //TODO: Are the classes in an appropriate relationship?
         myServer.setJpegSize(myAppl.jpegSize);
-        //TODO: SAVE RENDER TO PIXELS ON THE SERVER
-        // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
-        unsigned char* m_pixels = (unsigned char*) malloc (myAppl.jpegSize);
-        memcpy(m_pixels, myAppl.pixels, myAppl.jpegSize);
-        myServer.setImage(m_pixels);
+        //unsigned char* m_pixels = (unsigned char*) malloc (myAppl.jpegSize);
+        //memcpy(m_pixels, myAppl.pixels, myAppl.jpegSize);
+        myServer.setImage(myAppl.pixels);
 
-        delete(m_pixels);
+        //delete(m_pixels);
 
         //std::cout << "SERVER FRAME \t" << ++frame << " TIME \t" << glfwGetTime() << std::endl;
         if ( (old_time + 1) < glfwGetTime() ) {
