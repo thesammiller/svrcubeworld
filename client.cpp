@@ -186,12 +186,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     
     int frame = 0;
 
-    FrameWorker frameWorker(orb.in());
+    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 24);
+    for (int i=0; i < 24; i++) {
+      FrameWorker frameWorker(orb.in());
 
-    if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+      if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
                            "(%P|%t) Cannot activate worker threads\n"),
                           1);
+      FrameWorker * currentWorker = fw+i;
+      currentWorker = &frameWorker;
+      usleep(16666);
+
+    }
 
 
 
@@ -386,19 +393,22 @@ FrameWorker::run_test (void)
         tjDecompress2(handle, jpegBuff, _jpegSize, uncompressedBuffer, width, pitch, height, TJPF_RGB, TJFLAG_FASTDCT); 
 
         if (textureBufferList.size() > 16) {
-          m_mutex.acquire();
+          
           std::cout << "Clearing Texture Buffer List" << std::endl;
           textureBufferList.erase(textureBufferList.begin(), textureBufferList.end());
-          m_mutex.release();
+          
         }
 
+        m_mutex.acquire();
         textureBufferList.push_back(uncompressedBuffer); 
+        m_mutex.release();
 
         //Release TAO data
         (*taoBuff).freebuf(jpegBuff);
         delete(taoBuff);
 
         std::cout << "Frame stashed " << glfwGetTime() << std::endl;
+        usleep(16333);
       }
 
 	  }
