@@ -23,8 +23,8 @@ int nthreads = 1;
 void processInput(svrAppl appl);
 
 // GL Window Settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 2560;
+const unsigned int SCR_HEIGHT = 1440;
 
 
 int main(int argc, char* argv[])
@@ -76,9 +76,9 @@ int main(int argc, char* argv[])
 
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
-        unsigned char* m_pixels = (unsigned char*) malloc (800 * 600 * 3);
+        unsigned char* m_pixels = (unsigned char*) malloc (2560 * 1440 * 3);
 
-        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 800 * 600 * 3);
+        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 2560 * 1440 * 3);
         myServer.setImage(m_pixels);
         delete(m_pixels);
 

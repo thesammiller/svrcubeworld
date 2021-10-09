@@ -11,7 +11,7 @@ static ACE_Thread_Mutex m_mutex;
 
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
   Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
-  memcpy(value, this->imageData, sizeof(unsigned char) * 800 * 600 *3);
+  memcpy(value, this->imageData, sizeof(unsigned char) * 2560 * 1440 *3);
   return value;
 }
 
