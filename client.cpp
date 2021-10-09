@@ -307,6 +307,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
           }
+          sleep(1);
         
          //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
          //no-delay decoding can also be realized by directly calling DecodeFrame2() again with NULL input, as in the following. In this case, decoder would immediately reconstruct the input data. This can also be used similarly for Parsing only. Consequent decoding error and output indication should also be considered as above.
@@ -323,28 +324,55 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::cout << stride0 << std::endl;
 
 
-        cv::Mat imageYuvCh[3];
-        cv::Mat imageYuvMiniCh[3];
+        cv::Mat imageYuvCh[3] {
+           cv::Mat(width, height, CV_8UC1, pData[0]), 
+          cv::Mat(width, height, CV_8UC1, pData[1]), 
+          cv::Mat(width, height, CV_8UC1, pData[2])
+        };
+        cv::Mat imageYuvMiniCh[3] = {
+          cv::Mat(width, height, CV_8UC1, pData[0]), 
+          cv::Mat(width, height, CV_8UC1, pData[1]), 
+          cv::Mat(width, height, CV_8UC1, pData[2])
+        };
 
         
-        //copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
-        //copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
-        //copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
+        copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
+        copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
+        copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
         
-        imageYuvCh[0].data = pData[0];
-        imageYuvMiniCh[1].data = pData[1];
-        imageYuvMiniCh[2].data = pData[2];
+
+        //imageYuvCh[0].data = (unsigned char*) malloc (width * height * sizeof(unsigned char));
+        //imageYuvMiniCh[1].data = (unsigned char*) malloc (width/2 * height/2 * sizeof(unsigned char));
+        //imageYuvMiniCh[2].data = (unsigned char*) malloc (width/2 * height/2 * sizeof(unsigned char));
+
+        //memcpy(imageYuvCh[0].data, pData[0], width * height);
+        //memcpy(imageYuvMiniCh[1].data, pData[1], width/2 * height/2);
+        //memcpy(imageYuvMiniCh[2].data, pData[2], width/2 * height/2);
+
 
         cv::resize(imageYuvMiniCh[1], imageYuvCh[1], cv::Size(width, height));
         cv::resize(imageYuvMiniCh[2], imageYuvCh[2], cv::Size(width, height));
-        
+
+        cv::Mat *mv = imageYuvCh; 
+        size_t n = 3;
         cv::Mat resultYuv;
+        int i;
+        int depth = mv[0].depth();
+
+        for( i = 0; i < n; i++ )
+        {
+            std::cout << "mv " << i << " size \t" << mv[i].size << "\t0\t" << mv[0].size;
+            std::cout << "mv " << i << "depth \t" << mv[i].depth() << "\t0\t" <<  depth;
+            
+        }
+            
+        //cv::Mat resultYuv;
         cv::merge(imageYuvCh, 3, resultYuv);
 
-        cv::InputArray image = NULL;
+        cv::Mat image = cv::Mat();
         
-        cv::Mat result;
-        cvtColor(image, result, cv::COLOR_YUV2BGR);
+        //cv::Mat result;
+        cvtColor(resultYuv, image, cv::COLOR_YUV2BGR);
 
         cv::imwrite("file.tga", image);
 
