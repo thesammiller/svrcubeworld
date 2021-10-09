@@ -220,10 +220,6 @@ void svrAppl::createImage() {
             }
     }
 
-    
-
-
-
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:

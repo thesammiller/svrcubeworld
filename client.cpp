@@ -213,9 +213,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     while (!glfwWindowShouldClose(window))
     {
-      if (textureBufferList.size() < 1) {
-        continue;
-      }
+     
         //Decompression handle
         //tjhandle handle = tjInitDecompress();
 
@@ -236,7 +234,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ISVCDecoder *pSvcDecoder;
         //input: encoded bitstream start position; should include start code prefix
         unsigned char *pBuf = (*taoBuff).get_buffer(true);
-        FILE* file = fopen("test.264", "a+");
+        FILE* file = fopen("test2.264", "a+");
                 //This saves a movie file!!!
         fwrite(pBuf, _jpegSize, 1, file);
         fclose(file);   
@@ -253,7 +251,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         SDecodingParam sDecParam = {0};
         sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
         //for Parsing only, the assignment is mandatory
-        sDecParam.bParseOnly = true;
+        sDecParam.bParseOnly = false;
 
         pSvcDecoder->Initialize(&sDecParam);
 
@@ -269,6 +267,40 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       std::cout << "CLIENT FRAME " << ++frame << std::endl;
 
+      unsigned int _textures[3];
+      int width = 800;
+      int height = 600;
+
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  
+      glGenTextures(3, _textures);  
+      const unsigned char *pixels[3] = { pData[0], pData[1], pData[2] };  
+      const unsigned int widths[3]  = { width, width / 2, width / 2 };  
+      const unsigned int heights[3] = { height, height / 2, height / 2 };  
+      for (int i = 0; i < 3; ++i) {  
+          glBindTexture(GL_TEXTURE_2D, _textures[i]);  
+          glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, widths[i],heights[i],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,pixels[i]);  
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  
+          glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  
+          glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      
+      
+      }
+
+      static const GLfloat texCoords[] = { 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };  
+      static const GLfloat vertices[]= {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
+
+      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  
+      glClear(GL_COLOR_BUFFER_BIT);  
+      renderBufferShader.use();
+
+       GLint _uniformSamplers[3];
+        _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "s_texture_y");
+      _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "s_texture_u");
+      _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "s_texture_v");
+
+     
+
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
       // Default framebuffer
@@ -280,12 +312,27 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
 
-      CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
+      
+      //glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
+      //glEnableVertexAttribArray(ATTRIBUTE_VERTEX);  
+      //glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);  
+      //glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
+      //glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer); 
+
+        for (int i = 0; i < 3; ++i) {  
+          glActiveTexture(GL_TEXTURE0 + i);  
+          glBindTexture(GL_TEXTURE_2D, _textures[i]);  
+          glUniform1i(_uniformSamplers[i], i);  
+      }  
+      
+
+      //CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
 
       //OPENGL TEXTURE LOAD AND DRAW
-      pixelTexture = loadTexture(uncompressedBuffer);
-      glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+      //pixelTexture = loadTexture(uncompressedBuffer);
+      //glBindTexture(GL_TEXTURE_2D, pixelTexture); 
       glDrawArrays(GL_TRIANGLES, 0, 6);
+      
       
       //PSwap framebuffer to front buffer
       glfwSwapBuffers(window);
@@ -298,7 +345,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFlush();
 
       delete(uncompressedBuffer);
-      textureBufferList.erase(textureBufferList.begin());
+      //textureBufferList.erase(textureBufferList.begin());
 
       //SLEEP
       //-----
@@ -478,7 +525,7 @@ FrameWorker::run_test (void)
         int height = (int) SCR_HEIGHT;
         int pitch = width * COLOR_COMPONENTS;
 
-        CORBA::Octet* jpegBuff = (*taoBuff).get_buffer(true);
+        //CORBA::Octet* jpegBuff = (*taoBuff).get_buffer(true);
         //JPEG_TURBO DECOMPRESSION
         //Send the TAO Buffer in directly 
         /*tjDecompressHeader2(handle, jpegBuff, _jpegSize, &width, &height, &jpegSubsamp);
