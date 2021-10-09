@@ -174,15 +174,15 @@ void svrAppl::createImage() {
     pic.pData[1] = imageYuvMiniCh[1].data;
     pic.pData[2] = imageYuvMiniCh[2].data;
 
-    std::cout << "iStride[0]\t" << imageYuvCh[0].step << "\t";
-    std::cout << "iStride[1]\t" << imageYuvCh[1].step << "\t";
-    std::cout << "iStride[2]\t" << imageYuvCh[2].step << "\t";
+    // << "iStride[0]\t" << imageYuvCh[0].step << "\t";
+    //std::cout << "iStride[1]\t" << imageYuvCh[1].step << "\t";
+    //std::cout << "iStride[2]\t" << imageYuvCh[2].step << "\t";
 
 
    
     rv = encoder_->EncodeFrame (&pic, &info);
     //sbuf(1);
-    std::cout << "LAYER NUMBER \t" << info.iLayerNum << std::endl;
+    //std::cout << "LAYER NUMBER \t" << info.iLayerNum << std::endl;
     //sleep(1);
     assert (rv == cmResultSuccess);
     
@@ -220,12 +220,15 @@ void svrAppl::createImage() {
         SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[0];
         int iLayerSize = 0;
         int iNalIdx = pLayerBsInfo->iNalCount - 1;
+        std::cout << "iNalIdx\t" << iNalIdx << std::endl;
         do {
             iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
             --iNalIdx;
         } while (iNalIdx >= 0);
+        //Allocate the header
         header = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
         headerSize = iLayerSize;
+        memcpy(header, pLayerBsInfo->pBsBuf, headerSize);
 
         pLayerBsInfo = &info.sLayerInfo[1];
         iLayerSize = 0;
@@ -236,6 +239,12 @@ void svrAppl::createImage() {
         } while (iNalIdx >= 0);
         pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
         jpegSize = iLayerSize;
+        memcpy(pixels, pLayerBsInfo->pBsBuf, jpegSize);
+
+        FILE *f = fopen("svrout.264", "a+");
+        fwrite(header, headerSize, 1, f);
+        fwrite(pixels, jpegSize, 1, f);
+        fclose(f);
 
         
 

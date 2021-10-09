@@ -81,7 +81,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 //https://stackoverflow.com/questions/57212966/how-to-convert-openh264-decodeframenodelay-output-format-to-opencv-matrix
-void copyWithStride(void* dst, const void* src, size_t width, size_t height, size_t stride
+inline void copyWithStride(void* dst, const void* src, size_t width, size_t height, size_t stride
 ) {
     for (size_t row = 0; row < height; ++row) {
         uint8_t* posFrom = (uint8_t*)src + row * stride;
@@ -226,56 +226,95 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     while (!glfwWindowShouldClose(window))
     {
+        float startTime = glfwGetTime();
+        //uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
 
-        
-        uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
+        //https://github.com/cisco/openh264/wiki/UsageExampleForDecoder
 
-          //decoder declaration
+        //decoder declaration
         ISVCDecoder *pSvcDecoder;
-        //input: encoded bitstream start position; should include start code prefix
-        long unsigned int _jpegSize = server->sendJpegSize();      
-        long unsigned int _headerSize = server->sendHeaderSize();      
-        
-        //std::cout<< _headerSize << std::endl;
-        //std::cout << _jpegSize << std::endl;
-        
-        Simple_Server::pixels* taoBuff = server->sendImageData();
-        Simple_Server::header* headerBuff = server->sendHeaderData();
-        
 
-        unsigned char *pBuf = (*taoBuff).get_buffer(true);
+        //input: encoded bitstream start position; should include start code prefix
+        
+        long unsigned int _headerSize = server->sendHeaderSize();      
+        Simple_Server::header* headerBuff = server->sendHeaderData();
         unsigned char *hBuf = (*headerBuff).get_buffer(true);
 
-        FILE* file = fopen("test2.264", "a+");
-        fwrite(hBuf, _headerSize, 1, file);
-        fwrite(pBuf, _jpegSize, 1, file);
-        fclose(file);   
+        long unsigned int _pixelSize = server->sendJpegSize();      
+        Simple_Server::pixels* pixelBuff = server->sendImageData();
+        unsigned char *pBuf = (*pixelBuff).get_buffer(true);
+
+        FILE* vout = fopen("client_in.264", "a+");
+        fwrite(hBuf, _headerSize, 1, vout);
+        fwrite(pBuf, _pixelSize, 1, vout);
+        fclose(vout);
+
+        float timeDiff = glfwGetTime() - startTime;
+       std::cout << "DATA TIME \t" << timeDiff << std::endl;
+        
+
+        //FILE* file = fopen("test2.264", "a+");
+        //fwrite(hBuf, _headerSize, 1, file);
+        //fwrite(pBuf, _pixelSize, 1, file);
+        //fclose(file);   
         //input: encoded bit stream length; should include the size of start code prefix
-        int iSize  = _jpegSize;
+        
+        
+        /*
+        int iSize  = _pixelSize;
         //output: [0~2] for Y,U,V buffer for Decoding only
-        unsigned char *pData[3]  = {0, 0, 0};
+        unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
         //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
         SBufferInfo sDstBufInfo;
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
+        */
 
         
         //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
-        WelsCreateDecoder(&pSvcDecoder);
+
+        /*
+        int rv = WelsCreateDecoder(&pSvcDecoder);
+        assert (rv == 0);
+        ISVCDecoder* decoder_;
+        assert (decoder_ != NULL);
+
 
         SDecodingParam sDecParam = {0};
         sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
-        //for Parsing only, the assignment is mandatory
         sDecParam.bParseOnly = false;
-
+        sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
         pSvcDecoder->Initialize(&sDecParam);
 
-        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(pBuf, iSize, pData, &sDstBufInfo);
+        */
+
+        //WE"RE FAILING HERE
+        //I NEED TO READ UP ON THIS PART OF THE API
+        //DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(pBuf, iSize, pData, &sDstBufInfo);
+
+
+
+        /*
+        if (iRet != 0) {
+          std::cout << iRet << std::endl;
+          return -1;
+        }
+        */
+
+        
+
+
+
+        /*
         //for Decoding only, pData can be used for render.
         if (sDstBufInfo.iBufferStatus==1){
             //output handling (pData[0], pData[1], pData[2])
+            std::cout << "SUCCESS" << std::endl;
         }
-       
+        else { 
+          std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
+          }
+        */
          //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
          //no-delay decoding can also be realized by directly calling DecodeFrame2() again with NULL input, as in the following. In this case, decoder would immediately reconstruct the input data. This can also be used similarly for Parsing only. Consequent decoding error and output indication should also be considered as above.
          //iRet = pSvcDecoder->DecodeFrame2(NULL, 0, pData, &sDstBufInfo);
@@ -285,14 +324,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         int width = 800;
         int height = 600;
-        int stride0 = 800;
-        std::cout << stride0 << std::endl;
+        //int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
+        //int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
         
-        int stride1 = 800;
-        
+        //std::cout << stride0 << std::endl;
+
+
         cv::Mat imageYuvCh[3];
         cv::Mat imageYuvMiniCh[3];
 
+        /*
         copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
         copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
         copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
@@ -314,10 +355,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         cv::imwrite("file.tga", image);
 
+        */
 
       
       std::cout << "CLIENT FRAME " << ++frame << std::endl;
 
+
+      //https://stackoverflow.com/questions/16809833/opencv-image-loading-for-opengl-texture
+      /*
       unsigned int textureTrash;
       glGenTextures(1, &textureTrash);
       glBindTexture(GL_TEXTURE_2D, textureTrash);
@@ -341,6 +386,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                      image.getObj());        // The actual image data itself
 
       glGenerateMipmap(GL_TEXTURE_2D);
+      */
 
 
       /*
@@ -367,7 +413,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       static const GLfloat texCoords[] = { 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };  
       static const GLfloat vertices[]= {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
 
-      */
+      
+     
 
       glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  
       glClear(GL_COLOR_BUFFER_BIT);  
@@ -386,13 +433,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
       // Default framebuffer
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glDisable(GL_DEPTH_TEST);
+      //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      //glDisable(GL_DEPTH_TEST);
       //Clear screen (to white)
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
       //Bind the Framebuffer Quad Vertex
-      glBindVertexArray(quadVAO);
+      //glBindVertexArray(quadVAO);
 
       
       //glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
@@ -414,8 +461,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       //OPENGL TEXTURE LOAD AND DRAW
       //pixelTexture = loadTexture(uncompressedBuffer);
-      glBindTexture(GL_TEXTURE_2D, textureTrash); 
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+      //glBindTexture(GL_TEXTURE_2D, textureTrash); 
+      //glDrawArrays(GL_TRIANGLES, 0, 6);
       
       
       //PSwap framebuffer to front buffer
@@ -428,7 +475,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
       glFlush();
 
-      delete(uncompressedBuffer);
+      //delete(uncompressedBuffer);
       //textureBufferList.erase(textureBufferList.begin());
 
       //SLEEP
@@ -439,6 +486,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //usleep -- > 1 sec = 1,000,000
       //1,000,000 / 16 = 16,666
       // 1/2 of that is 8333
+
+      
+
 
      
       
