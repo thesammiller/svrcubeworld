@@ -10,3 +10,6 @@
 [submodule "extern/openh264"]
 	path = extern/openh264
 	url = https://github.com/cisco/openh264.git
+[submodule "extern/opencv"]
+	path = extern/opencv
+	url = https://github.com/opencv/opencv

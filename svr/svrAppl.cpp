@@ -5,6 +5,10 @@
 #include "extern/libjpeg-turbo/turbojpeg.h"
 #include "extern/openh264/codec/api/svc/codec_api.h"
 
+#include "extern/opencv/modules/core/include/opencv2/core.hpp"
+#include "extern/opencv/modules/core/include/opencv2/imgcodecs.hpp"
+#include "extern/opencv/modules/core/include/opencv2/highgui.hpp"
+#include "extern/opencv/modules/core/include/opencv2/imgproc.hpp"
 
 //Square (two triangles) for framebuffer to hold texture
 float quadVertices[] = {
@@ -151,6 +155,16 @@ void svrAppl::createImage() {
     pic.pData[0] = jpeg_pixels;
     pic.pData[1] = pic.pData[0] + width * height;
     pic.pData[2] = pic.pData[1] + (width * height >> 2);
+
+    Mat imageResized, imageYuv, imageYuvMini; 
+    resize(image, imageResized, Size(width, height));
+    Mat imageYuvCh[3], imageYuvMiniCh[3];
+    cvtColor(imageResized, imageYuv, cv::COLOR_BGR2YUV);
+    split(imageYuv, imageYuvCh);
+    resize(imageYuv, imageYuvMini, Size(width/2, height/2));
+    split(imageYuvMini, imageYuvMiniCh);
+
+    
    
     rv = encoder_->EncodeFrame (&pic, &info);
     //sleep(1);
