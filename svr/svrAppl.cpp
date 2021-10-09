@@ -6,9 +6,12 @@
 #include "extern/openh264/codec/api/svc/codec_api.h"
 
 #include <opencv2/core.hpp>
-//#include "extern/opencv/modules/core/include/opencv2/imgcodecs.hpp"
-//#include "extern/opencv/modules/core/include/opencv2/highgui.hpp"
-//#include "extern/opencv/modules/core/include/opencv2/imgproc.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+#include <opencv2/core/mat.hpp>
+
+
 
 //Square (two triangles) for framebuffer to hold texture
 float quadVertices[] = {
@@ -142,6 +145,7 @@ void svrAppl::createImage() {
     encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
 
     //step 4: encode and store output bitstream
+    /*
     int frameSize = width * height * 3 / 2;
     SFrameBSInfo info;
     memset (&info, 0, sizeof (SFrameBSInfo));
@@ -155,16 +159,34 @@ void svrAppl::createImage() {
     pic.pData[0] = jpeg_pixels;
     pic.pData[1] = pic.pData[0] + width * height;
     pic.pData[2] = pic.pData[1] + (width * height >> 2);
+    */
 
-    Mat imageResized, imageYuv, imageYuvMini; 
-    resize(image, imageResized, Size(width, height));
-    Mat imageYuvCh[3], imageYuvMiniCh[3];
-    cvtColor(imageResized, imageYuv, cv::COLOR_BGR2YUV);
-    split(imageYuv, imageYuvCh);
-    resize(imageYuv, imageYuvMini, Size(width/2, height/2));
-    split(imageYuvMini, imageYuvMiniCh);
+    cv::Mat rawData(1, jpegSize, CV_8UC1, (void*)jpeg_pixels);
+
+    cv::Mat image = cv::imdecode(rawData, cv::IMREAD_COLOR);
 
     
+    cv::Mat imageResized, imageYuv, imageYuvMini; 
+    resize(image, imageResized, cv::Size(width, height));
+    cv::Mat imageYuvCh[3], imageYuvMiniCh[3];
+    cvtColor(imageResized, imageYuv, cv::COLOR_BGR2YUV);
+    split(imageYuv, imageYuvCh);
+    resize(imageYuv, imageYuvMini, cv::Size(width/2, height/2));
+    split(imageYuvMini, imageYuvMiniCh);
+
+    SFrameBSInfo info;
+    memset (&info, 0, sizeof (SFrameBSInfo));
+    SSourcePicture pic;
+    memset (&pic, 0, sizeof (SSourcePicture));
+    pic.iPicWidth = width;
+    pic.iPicHeight = height;
+    pic.iColorFormat = videoFormatI420;
+    pic.iStride[0] = imageYuvCh[0].step;
+    pic.iStride[1] = imageYuvMiniCh[1].step;
+    pic.iStride[2] = imageYuvMiniCh[2].step;
+    pic.pData[0] = imageYuvCh[0].data;
+    pic.pData[1] = imageYuvMiniCh[1].data;
+    pic.pData[2] = imageYuvMiniCh[2].data;
    
     rv = encoder_->EncodeFrame (&pic, &info);
     //sleep(1);

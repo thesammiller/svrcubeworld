@@ -37,6 +37,7 @@ message(STATUS "${ACE_LIB}")
 find_library(libturbojpeg SHARED turbojpeg PATHS "${TURBOJPEG_ROOT}")
 find_library(libopenh264 SHARED openh264 PATHS "${OPENH264_ROOT}")
 find_library(libopencv_core SHARED opencv_core PATHS "${OPENCV_LIB}")
+find_library(libopencv_imgcodecs SHARED opencv_imgcodecs PATHS "${OPENCV_LIB}")
 
 add_executable(${PROJECT_NAME} main.cpp testC.cpp  test_i.cpp  testS.cpp svr/svrWorker.cpp svr/svrAppl.cpp shader_s.cpp svr/svrCubeWorld.cpp svr/svrServer.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
@@ -62,13 +63,13 @@ include_directories(${OPENCV_ROOT})
 include_directories(extern/opencv/modules/core/include/)
 
 
-target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 add_executable(
   client
   client.cpp testC.cpp shader_s.cpp
   )
-target_link_libraries(client OpenGL::GL glfw glm "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(client OpenGL::GL glfw glm "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 enable_testing()
 
