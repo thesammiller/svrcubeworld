@@ -255,7 +255,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        //float timeDiff = glfwGetTime() - dataTime;
        //std::cout << "DATA TIME \t" << timeDiff << std::endl;
         
-
         //input: encoded bit stream length; should include the size of start code prefix
         int iSize  = _pixelSize;
         //output: [0~2] for Y,U,V buffer for Decoding only
@@ -264,12 +263,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         SBufferInfo sDstBufInfo;
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
         
-
-        
         //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
+        uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
+        uint8_t uiStartCode[4] = {0, 0, 0, 1};
 
+        memcpy(newBuf, hBuf, _headerSize);
+        memcpy(newBuf+_headerSize, pBuf, iSize);
         
+        memcpy (newBuf + _headerSize + iSize, &uiStartCode[0], 4);
+
         int rv = WelsCreateDecoder(&pSvcDecoder);
         assert (rv == 0);
         ISVCDecoder* decoder_;
@@ -279,30 +282,24 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         SDecodingParam sDecParam = {0};
         sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
         sDecParam.bParseOnly = false;
-        sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
+        //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
         pSvcDecoder->Initialize(&sDecParam);
 
-        
 
         //WE"RE FAILING HERE
         //I NEED TO READ UP ON THIS PART OF THE API
-        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(pBuf, iSize, pData, &sDstBufInfo);
+        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
 
-
-
-        
         if (iRet != 0) {
           std::cout << iRet << std::endl;
           return -1;
         }
         
+        if (iRet == 0) {
+          std::cout << "SUCCESS" << std::endl;
+        }
 
         
-
-
-
-        /*
-        //for Decoding only, pData can be used for render.
         if (sDstBufInfo.iBufferStatus==1){
             //output handling (pData[0], pData[1], pData[2])
             std::cout << "SUCCESS" << std::endl;
@@ -310,7 +307,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
           }
-        */
+        
          //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
          //no-delay decoding can also be realized by directly calling DecodeFrame2() again with NULL input, as in the following. In this case, decoder would immediately reconstruct the input data. This can also be used similarly for Parsing only. Consequent decoding error and output indication should also be considered as above.
          //iRet = pSvcDecoder->DecodeFrame2(NULL, 0, pData, &sDstBufInfo);
@@ -320,16 +317,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         int width = 800;
         int height = 600;
-        //int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-        //int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+        int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
+        int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
         
-        //std::cout << stride0 << std::endl;
+        std::cout << stride0 << std::endl;
 
 
         cv::Mat imageYuvCh[3];
         cv::Mat imageYuvMiniCh[3];
 
-        /*
+        
         copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
         copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
         copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
@@ -351,7 +348,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         cv::imwrite("file.tga", image);
 
-        */
+        
 
       
       
@@ -467,7 +464,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       
       //Release GL data
-      glDeleteTextures(1, &pixelTexture);
+      //glDeleteTextures(1, &pixelTexture);
       glFinish();
       glFlush();
 
