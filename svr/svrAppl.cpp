@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "extern/libjpeg-turbo/turbojpeg.h"
+#include "extern/openh264/codec/api/svc/codec_api.h"
 
 
 //Square (two triangles) for framebuffer to hold texture
@@ -74,6 +75,64 @@ void svrAppl::createImage() {
     //Read pixels from the GL Draw
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
 
+
+    ISVCEncoder*  encoder_;
+    int rv = WelsCreateSVCEncoder (&encoder_);
+    assert (rv == 0);
+    assert (encoder_ != NULL);
+
+
+
+    int width = 800;
+    int height = 600;
+
+    SEncParamBase param;
+    memset (&param, 0, sizeof (SEncParamBase));
+    param.iUsageType = CAMERA_VIDEO_REAL_TIME; //from EUsageType enum
+    param.fMaxFrameRate = 90.0f;
+    param.iPicWidth = width;
+    param.iPicHeight = height;
+    param.iTargetBitrate = 5000000;
+    encoder_->Initialize (&param);
+
+    static int     g_LevelSetting = WELS_LOG_ERROR;
+    encoder_->SetOption (ENCODER_OPTION_TRACE_LEVEL, &g_LevelSetting);
+    int videoFormat = videoFormatRGB;
+    encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
+
+    int frameSize = width * height * 3 / 2;
+    SFrameBSInfo info;
+    memset (&info, 0, sizeof (SFrameBSInfo));
+    SSourcePicture pic;
+    memset (&pic, 0, sizeof (SSourcePicture));
+    pic.iPicWidth = width;
+    pic.iPicHeight = height;
+    pic.iColorFormat = videoFormatRGB;
+    pic.iStride[0] = pic.iPicWidth;
+    pic.iStride[1] = pic.iStride[2] = pic.iPicWidth >> 1;
+    pic.pData[0] = srcBuf;
+    pic.pData[1] = pic.pData[0] + width * height;
+    pic.pData[2] = pic.pData[1] + (width * height >> 2);
+   
+    rv = encoder_->EncodeFrame (&pic, &info);
+    assert (rv == cmResultSuccess);
+    if (info.eFrameType != videoFrameTypeSkip) {
+        SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[0];
+
+        int iLayerSize = 0;
+        int iNalIdx = pLayerBsInfo->iNalCount - 1;
+        do {
+            iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
+            --iNalIdx;
+        } while (iNalIdx >= 0);
+
+        pixels = pLayerBsInfo->pBsBuf;
+        jpegSize = iLayerSize;
+    }
+
+
+    /*
+
     //COMPRESSION -- TURBO JPEG
     tjhandle handle = tjInitCompress();
     if (handle == NULL)
@@ -101,10 +160,12 @@ void svrAppl::createImage() {
     jpegSize = _jpegSize;
 
     tjDestroy(handle);
+    */
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:
-    tjFree(pixels);
+    //tjFree(pixels);
+
     delete(srcBuf);
 }
 

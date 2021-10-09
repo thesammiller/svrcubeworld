@@ -12,6 +12,7 @@ set(ACE_ROOT "extern/ACE_wrappers/build/default")
 set(TAO_ROOT "${ACE_ROOT}/TAO")
 
 set(TURBOJPEG_ROOT "extern/libjpeg-turbo")
+set(OPENH264_ROOT "extern/openh264")
 
 include(FetchContent)
 FetchContent_Declare(
@@ -30,6 +31,7 @@ find_library(libACE SHARED ACE PATHS "${ACE_LIB}")
 message(STATUS "${ACE_LIB}")
 
 find_library(libturbojpeg SHARED turbojpeg PATHS "${TURBOJPEG_ROOT}")
+find_library(libopenh264 SHARED openh264 PATHS "${OPENH264_ROOT}")
 
 add_executable(${PROJECT_NAME} main.cpp testC.cpp  test_i.cpp  testS.cpp svr/svrWorker.cpp svr/svrAppl.cpp shader_s.cpp svr/svrCubeWorld.cpp svr/svrServer.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
@@ -50,14 +52,15 @@ message(STATUS "Found GLFW3 in ${GLFW3_INCLUDE_DIR}")
 include_directories(${ACE_ROOT})
 include_directories(${TAO_ROOT})
 include_directories(${LIBJPEG_ROOT})
+include_directories(${OPENH264_ROOT})
 
-target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 add_executable(
   client
   client.cpp testC.cpp shader_s.cpp
   )
-target_link_libraries(client OpenGL::GL glfw glm "${libturbojpeg}" "${TAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(client OpenGL::GL glfw glm "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 enable_testing()
 

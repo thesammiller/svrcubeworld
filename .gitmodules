@@ -7,3 +7,6 @@
 [submodule "extern/libjpeg-turbo"]
 	path = extern/libjpeg-turbo
 	url = https://github.com/libjpeg-turbo/libjpeg-turbo
+[submodule "extern/openh264"]
+	path = extern/openh264
+	url = https://github.com/cisco/openh264.git
