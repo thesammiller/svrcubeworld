@@ -88,7 +88,7 @@ void svrAppl::createImage() {
         std::cout << "TJ ERROR!" << std::endl;
     }
     //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 92;
+    const int JPEG_QUALITY = 100;
     const int COLOR_COMPONENTS = 3;
     int _width = m_width; //convert to signed integer
     int _height = m_height; 
@@ -153,11 +153,11 @@ void svrAppl::createImage() {
     pic.pData[2] = pic.pData[1] + (width * height >> 2);
    
     rv = encoder_->EncodeFrame (&pic, &info);
-    sleep(1);
+    //sleep(1);
     std::cout << "LAYER NUMBER \t" << info.iLayerNum << std::endl;
-    sleep(1);
+    //sleep(1);
     assert (rv == cmResultSuccess);
-    FILE* file = fopen("test.264", "wb");
+    
 
     if (info.eFrameType != videoFrameTypeSkip) {
         //output bitstream handling --> it's not more than that
@@ -179,12 +179,13 @@ void svrAppl::createImage() {
                 std::cout << "LAYER SIZE \t" << jpegSize << std::endl;
                 //it's writing data but i don't know what exactly the data is... 
                 //This layers concept might be something to read about
-                
-                fwrite(pixels, jpegSize, 1, file);   
+                FILE* file = fopen("test.264", "a+");
+                fwrite(pixels, jpegSize, 1, file);
+                fclose(file);   
             }
     }
 
-    fclose(file);
+    
 
 
 
@@ -414,6 +415,8 @@ void svrAppl::render() {
     //Create the image to send before we swap the buffers
     //This improves performance in reading the pixels with the off-screen buffer
     //****************************************************************************
+
+    //TODO: This should be spun off as its own thread... 
     createImage();
 
     //TODO: CREATE HEADLESS OPENGL MODE
