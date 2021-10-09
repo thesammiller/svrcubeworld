@@ -75,11 +75,7 @@ void svrAppl::createImage() {
     //Read pixels from the GL Draw
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
 
-    ISVCEncoder*  encoder_;
-    int rv = WelsCreateSVCEncoder (&encoder_);
-    assert (rv == 0);
-    assert (encoder_ != NULL);
-
+  
     unsigned char *jpeg_pixels;
 
     int width = 800;
@@ -92,7 +88,7 @@ void svrAppl::createImage() {
         std::cout << "TJ ERROR!" << std::endl;
     }
     //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 25;
+    const int JPEG_QUALITY = 92;
     const int COLOR_COMPONENTS = 3;
     int _width = m_width; //convert to signed integer
     int _height = m_height; 
@@ -117,6 +113,15 @@ void svrAppl::createImage() {
 
     tjDestroy(handle);
 
+    //An encoder with a basic parameter
+
+    //step 1: setup encoder
+    ISVCEncoder*  encoder_;
+    int rv = WelsCreateSVCEncoder (&encoder_);
+    assert (rv == 0);
+    assert (encoder_ != NULL);
+
+    //step 2: initialiaze with basic parameter
     SEncParamBase param;
     memset (&param, 0, sizeof (SEncParamBase));
     param.iUsageType = CAMERA_VIDEO_REAL_TIME; //from EUsageType enum
@@ -126,11 +131,13 @@ void svrAppl::createImage() {
     param.iTargetBitrate = 5000000;
     encoder_->Initialize (&param);
 
+    //step 3: set option, during encoding process
     static int     g_LevelSetting = WELS_LOG_ERROR;
     encoder_->SetOption (ENCODER_OPTION_TRACE_LEVEL, &g_LevelSetting);
     int videoFormat = videoFormatRGB;
     encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
 
+    //step 4: encode and store output bitstream
     int frameSize = width * height * 3 / 2;
     SFrameBSInfo info;
     memset (&info, 0, sizeof (SFrameBSInfo));
@@ -146,13 +153,14 @@ void svrAppl::createImage() {
     pic.pData[2] = pic.pData[1] + (width * height >> 2);
    
     rv = encoder_->EncodeFrame (&pic, &info);
-    sleep(2);
+    sleep(1);
     std::cout << info.iLayerNum << std::endl;
-    sleep(2);
+    sleep(1);
     assert (rv == cmResultSuccess);
     FILE* file = fopen("test.264", "wb");
 
     if (info.eFrameType != videoFrameTypeSkip) {
+        //output bitstream handling --> it's not more than that
 
         for (int iLayer=0; iLayer < info.iLayerNum; iLayer++)
             {
@@ -169,12 +177,11 @@ void svrAppl::createImage() {
                 memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
                 jpegSize = iLayerSize;
                 std::cout << jpegSize << std::endl;
-
+                //it's writing data but i don't know what exactly the data is... 
+                //This layers concept might be something to read about
                 
-                fwrite(pixels, jpegSize, 1, file);
-                
+                fwrite(pixels, jpegSize, 1, file);   
             }
-    
     }
 
     fclose(file);
