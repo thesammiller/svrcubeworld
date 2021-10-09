@@ -5,10 +5,10 @@
 #include "extern/libjpeg-turbo/turbojpeg.h"
 #include "extern/openh264/codec/api/svc/codec_api.h"
 
-#include "extern/opencv/modules/core/include/opencv2/core.hpp"
-#include "extern/opencv/modules/core/include/opencv2/imgcodecs.hpp"
-#include "extern/opencv/modules/core/include/opencv2/highgui.hpp"
-#include "extern/opencv/modules/core/include/opencv2/imgproc.hpp"
+#include <opencv2/core.hpp>
+//#include "extern/opencv/modules/core/include/opencv2/imgcodecs.hpp"
+//#include "extern/opencv/modules/core/include/opencv2/highgui.hpp"
+//#include "extern/opencv/modules/core/include/opencv2/imgproc.hpp"
 
 //Square (two triangles) for framebuffer to hold texture
 float quadVertices[] = {

@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O1")
 
+
 set(ACE_ROOT "extern/ACE_wrappers/build/default")
 set(TAO_ROOT "${ACE_ROOT}/TAO")
 
@@ -58,41 +59,8 @@ include_directories(${TAO_ROOT})
 include_directories(${LIBJPEG_ROOT})
 include_directories(${OPENH264_ROOT})
 include_directories(${OPENCV_ROOT})
+include_directories(extern/opencv/modules/core/include/)
 
-target_include_directories(${PROJECT_NAME} PUBLIC 
-    extern/opencv/modules/calib3d/include
-    extern/opencv/modules/core/include
-    extern/opencv/modules/cudaarithm/include
-    extern/opencv/modules/cudabgsegm/include
-    extern/opencv/modules/cudacodec/include
-    extern/opencv/modules/cudafeatures2d/include
-    extern/opencv/modules/cudafilters/include
-    extern/opencv/modules/cudaimgproc/include
-    extern/opencv/modules/cudalegacy/include
-    extern/opencv/modules/cudaobjdetect/include
-    extern/opencv/modules/cudaoptflow/include
-    extern/opencv/modules/cudastereo/include
-    extern/opencv/modules/cudawarping/include
-    extern/opencv/modules/cudev/include
-    extern/opencv/modules/dnn/include
-    extern/opencv/modules/features2d/include
-    extern/opencv/modules/flann/include
-    extern/opencv/modules/highgui/include
-    extern/opencv/modules/imgcodecs/include
-    extern/opencv/modules/imgproc/include
-    extern/opencv/modules/ml/include
-    extern/opencv/modules/objdetect/include
-    extern/opencv/modules/photo/include
-    extern/opencv/modules/shape/include
-    extern/opencv/modules/stitching/include
-    extern/opencv/modules/superres/include
-    extern/opencv/modules/ts/include
-    extern/opencv/modules/video/include
-    extern/opencv/modules/videoio/include
-    extern/opencv/modules/videostab/include
-    extern/opencv/modules/viz/include
-    extern/opencv/modules/world/include
-)
 
 target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
