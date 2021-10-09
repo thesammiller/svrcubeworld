@@ -111,12 +111,16 @@ void svrAppl::createImage() {
 
     jpegSize = _jpegSize;
 
+    FILE* jpeg_file = fopen("jpeg.jpg", "wb");
+    fwrite(jpeg_pixels, _jpegSize, 1, jpeg_file);
+    fclose(jpeg_file);
+
     tjDestroy(handle);
 
     SEncParamBase param;
     memset (&param, 0, sizeof (SEncParamBase));
     param.iUsageType = CAMERA_VIDEO_REAL_TIME; //from EUsageType enum
-    param.fMaxFrameRate = 90.0f;
+    param.fMaxFrameRate = 60.0f;
     param.iPicWidth = width;
     param.iPicHeight = height;
     param.iTargetBitrate = 5000000;
@@ -142,7 +146,12 @@ void svrAppl::createImage() {
     pic.pData[2] = pic.pData[1] + (width * height >> 2);
    
     rv = encoder_->EncodeFrame (&pic, &info);
+    sleep(2);
+    std::cout << info.iLayerNum << std::endl;
+    sleep(2);
     assert (rv == cmResultSuccess);
+    FILE* file = fopen("test.264", "wb");
+
     if (info.eFrameType != videoFrameTypeSkip) {
 
         for (int iLayer=0; iLayer < info.iLayerNum; iLayer++)
@@ -156,20 +165,20 @@ void svrAppl::createImage() {
                     --iNalIdx;
                 } while (iNalIdx >= 0);
 
-                
-                pixels = pLayerBsInfo->pBsBuf;
+                pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
+                memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
                 jpegSize = iLayerSize;
+                std::cout << jpegSize << std::endl;
+
+                
+                fwrite(pixels, jpegSize, 1, file);
+                
             }
+    
     }
 
-    FILE* m_file = fopen("test.mp4", "wb");
-    
-    fwrite(pixels, jpegSize, 0, m_file);
-    if (m_file == NULL) {
-        std::cout << "null" << std::endl;
-    }
-    
-    fclose(m_file);
+    fclose(file);
+
 
 
 
@@ -178,6 +187,7 @@ void svrAppl::createImage() {
     //tjFree(pixels);
 
     delete(srcBuf);
+
 }
 
 

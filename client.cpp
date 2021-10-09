@@ -295,11 +295,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "s_texture_u");
       _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "s_texture_v");
 
-      for (int i = 0; i < 3; ++i) {  
-          glActiveTexture(GL_TEXTURE0 + i);  
-          glBindTexture(GL_TEXTURE_2D, _textures[i]);  
-          glUniform1i(_uniformSamplers[i], i);  
-      }  
+     
 
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
@@ -313,11 +309,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glBindVertexArray(quadVAO);
 
       
-      glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
-      glEnableVertexAttribArray(ATTRIBUTE_VERTEX);  
-      glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);  
-      glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
-      glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);  
+      //glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
+      //glEnableVertexAttribArray(ATTRIBUTE_VERTEX);  
+      //glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);  
+      //glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
+      //glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer); 
+
+        for (int i = 0; i < 3; ++i) {  
+          glActiveTexture(GL_TEXTURE0 + i);  
+          glBindTexture(GL_TEXTURE_2D, _textures[i]);  
+          glUniform1i(_uniformSamplers[i], i);  
+      }  
       
 
       //CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
