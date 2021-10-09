@@ -172,7 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     glfwMakeContextCurrent(window);
 
-        Shader renderBufferShader("shaders/renderBuffer.vs", "shaders/renderBuffer.fs");
+        Shader renderBufferShader("shaders/renderBuffer.vs", "shaders/yuvShader.fs");
 
       float quadVertices[] = {
         // positions  //texcoords
@@ -276,7 +276,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         int rv = WelsCreateDecoder(&pSvcDecoder);
         assert (rv == 0);
         ISVCDecoder* decoder_;
-        assert (decoder_ != NULL);
+        //assert (decoder_ != NULL);
 
 
         SDecodingParam sDecParam = {0};
@@ -318,21 +318,23 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         int width = 800;
         int height = 600;
+        
+        /*
         int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-        int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+                int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
         
         std::cout << stride0 << std::endl;
 
 
         cv::Mat imageYuvCh[3] {
            cv::Mat(width, height, CV_8UC1, pData[0]), 
-          cv::Mat(width, height, CV_8UC1, pData[1]), 
-          cv::Mat(width, height, CV_8UC1, pData[2])
+          cv::Mat(width/2, height/2, CV_8UC1, pData[1]), 
+          cv::Mat(width/2, height/2, CV_8UC1, pData[2])
         };
         cv::Mat imageYuvMiniCh[3] = {
           cv::Mat(width, height, CV_8UC1, pData[0]), 
-          cv::Mat(width, height, CV_8UC1, pData[1]), 
-          cv::Mat(width, height, CV_8UC1, pData[2])
+          cv::Mat(width/2, height/2, CV_8UC1, pData[1]), 
+          cv::Mat(width/2, height/2, CV_8UC1, pData[2])
         };
 
         
@@ -376,14 +378,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         cv::imwrite("file.tga", image);
 
-        
-
-      
-      
+        */
 
 
       //https://stackoverflow.com/questions/16809833/opencv-image-loading-for-opengl-texture
-      /*
+      
       unsigned int textureTrash;
       glGenTextures(1, &textureTrash);
       glBindTexture(GL_TEXTURE_2D, textureTrash);
@@ -399,21 +398,30 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glTexImage2D(GL_TEXTURE_2D,     // Type of texture
                      0,                 // Pyramid level (for mip-mapping) - 0 is the top level
                      GL_RGB,            // Internal colour format to convert to
-                     image.cols(),          // Image width  i.e. 640 for Kinect in standard mode
-                     image.rows(),          // Image height i.e. 480 for Kinect in standard mode
+                     width,          // Image width  i.e. 640 for Kinect in standard mode
+                     height,          // Image height i.e. 480 for Kinect in standard mode
                      0,                 // Border width in pixels (can either be 1 or 0)
                      GL_BGR, // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)
                      GL_UNSIGNED_BYTE,  // Image data type
-                     image.getObj());        // The actual image data itself
+                     pData[0]);        // The actual image data itself
 
       glGenerateMipmap(GL_TEXTURE_2D);
-      */
+
+      glTexImage2D(GL_LUMINANCE12, 
+      0,
+      GL_RGB,
+      width/2,
+      height/2,
+      0,
+      GL_BGR,
+      GL_UNSIGNED_BYTE,
+      pData[1]);
+      
 
 
-      /*
+      
       unsigned int _textures[3];
-      int width = 800;
-      int height = 600;
+
 
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  
       glGenTextures(3, _textures);  
@@ -434,33 +442,28 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       static const GLfloat texCoords[] = { 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };  
       static const GLfloat vertices[]= {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
 
-      
-     
 
-      glClearColor(0.0f, 0.0f, 0.0f, 1.0f);  
-      glClear(GL_COLOR_BUFFER_BIT);  
       renderBufferShader.use();
 
-      /*
+      
 
        GLint _uniformSamplers[3];
         _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "s_texture_y");
       _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "s_texture_u");
       _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "s_texture_v");
 
-      */
+      
      
 
       //Select the GL Shader for Framebuffer
-      renderBufferShader.use();
-      // Default framebuffer
+  
       //glBindFramebuffer(GL_FRAMEBUFFER, 0);
       //glDisable(GL_DEPTH_TEST);
       //Clear screen (to white)
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
       //Bind the Framebuffer Quad Vertex
-      //glBindVertexArray(quadVAO);
+      glBindVertexArray(quadVAO);
 
       
       //glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
@@ -469,21 +472,21 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
       //glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer); 
 
-      /*
+      
         for (int i = 0; i < 3; ++i) {  
           glActiveTexture(GL_TEXTURE0 + i);  
           glBindTexture(GL_TEXTURE_2D, _textures[i]);  
           glUniform1i(_uniformSamplers[i], i);  
       }  
-      */
+      
       
 
       //CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
 
       //OPENGL TEXTURE LOAD AND DRAW
       //pixelTexture = loadTexture(uncompressedBuffer);
-      //glBindTexture(GL_TEXTURE_2D, textureTrash); 
-      //glDrawArrays(GL_TRIANGLES, 0, 6);
+      glBindTexture(GL_TEXTURE_2D, textureTrash); 
+      glDrawArrays(GL_TRIANGLES, 0, 6);
       
       
       //PSwap framebuffer to front buffer
