@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
         //NOTE: Using sleep is not optimal
         //Will be about 25-30 FPS at this rate
         //Anything more adds artifacts/glitches to the client
-        usleep(34666);
+        
 
     }
 
