@@ -2,3 +2,6 @@
 out/build/
 extern/ACE_wrappers/
 *.ior
+extern/libjpeg-turbo
+extern/opencv
+exter/openh264
