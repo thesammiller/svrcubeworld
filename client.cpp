@@ -307,7 +307,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
           }
-          sleep(1);
+        
         
          //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
          //no-delay decoding can also be realized by directly calling DecodeFrame2() again with NULL input, as in the following. In this case, decoder would immediately reconstruct the input data. This can also be used similarly for Parsing only. Consequent decoding error and output indication should also be considered as above.
@@ -407,17 +407,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       glGenerateMipmap(GL_TEXTURE_2D);
 
-      glTexImage2D(GL_LUMINANCE12, 
-      0,
-      GL_RGB,
-      width/2,
-      height/2,
-      0,
-      GL_BGR,
-      GL_UNSIGNED_BYTE,
-      pData[1]);
-      
-
 
       
       unsigned int _textures[3];
@@ -448,7 +437,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
 
        GLint _uniformSamplers[3];
-        _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "s_texture_y");
+      _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "s_texture_y");
       _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "s_texture_u");
       _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "s_texture_v");
 
@@ -477,6 +466,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           glActiveTexture(GL_TEXTURE0 + i);  
           glBindTexture(GL_TEXTURE_2D, _textures[i]);  
           glUniform1i(_uniformSamplers[i], i);  
+          glDrawArrays(GL_TRIANGLES, 0, 6);
+          
       }  
       
       
@@ -485,8 +476,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       //OPENGL TEXTURE LOAD AND DRAW
       //pixelTexture = loadTexture(uncompressedBuffer);
-      glBindTexture(GL_TEXTURE_2D, textureTrash); 
-      glDrawArrays(GL_TRIANGLES, 0, 6);
+      //glBindTexture(GL_TEXTURE_2D, textureTrash); 
+      
       
       
       //PSwap framebuffer to front buffer
