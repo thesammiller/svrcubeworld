@@ -75,7 +75,6 @@ void svrAppl::createImage() {
     //Read pixels from the GL Draw
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
 
-
     ISVCEncoder*  encoder_;
     int rv = WelsCreateSVCEncoder (&encoder_);
     assert (rv == 0);
@@ -113,7 +112,6 @@ void svrAppl::createImage() {
     jpegSize = _jpegSize;
 
     tjDestroy(handle);
-    
 
     SEncParamBase param;
     memset (&param, 0, sizeof (SEncParamBase));
@@ -146,23 +144,34 @@ void svrAppl::createImage() {
     rv = encoder_->EncodeFrame (&pic, &info);
     assert (rv == cmResultSuccess);
     if (info.eFrameType != videoFrameTypeSkip) {
-        SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[0];
 
-        int iLayerSize = 0;
-        int iNalIdx = pLayerBsInfo->iNalCount - 1;
-        do {
-            iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
-            --iNalIdx;
-        } while (iNalIdx >= 0);
+        for (int iLayer=0; iLayer < info.iLayerNum; iLayer++)
+            {
+                SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[iLayer];
 
-        pixels = pLayerBsInfo->pBsBuf;
-        jpegSize = iLayerSize;
+                int iLayerSize = 0;
+                int iNalIdx = pLayerBsInfo->iNalCount - 1;
+                do {
+                    iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
+                    --iNalIdx;
+                } while (iNalIdx >= 0);
+
+                
+                pixels = pLayerBsInfo->pBsBuf;
+                jpegSize = iLayerSize;
+            }
     }
 
-
+    FILE* m_file = fopen("test.mp4", "wb");
     
-
+    fwrite(pixels, jpegSize, 0, m_file);
+    if (m_file == NULL) {
+        std::cout << "null" << std::endl;
+    }
     
+    fclose(m_file);
+
+
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:

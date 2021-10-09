@@ -312,13 +312,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
 
-      /*
-      glVertexAttribPointer(ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
+      
+      glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
       glEnableVertexAttribArray(ATTRIBUTE_VERTEX);  
       glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);  
       glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
       glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);  
-      */
+      
 
       //CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
 
