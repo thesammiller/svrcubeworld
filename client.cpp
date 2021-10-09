@@ -81,9 +81,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 //https://stackoverflow.com/questions/57212966/how-to-convert-openh264-decodeframenodelay-output-format-to-opencv-matrix
-void copyWithStride(
-        void* dst, const void* src,
-        size_t width, size_t height, size_t stride
+void copyWithStride(void* dst, const void* src, size_t width, size_t height, size_t stride
 ) {
     for (size_t row = 0; row < height; ++row) {
         uint8_t* posFrom = (uint8_t*)src + row * stride;
@@ -261,7 +259,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
 
         
-        memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
+        //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
         WelsCreateDecoder(&pSvcDecoder);
 
@@ -287,8 +285,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         int width = 800;
         int height = 600;
-         int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-        int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+        int stride0 = 800;
+        std::cout << stride0 << std::endl;
+        
+        int stride1 = 800;
         
         cv::Mat imageYuvCh[3];
         cv::Mat imageYuvMiniCh[3];
@@ -297,6 +297,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
         copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
         
+        //imageYuvCh[0].data = pData[0];
+        //imageYuvMiniCh[1].data = pData[1];
+        //imageYuvMiniCh[2].data = pData[2];
+
         cv::resize(imageYuvMiniCh[1], imageYuvCh[1], cv::Size(width, height));
         cv::resize(imageYuvMiniCh[2], imageYuvCh[2], cv::Size(width, height));
         
@@ -307,6 +311,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         
         cv::Mat result;
         cvtColor(image, result, cv::COLOR_YUV2BGR);
+
+        cv::imwrite("file.tga", image);
+
+
       
       std::cout << "CLIENT FRAME " << ++frame << std::endl;
 

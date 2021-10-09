@@ -173,6 +173,12 @@ void svrAppl::createImage() {
     pic.pData[0] = imageYuvCh[0].data;
     pic.pData[1] = imageYuvMiniCh[1].data;
     pic.pData[2] = imageYuvMiniCh[2].data;
+
+    std::cout << "iStride[0]\t" << imageYuvCh[0].step << "\t";
+    std::cout << "iStride[1]\t" << imageYuvCh[1].step << "\t";
+    std::cout << "iStride[2]\t" << imageYuvCh[2].step << "\t";
+
+
    
     rv = encoder_->EncodeFrame (&pic, &info);
     //sbuf(1);
