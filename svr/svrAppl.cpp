@@ -81,10 +81,39 @@ void svrAppl::createImage() {
     assert (rv == 0);
     assert (encoder_ != NULL);
 
-
+    unsigned char *jpeg_pixels;
 
     int width = 800;
     int height = 600;
+
+    //COMPRESSION -- TURBO JPEG
+    tjhandle handle = tjInitCompress();
+    if (handle == NULL)
+    {
+        std::cout << "TJ ERROR!" << std::endl;
+    }
+    //TURBO JPEG VALUES
+    const int JPEG_QUALITY = 25;
+    const int COLOR_COMPONENTS = 3;
+    int _width = m_width; //convert to signed integer
+    int _height = m_height; 
+    long unsigned int _jpegSize = 0;
+    pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
+    int pitch = _width * COLOR_COMPONENTS;
+    int pixelFormat = TJPF_RGB;
+    int jpegSubsamp = TJSAMP_420;
+    int flags = TJFLAG_FASTDCT;
+
+    //Compress Image
+    //pixels is a class property field
+    tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
+            &jpeg_pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
+            flags);
+
+    jpegSize = _jpegSize;
+
+    tjDestroy(handle);
+    
 
     SEncParamBase param;
     memset (&param, 0, sizeof (SEncParamBase));
@@ -107,10 +136,10 @@ void svrAppl::createImage() {
     memset (&pic, 0, sizeof (SSourcePicture));
     pic.iPicWidth = width;
     pic.iPicHeight = height;
-    pic.iColorFormat = videoFormatRGB;
+    pic.iColorFormat = videoFormatI420;
     pic.iStride[0] = pic.iPicWidth;
     pic.iStride[1] = pic.iStride[2] = pic.iPicWidth >> 1;
-    pic.pData[0] = srcBuf;
+    pic.pData[0] = jpeg_pixels;
     pic.pData[1] = pic.pData[0] + width * height;
     pic.pData[2] = pic.pData[1] + (width * height >> 2);
    
@@ -131,36 +160,9 @@ void svrAppl::createImage() {
     }
 
 
-    /*
+    
 
-    //COMPRESSION -- TURBO JPEG
-    tjhandle handle = tjInitCompress();
-    if (handle == NULL)
-    {
-        std::cout << "TJ ERROR!" << std::endl;
-    }
-    //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 25;
-    const int COLOR_COMPONENTS = 3;
-    int _width = m_width; //convert to signed integer
-    int _height = m_height; 
-    long unsigned int _jpegSize = 0;
-    pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
-    int pitch = _width * COLOR_COMPONENTS;
-    int pixelFormat = TJPF_RGB;
-    int jpegSubsamp = TJSAMP_444;
-    int flags = TJFLAG_FASTDCT;
-
-    //Compress Image
-    //pixels is a class property field
-    tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
-            &pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
-            flags);
-
-    jpegSize = _jpegSize;
-
-    tjDestroy(handle);
-    */
+    
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:
