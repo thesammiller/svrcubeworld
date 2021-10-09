@@ -195,6 +195,7 @@ void svrAppl::createImage() {
     assert (rv == cmResultSuccess);
     
 
+
     if (info.eFrameType != videoFrameTypeSkip) {
         //output bitstream handling --> it's not more than that
 
@@ -216,6 +217,7 @@ void svrAppl::createImage() {
                 //it's writing data but i don't know what exactly the data is... 
                 //This layers concept might be something to read about
                 FILE* file = fopen("test.264", "a+");
+                //This saves a movie file!!!
                 fwrite(pixels, jpegSize, 1, file);
                 fclose(file);   
             }
