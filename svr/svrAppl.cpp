@@ -241,10 +241,10 @@ void svrAppl::createImage() {
         jpegSize = iLayerSize;
         memcpy(pixels, pLayerBsInfo->pBsBuf, jpegSize);
 
-        FILE *f = fopen("svrout.264", "a+");
-        fwrite(header, headerSize, 1, f);
-        fwrite(pixels, jpegSize, 1, f);
-        fclose(f);
+        //FILE *f = fopen("svrout.264", "a+");
+        //fwrite(header, headerSize, 1, f);
+        //fwrite(pixels, jpegSize, 1, f);
+        //fclose(f);
 
         
 

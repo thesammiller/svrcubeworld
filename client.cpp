@@ -247,36 +247,29 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         Simple_Server::pixels* pixelBuff = server->sendImageData();
         unsigned char *pBuf = (*pixelBuff).get_buffer(true);
 
-        FILE* vout = fopen("client_in.264", "a+");
-        fwrite(hBuf, _headerSize, 1, vout);
-        fwrite(pBuf, _pixelSize, 1, vout);
-        fclose(vout);
+        //FILE* vout = fopen("client_in.264", "a+");
+        //fwrite(hBuf, _headerSize, 1, vout);
+        //fwrite(pBuf, _pixelSize, 1, vout);
+        //fclose(vout);
 
-        float timeDiff = glfwGetTime() - dataTime;
-       std::cout << "DATA TIME \t" << timeDiff << std::endl;
+       //float timeDiff = glfwGetTime() - dataTime;
+       //std::cout << "DATA TIME \t" << timeDiff << std::endl;
         
 
-        //FILE* file = fopen("test2.264", "a+");
-        //fwrite(hBuf, _headerSize, 1, file);
-        //fwrite(pBuf, _pixelSize, 1, file);
-        //fclose(file);   
         //input: encoded bit stream length; should include the size of start code prefix
-        
-        
-        /*
         int iSize  = _pixelSize;
         //output: [0~2] for Y,U,V buffer for Decoding only
         unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
         //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
         SBufferInfo sDstBufInfo;
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
-        */
+        
 
         
         //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
 
-        /*
+        
         int rv = WelsCreateDecoder(&pSvcDecoder);
         assert (rv == 0);
         ISVCDecoder* decoder_;
@@ -289,20 +282,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
         pSvcDecoder->Initialize(&sDecParam);
 
-        */
+        
 
         //WE"RE FAILING HERE
         //I NEED TO READ UP ON THIS PART OF THE API
-        //DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(pBuf, iSize, pData, &sDstBufInfo);
+        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(pBuf, iSize, pData, &sDstBufInfo);
 
 
 
-        /*
+        
         if (iRet != 0) {
           std::cout << iRet << std::endl;
           return -1;
         }
-        */
+        
 
         
 
