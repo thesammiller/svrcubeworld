@@ -327,13 +327,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         cv::Mat imageYuvMiniCh[3];
 
         
-        copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
-        copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
-        copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
+        //copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
+        //copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
+        //copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
         
-        //imageYuvCh[0].data = pData[0];
-        //imageYuvMiniCh[1].data = pData[1];
-        //imageYuvMiniCh[2].data = pData[2];
+        imageYuvCh[0].data = pData[0];
+        imageYuvMiniCh[1].data = pData[1];
+        imageYuvMiniCh[2].data = pData[2];
 
         cv::resize(imageYuvMiniCh[1], imageYuvCh[1], cv::Size(width, height));
         cv::resize(imageYuvMiniCh[2], imageYuvCh[2], cv::Size(width, height));
