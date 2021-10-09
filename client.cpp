@@ -239,6 +239,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         Simple_Server::pixels* taoBuff = server->sendImageData();
 
         Simple_Server::header* headerBuff = server->sendHeaderData();
+        std::cout<< _headerSize << std::endl;
 
         unsigned char *pBuf = (*taoBuff).get_buffer(true);
         unsigned char *hBuf = (*headerBuff).get_buffer(true);

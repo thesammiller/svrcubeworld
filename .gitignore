@@ -1,5 +1,8 @@
 *~
 out/build/
 extern/ACE_wrappers/
+
+
 *.ior
 *.264
+*.jpg
