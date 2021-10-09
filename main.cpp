@@ -95,6 +95,8 @@ int main(int argc, char* argv[])
         //TODO: Are the classes in an appropriate relationship?
         myServer.setJpegSize(myAppl.jpegSize);
         myServer.setImage(myAppl.pixels);
+        myServer.setHeader(myAppl.header);
+        myServer.setHeaderSize(myAppl.headerSize);
 
         // Calculate Frame Rate
         // -------------------

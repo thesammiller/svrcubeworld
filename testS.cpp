@@ -26,8 +26,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:635
 
-#ifndef _TAO_IDL_TESTS_L7UCJN_CPP_
-#define _TAO_IDL_TESTS_L7UCJN_CPP_
+#ifndef _TAO_IDL_TESTS_I9R8JL_CPP_
+#define _TAO_IDL_TESTS_I9R8JL_CPP_
 
 
 #include "testS.h"
@@ -70,19 +70,19 @@ TAO_Simple_Server_Perfect_Hash_OpTable::hash (const char *str, unsigned int len)
 {
   static const unsigned char asso_values[] =
     {
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21,  0, 21,  0, 21, 21,
-      0,  6, 21, 21, 21, 21, 21, 21, 21, 21,
-     21, 21, 21, 21, 21,  0,  7, 21, 21, 21,
-     21, 21, 21, 21, 21, 21, 21, 21,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25,  0, 25,  0, 25, 25,
+     10,  5, 25, 25, 25, 25, 25, 25, 25, 25,
+     25, 25, 25, 25, 25,  0, 10, 25, 25, 25,
+     25, 25, 25, 25, 25, 25, 25, 25,
     };
   return len + asso_values[static_cast<int>(str[len - 1])] + asso_values[static_cast<int>(str[0])];
 }
@@ -92,14 +92,14 @@ TAO_Simple_Server_Perfect_Hash_OpTable::lookup (const char *str, unsigned int le
 {
   enum
     {
-      TOTAL_KEYWORDS = 8,
+      TOTAL_KEYWORDS = 10,
       MIN_WORD_LENGTH = 5,
       MAX_WORD_LENGTH = 14,
       MIN_HASH_VALUE = 5,
-      MAX_HASH_VALUE = 20,
-      HASH_VALUE_RANGE = 16,
+      MAX_HASH_VALUE = 24,
+      HASH_VALUE_RANGE = 20,
       DUPLICATES = 0,
-      WORDLIST_SIZE = 13
+      WORDLIST_SIZE = 15
     };
 
   static const TAO_operation_db_entry wordlist[] =
@@ -110,13 +110,16 @@ TAO_Simple_Server_Perfect_Hash_OpTable::lookup (const char *str, unsigned int le
       {"send_data", std::addressof(POA_Simple_Server::send_data_skel), nullptr},
       {"",0,0},{"",0,0},{"",0,0},
       {"sendImageData", std::addressof(POA_Simple_Server::sendImageData_skel), nullptr},
-      {"_repository_id", std::addressof(TAO_ServantBase::_repository_id_thru_poa_skel), nullptr},
-      {"",0,0},
+      {"sendHeaderData", std::addressof(POA_Simple_Server::sendHeaderData_skel), nullptr},
       {"_interface", std::addressof(TAO_ServantBase::_interface_skel), nullptr},
-      {"_component", std::addressof(TAO_ServantBase::_component_thru_poa_skel), nullptr},
+      {"",0,0},
       {"sendJpegSize", std::addressof(POA_Simple_Server::sendJpegSize_skel), nullptr},
       {"",0,0},
+      {"sendHeaderSize", std::addressof(POA_Simple_Server::sendHeaderSize_skel), nullptr},
+      {"_component", std::addressof(TAO_ServantBase::_component_thru_poa_skel), nullptr},
+      {"",0,0},{"",0,0},
       {"_non_existent", std::addressof(TAO_ServantBase::_non_existent_thru_poa_skel), nullptr},
+      {"_repository_id", std::addressof(TAO_ServantBase::_repository_id_thru_poa_skel), nullptr},
     };
 
   if (len <= MAX_WORD_LENGTH && len >= MIN_WORD_LENGTH)
@@ -323,6 +326,82 @@ void POA_Simple_Server::sendImageData_skel (
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/upcall_command_ss.cpp:80
 
+class sendHeaderData_Simple_Server
+  : public TAO::Upcall_Command
+{
+public:
+  inline sendHeaderData_Simple_Server (
+    POA_Simple_Server * servant,
+    TAO_Operation_Details const * operation_details,
+    TAO::Argument * const args[])
+    : servant_ (servant)
+      , operation_details_ (operation_details)
+      , args_ (args)
+  {
+  }
+
+  void execute () override
+  {
+    TAO::SArg_Traits< ::Simple_Server::header>::ret_arg_type retval =
+      TAO::Portable_Server::get_ret_arg< ::Simple_Server::header> (
+        this->operation_details_,
+        this->args_);
+    
+    retval =
+      this->servant_->sendHeaderData ();
+  }
+
+private:
+  POA_Simple_Server * const servant_;
+  TAO_Operation_Details const * const operation_details_;
+  TAO::Argument * const * const args_;
+};
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_ss.cpp:168
+
+void POA_Simple_Server::sendHeaderData_skel (
+  TAO_ServerRequest & server_request,
+  TAO::Portable_Server::Servant_Upcall *TAO_INTERCEPTOR (servant_upcall),
+  TAO_ServantBase *servant)
+{TAO::SArg_Traits< ::Simple_Server::header>::ret_val retval;
+
+  TAO::Argument * const args[] =
+    {
+      std::addressof(retval)
+    };
+  
+  POA_Simple_Server * const impl =
+    dynamic_cast<POA_Simple_Server *> (servant);
+
+  if (!impl)
+    {
+      throw ::CORBA::INTERNAL ();
+    }
+
+  sendHeaderData_Simple_Server command (
+    impl,
+    server_request.operation_details (),
+    args);
+  
+  TAO::Upcall_Wrapper upcall_wrapper;
+  upcall_wrapper.upcall (server_request
+                         , args
+                         , 1
+                         , command
+#if TAO_HAS_INTERCEPTORS == 1
+                         , servant_upcall
+                         , nullptr
+                         , 0
+#endif  /* TAO_HAS_INTERCEPTORS == 1 */
+                         );
+}
+
+
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/upcall_command_ss.cpp:80
+
 class sendJpegSize_Simple_Server
   : public TAO::Upcall_Command
 {
@@ -377,6 +456,82 @@ void POA_Simple_Server::sendJpegSize_skel (
     }
 
   sendJpegSize_Simple_Server command (
+    impl,
+    server_request.operation_details (),
+    args);
+  
+  TAO::Upcall_Wrapper upcall_wrapper;
+  upcall_wrapper.upcall (server_request
+                         , args
+                         , 1
+                         , command
+#if TAO_HAS_INTERCEPTORS == 1
+                         , servant_upcall
+                         , nullptr
+                         , 0
+#endif  /* TAO_HAS_INTERCEPTORS == 1 */
+                         );
+}
+
+
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/upcall_command_ss.cpp:80
+
+class sendHeaderSize_Simple_Server
+  : public TAO::Upcall_Command
+{
+public:
+  inline sendHeaderSize_Simple_Server (
+    POA_Simple_Server * servant,
+    TAO_Operation_Details const * operation_details,
+    TAO::Argument * const args[])
+    : servant_ (servant)
+      , operation_details_ (operation_details)
+      , args_ (args)
+  {
+  }
+
+  void execute () override
+  {
+    TAO::SArg_Traits< ::CORBA::Long>::ret_arg_type retval =
+      TAO::Portable_Server::get_ret_arg< ::CORBA::Long> (
+        this->operation_details_,
+        this->args_);
+    
+    retval =
+      this->servant_->sendHeaderSize ();
+  }
+
+private:
+  POA_Simple_Server * const servant_;
+  TAO_Operation_Details const * const operation_details_;
+  TAO::Argument * const * const args_;
+};
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_ss.cpp:168
+
+void POA_Simple_Server::sendHeaderSize_skel (
+  TAO_ServerRequest & server_request,
+  TAO::Portable_Server::Servant_Upcall *TAO_INTERCEPTOR (servant_upcall),
+  TAO_ServantBase *servant)
+{TAO::SArg_Traits< ::CORBA::Long>::ret_val retval;
+
+  TAO::Argument * const args[] =
+    {
+      std::addressof(retval)
+    };
+  
+  POA_Simple_Server * const impl =
+    dynamic_cast<POA_Simple_Server *> (servant);
+
+  if (!impl)
+    {
+      throw ::CORBA::INTERNAL ();
+    }
+
+  sendHeaderSize_Simple_Server command (
     impl,
     server_request.operation_details (),
     args);

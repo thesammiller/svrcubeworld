@@ -18,6 +18,8 @@ class svrServer {
         int parse_args(int argc, char *argv[]);
         void setImage(unsigned char *pixels);
         void setJpegSize(long unsigned int js);
+        void setHeader(unsigned char* header);
+        void setHeaderSize(long unsigned int hs);
         void wait();
 
         CORBA::ORB_var orb;
@@ -27,4 +29,5 @@ class svrServer {
         Simple_Server_i server_impl = NULL;
         
         long unsigned int jpegSize;
+        long unsigned int headerSize;
 };

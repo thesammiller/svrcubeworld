@@ -31,12 +31,17 @@ public:
   void send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose );
   void get_data(float *in_pose);
   Simple_Server::pixels* sendImageData();
+  Simple_Server::header* sendHeaderData();
   
   void setImageData(unsigned char* iData);
+  void setHeaderData(unsigned char* iData);
   
   void shutdown (void);
   CORBA::Long sendJpegSize();
+  CORBA::Long sendHeaderSize();
   void setJpegSize(long unsigned int js);
+  void setHeaderSize(long unsigned int hs);
+
 
 private:
   /// The ORB
@@ -45,6 +50,9 @@ private:
   //CORBA::Octet* oldData;
   bool dataSet = false;
   CORBA::Long jpegSize;
+
+  CORBA::Octet* headerData;
+  CORBA::Long headerSize;
   
 };
 

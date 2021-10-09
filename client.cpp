@@ -218,9 +218,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         //tjhandle handle = tjInitDecompress();
 
         //Get the size of the JPEG from the server
-        long unsigned int _jpegSize = server->sendJpegSize();      
+        
         //Allocate size for the buffer for TAO
-        Simple_Server::pixels* taoBuff = server->sendImageData();
+        
         //Get the TAO data handler     
         //Create the uncompressedBuffer for JPEG Decompression
         
@@ -233,9 +233,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           //decoder declaration
         ISVCDecoder *pSvcDecoder;
         //input: encoded bitstream start position; should include start code prefix
+        long unsigned int _jpegSize = server->sendJpegSize();      
+        long unsigned int _headerSize = server->sendHeaderSize();      
+        std::cout << _jpegSize << std::endl;
+        Simple_Server::pixels* taoBuff = server->sendImageData();
+
+        Simple_Server::header* headerBuff = server->sendHeaderData();
+
         unsigned char *pBuf = (*taoBuff).get_buffer(true);
+        unsigned char *hBuf = (*headerBuff).get_buffer(true);
+
         FILE* file = fopen("test2.264", "a+");
-                //This saves a movie file!!!
+        fwrite(headerBuff, _headerSize, 1, file);
         fwrite(pBuf, _jpegSize, 1, file);
         fclose(file);   
         //input: encoded bit stream length; should include the size of start code prefix
@@ -263,7 +272,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        
          //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
          //no-delay decoding can also be realized by directly calling DecodeFrame2() again with NULL input, as in the following. In this case, decoder would immediately reconstruct the input data. This can also be used similarly for Parsing only. Consequent decoding error and output indication should also be considered as above.
-         iRet = pSvcDecoder->DecodeFrame2(NULL, 0, pData, &sDstBufInfo);
+         //iRet = pSvcDecoder->DecodeFrame2(NULL, 0, pData, &sDstBufInfo);
       
       std::cout << "CLIENT FRAME " << ++frame << std::endl;
 
@@ -495,7 +504,7 @@ FrameWorker::run_test (void)
         //input: encoded bit stream length; should include the size of start code prefix
         int iSize  = _jpegSize;
         //output: [0~2] for Y,U,V buffer for Decoding only
-        unsigned char *pData[3]  {0, 0, 0};
+        unsigned char *pData[3] = {0, 0, 0};
         //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
         SBufferInfo sDstBufInfo;
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));

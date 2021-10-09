@@ -75,7 +75,10 @@ class svrAppl {
         int textureUnitIndex;
 
         unsigned char *pixels;
-
+         long unsigned int jpegSize;
+        unsigned char *header;
+         long unsigned int headerSize;
+        
 
         //World
         unsigned int vertexBuffer;
@@ -115,7 +118,7 @@ class svrAppl {
         float lastY;
         float fov;
 
-        long unsigned int jpegSize;
+       
 
 
 };

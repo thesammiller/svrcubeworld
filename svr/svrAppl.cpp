@@ -144,28 +144,13 @@ void svrAppl::createImage() {
     int videoFormat = videoFormatI420;
     encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
 
-    //step 4: encode and store output bitstream
-    /*
-    int frameSize = width * height * 3 / 2;
-    SFrameBSInfo info;
-    memset (&info, 0, sizeof (SFrameBSInfo));
-    SSourcePicture pic;
-    memset (&pic, 0, sizeof (SSourcePicture));
-    pic.iPicWidth = width;
-    pic.iPicHeight = height;
-    pic.iColorFormat = videoFormatI420;
-    pic.iStride[0] = pic.iPicWidth;
-    pic.iStride[1] = pic.iStride[2] = pic.iPicWidth >> 1;
-    pic.pData[0] = jpeg_pixels;
-    pic.pData[1] = pic.pData[0] + width * height;
-    pic.pData[2] = pic.pData[1] + (width * height >> 2);
-    */
-
+    //Step 3b: Preparing image data
+    //Preparing our data for OpenCV Material type
     cv::Mat rawData(1, jpegSize, CV_8UC1, (void*)jpeg_pixels);
-
     cv::Mat image = cv::imdecode(rawData, cv::IMREAD_COLOR);
-
     
+    //Using https://stackoverflow.com/questions/51287413/how-do-i-properly-use-the-openh264-usage-code-example-for-encoding
+    //Thanks to TimSC on StackOverflow
     cv::Mat imageResized, imageYuv, imageYuvMini; 
     resize(image, imageResized, cv::Size(width, height));
     cv::Mat imageYuvCh[3], imageYuvMiniCh[3];
@@ -174,6 +159,7 @@ void svrAppl::createImage() {
     resize(imageYuv, imageYuvMini, cv::Size(width/2, height/2));
     split(imageYuvMini, imageYuvMiniCh);
 
+    //step 4: encode and store output bitstream
     SFrameBSInfo info;
     memset (&info, 0, sizeof (SFrameBSInfo));
     SSourcePicture pic;
@@ -189,13 +175,11 @@ void svrAppl::createImage() {
     pic.pData[2] = imageYuvMiniCh[2].data;
    
     rv = encoder_->EncodeFrame (&pic, &info);
-    //sleep(1);
+    //sbuf(1);
     std::cout << "LAYER NUMBER \t" << info.iLayerNum << std::endl;
     //sleep(1);
     assert (rv == cmResultSuccess);
     
-
-
     if (info.eFrameType != videoFrameTypeSkip) {
         //output bitstream handling --> it's not more than that
 
@@ -210,14 +194,50 @@ void svrAppl::createImage() {
                     --iNalIdx;
                 } while (iNalIdx >= 0);
 
-                pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
-                memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
-                jpegSize = iLayerSize;
+                
                 std::cout << "LAYER SIZE \t" << jpegSize << std::endl;
                 //it's writing data but i don't know what exactly the data is... 
                 //This layers concept might be something to read about
+                //First layer is 28 - propeties
+                //Second layer is the image data
+                //The image data is getting passed
+                //But not the property data
+                //pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
+                //memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
+                //jpegSize = iLayerSize;
                 
             }
+        
+        //save the header information
+        SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[0];
+        int iLayerSize = 0;
+        int iNalIdx = pLayerBsInfo->iNalCount - 1;
+        do {
+            iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
+            --iNalIdx;
+        } while (iNalIdx >= 0);
+        header = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
+        headerSize = iLayerSize;
+
+        pLayerBsInfo = &info.sLayerInfo[1];
+        iLayerSize = 0;
+        iNalIdx = pLayerBsInfo->iNalCount - 1;
+        do {
+            iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
+            --iNalIdx;
+        } while (iNalIdx >= 0);
+        pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
+        jpegSize = iLayerSize;
+
+        
+
+
+
+
+        //save the pixels information
+
+
+
     }
 
 

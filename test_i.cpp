@@ -11,6 +11,9 @@
 static ACE_Thread_Mutex m_mutex;
 static ACE_Thread_Mutex m_mutex_pose;
 
+
+///IMAGE DATA
+
 Simple_Server::pixels* Simple_Server_i::sendImageData() {
   m_mutex.acquire();
   Simple_Server::pixels* value = 0;
@@ -24,11 +27,34 @@ Simple_Server::pixels* Simple_Server_i::sendImageData() {
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
   m_mutex.acquire();
-  free(this->imageData);
+  //free(this->imageData);
   this->imageData = (CORBA::Octet*) malloc (jpegSize);
   memcpy(this->imageData, iData, jpegSize); 
   m_mutex.release();
 }
+
+/// HEADER DATA
+
+Simple_Server::header* Simple_Server_i::sendHeaderData() {
+  m_mutex.acquire();
+  Simple_Server::header* value = 0;
+
+  ACE_NEW_THROW_EX(value, Simple_Server::header(headerSize, this->headerData), CORBA::NO_MEMORY());
+
+  //memcpy(value, this->imageData, jpegSize);
+  m_mutex.release();
+  return value;
+}
+
+void Simple_Server_i::setHeaderData(unsigned char* iData) {
+  m_mutex.acquire();
+  //free(this->headerData);
+  this->headerData = (CORBA::Octet*) malloc (headerSize);
+  memcpy(this->headerData, iData, headerSize); 
+  m_mutex.release();
+}
+
+///POSE DATA
 
 void
 Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose)
@@ -66,6 +92,15 @@ CORBA::Long Simple_Server_i::sendJpegSize() {
 
 void Simple_Server_i::setJpegSize(long unsigned int js) {
   jpegSize = js;
+}
+
+
+CORBA::Long Simple_Server_i::sendHeaderSize() {
+  return headerSize;
+}
+
+void Simple_Server_i::setHeaderSize(long unsigned int hs) {
+  headerSize = hs;
 }
 
 void

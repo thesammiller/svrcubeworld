@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:149
 
-#ifndef _TAO_IDL_TESTC_PN9W3R_H_
-#define _TAO_IDL_TESTC_PN9W3R_H_
+#ifndef _TAO_IDL_TESTC_SSCPRG_H_
+#define _TAO_IDL_TESTC_SSCPRG_H_
 
 
 #include /**/ "ace/config-all.h"
@@ -216,9 +216,58 @@ public:
 
   static ::CORBA::TypeCode_ptr const _tc_pixels;
 
+  // TAO_IDL - Generated from
+  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_sequence/sequence_ch.cpp:99
+
+#if !defined (_SIMPLE_SERVER_HEADER_CH_)
+#define _SIMPLE_SERVER_HEADER_CH_
+
+  class header;
+  typedef ::TAO_FixedSeq_Var_T<header> header_var;
+  typedef ::TAO_Seq_Out_T<header> header_out;
+  
+
+  class  header
+    : public
+        ::TAO::bounded_value_sequence< ::CORBA::Octet,100000>
+  {
+  public:
+    header ();
+    header (
+      ::CORBA::ULong length,
+      ::CORBA::Octet* buffer,
+      ::CORBA::Boolean release = false);
+    header (const header &) = default;
+    header (header &&) = default;
+    header& operator= (const header &) = default;
+    header& operator= (header &&) = default;
+    virtual ~header ();
+    
+
+    // TAO_IDL - Generated from
+    // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_type.cpp:299
+
+    
+    using _var_type = header_var;
+    using _out_type = header_out;
+
+    static void _tao_any_destructor (void *);
+  };
+
+#endif /* end #if !defined */
+
+  // TAO_IDL - Generated from
+  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_typecode/typecode_decl.cpp:34
+
+  static ::CORBA::TypeCode_ptr const _tc_header;
+
   virtual ::Simple_Server::pixels * sendImageData ();
 
+  virtual ::Simple_Server::header * sendHeaderData ();
+
   virtual ::CORBA::Long sendJpegSize ();
+
+  virtual ::CORBA::Long sendHeaderSize ();
 
   // TAO_IDL - Generated from
   // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_interface/interface_ch.cpp:137
@@ -308,6 +357,19 @@ namespace TAO
     : public
         Var_Size_Arg_Traits_T<
             ::Simple_Server::pixels,
+            TAO::Any_Insert_Policy_Stream
+          >
+  {
+  };
+
+  // TAO_IDL - Generated from
+  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_arg_traits.cpp:683
+
+  template<>
+  class Arg_Traits< ::Simple_Server::header>
+    : public
+        Var_Size_Arg_Traits_T<
+            ::Simple_Server::header,
             TAO::Any_Insert_Policy_Stream
           >
   {
@@ -404,6 +466,19 @@ TAO_END_VERSIONED_NAMESPACE_DECL
 
 
 // TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_sequence/any_op_ch.cpp:47
+
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+ void operator<<= ( ::CORBA::Any &, const Simple_Server::header &); // copying version
+ void operator<<= ( ::CORBA::Any &, Simple_Server::header*); // noncopying version
+ ::CORBA::Boolean operator>>= (const ::CORBA::Any &, const Simple_Server::header *&);
+TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+// TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_interface/cdr_op_ch.cpp:41
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -447,6 +522,27 @@ TAO_END_VERSIONED_NAMESPACE_DECL
 
 
 #endif /* _TAO_CDR_OP_Simple_Server_pixels_H_ */
+
+// TAO_IDL - Generated from
+// /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_sequence/cdr_op_ch.cpp:65
+
+#if !defined _TAO_CDR_OP_Simple_Server_header_H_
+#define _TAO_CDR_OP_Simple_Server_header_H_
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+
+ ::CORBA::Boolean operator<< (
+    TAO_OutputCDR &strm,
+    const Simple_Server::header &_tao_sequence);
+ ::CORBA::Boolean operator>> (
+    TAO_InputCDR &strm,
+    Simple_Server::header &_tao_sequence);
+
+TAO_END_VERSIONED_NAMESPACE_DECL
+
+
+
+#endif /* _TAO_CDR_OP_Simple_Server_header_H_ */
 
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:1685

@@ -95,6 +95,9 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 }
 
 
+
+//SET IMAGE DATA
+
 void svrServer::setImage(unsigned char *pixels) {
   unsigned char* p = (unsigned char*) malloc (jpegSize);
   memcpy(p, pixels, jpegSize);
@@ -106,4 +109,19 @@ void svrServer::setImage(unsigned char *pixels) {
 void svrServer::setJpegSize(unsigned long int js) {
     jpegSize = js;
     server_impl.setJpegSize(jpegSize);
+}
+
+//HEADER DATA
+
+void svrServer::setHeader(unsigned char *header) {
+  unsigned char* h = (unsigned char*) malloc (headerSize);
+  memcpy(h, header, headerSize);
+  server_impl.setHeaderData(h);
+  delete(h);
+
+}
+
+void svrServer::setHeaderSize(unsigned long int hs) {
+    headerSize = hs;
+    server_impl.setHeaderSize(headerSize);
 }
