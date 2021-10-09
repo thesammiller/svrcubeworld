@@ -7,11 +7,14 @@
 #include <iostream>
 #include <unistd.h>
 
+#define OVR_WIDTH 1024
+#define OVR_HEIGHT 1024
+
 static ACE_Thread_Mutex m_mutex;
 
 Simple_Server::pixels_slice* Simple_Server_i::sendImageData() {
   Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
-  memcpy(value, this->imageData, sizeof(unsigned char) * 1024 * 1024 *3);
+  memcpy(value, this->imageData, sizeof(unsigned char) * OVR_WIDTH * OVR_HEIGHT * 3);
   return value;
 }
 
@@ -27,7 +30,6 @@ Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::
   gettimeofday(&tv, NULL);
   long time_in_micros = 1000000 * tv.tv_sec + tv.tv_usec;
 
-  
   ACE_DEBUG ((LM_DEBUG, "%d\t%d\t\t%f %f %f %f\t%f %f %f\n",
 	      microsecond, time_in_micros,
 	      headpose[0], headpose[1], headpose[2], headpose[3],
@@ -35,8 +37,6 @@ Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::
   
   memcpy(data, headpose, sizeof(float) * 7);
 
-
-  
 }
 
 void

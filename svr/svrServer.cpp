@@ -95,9 +95,5 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 
 
 void svrServer::setImage(unsigned char *pixels) {
-  unsigned char* p = (unsigned char*) malloc (1024 * 1024 * 3);
-  memcpy(p, pixels, sizeof(unsigned char) * 1024 * 1024 * 3);
-  server_impl.setImageData(p);
-  delete(p);
-
+  server_impl.setImageData(pixels);
 }

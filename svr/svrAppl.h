@@ -17,6 +17,9 @@
 
 #include "shader_s.h"
 
+#define OVR_WIDTH 1024
+#define OVR_HEIGHT 1024
+
 
 // OVR VertexAttributes 
 struct VertexAttribs {
@@ -72,8 +75,7 @@ class svrAppl {
         unsigned int rbo;
         int textureUnitIndex;
 
-        unsigned char *pixels = (unsigned char *) malloc (1024 * 1024 * 3);
-
+        unsigned char *pixels = (unsigned char *) malloc (OVR_WIDTH * OVR_HEIGHT * 3);
 
 
         //World

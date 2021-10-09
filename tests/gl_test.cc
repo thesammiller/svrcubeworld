@@ -3,9 +3,8 @@
 //TODO: Rewrite this test to work with the new class system.
 /*
 
-
-int SCR_WIDTH = 800;
-int SCR_HEIGHT = 600;
+//height
+//width
 
 struct GLsetup {
   GLFWwindow* window;
