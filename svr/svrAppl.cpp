@@ -183,6 +183,7 @@ void svrAppl::createImage() {
     if (info.eFrameType != videoFrameTypeSkip) {
         //output bitstream handling --> it's not more than that
 
+        /*
         for (int iLayer=0; iLayer < info.iLayerNum; iLayer++)
             {
                 SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[iLayer];
@@ -206,9 +207,10 @@ void svrAppl::createImage() {
                 //memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
                 //jpegSize = iLayerSize;
                 
-            }
+            }*/
         
         //save the header information
+        //Unroll the loop so that we can save data in two different places without conditional
         SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[0];
         int iLayerSize = 0;
         int iNalIdx = pLayerBsInfo->iNalCount - 1;
