@@ -232,7 +232,7 @@ Simple_Server::pixels_slice *
 Simple_Server::pixels_alloc ()
 {
   Simple_Server::pixels_slice *retval {};
-  ACE_NEW_RETURN (retval, ::CORBA::Octet[11059200], nullptr);
+  ACE_NEW_RETURN (retval, ::CORBA::Octet[3145728], nullptr);
   return retval;
 }
 
@@ -248,7 +248,7 @@ Simple_Server::pixels_copy (
     const Simple_Server::pixels_slice *_tao_from)
 {
   // Copy each individual element.
-  for ( ::CORBA::ULong i0 = 0; i0 < 11059200; ++i0)
+  for ( ::CORBA::ULong i0 = 0; i0 < 3145728; ++i0)
     {
       _tao_to[i0] = _tao_from[i0];
     }
@@ -276,13 +276,13 @@ namespace TAO
     {
       TAO::TypeCode::Sequence< ::CORBA::TypeCode_ptr const *,
                               TAO::Null_RefCount_Policy>
-        Simple_Server_pixels_11059200 (
+        Simple_Server_pixels_3145728 (
           ::CORBA::tk_array,
           &CORBA::_tc_octet,
-          11059200U);
+          3145728U);
         
       ::CORBA::TypeCode_ptr const tc_Simple_Server_pixels =
-        &Simple_Server_pixels_11059200;
+        &Simple_Server_pixels_3145728;
     }
   }
 }
@@ -623,7 +623,7 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 {
   return strm.write_octet_array (
       reinterpret_cast <const ACE_CDR::Octet *> (_tao_array.in ()),
-      11059200);
+      3145728);
 }
 
 ::CORBA::Boolean operator>> (
@@ -632,7 +632,7 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 {
   return strm.read_octet_array (
       reinterpret_cast <ACE_CDR::Octet *> (_tao_array.out ()),
-      11059200);
+      3145728);
 }
 
 TAO_END_VERSIONED_NAMESPACE_DECL

@@ -59,10 +59,10 @@ svrAppl::svrAppl() {
 }
 
 void svrAppl::createImage() {
-    unsigned char* p = (unsigned char*) malloc (2560 * 1440 * 3);
+    unsigned char* p = (unsigned char*) malloc (1024 * 1024 * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
-    memcpy(pixels, p, sizeof(unsigned char) * 2560 * 1440 *3);
+    memcpy(pixels, p, sizeof(unsigned char) * 1024 * 1024 *3);
     delete(p);
 
 }
@@ -374,8 +374,8 @@ void svrAppl::createCamera() {
     firstMouse = true;
     yaw   = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
     pitch =  0.0f;
-    lastX =  2560.0f / 2.0;
-    lastY =  1440.0 / 2.0;
+    lastX =  1024.0f / 2.0;
+    lastY =  1024.0 / 2.0;
     fov   =  45.0f;
 
 

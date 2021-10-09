@@ -114,7 +114,7 @@ TAO::Array_Traits<Simple_Server::pixels_forany>::zero (
     Simple_Server::pixels_slice * _tao_slice)
 {
   // Zero each individual element.
-  for ( ::CORBA::ULong i0 = 0; i0 < 11059200; ++i0)
+  for ( ::CORBA::ULong i0 = 0; i0 < 3145728; ++i0)
     {
       _tao_slice[i0] = ::CORBA::Octet ();
     }

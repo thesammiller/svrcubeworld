@@ -20,8 +20,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-const unsigned int SCR_WIDTH = 2560;
-const unsigned int SCR_HEIGHT = 1440;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 1024;
 
 
 unsigned int loadTexture(const char *path);

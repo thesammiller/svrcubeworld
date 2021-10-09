@@ -72,7 +72,7 @@ class svrAppl {
         unsigned int rbo;
         int textureUnitIndex;
 
-        unsigned char *pixels = (unsigned char *) malloc (2560 * 1440 * 3);
+        unsigned char *pixels = (unsigned char *) malloc (1024 * 1024 * 3);
 
 
 
