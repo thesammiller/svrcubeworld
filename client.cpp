@@ -223,10 +223,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     }*/
 
+     float startTime = glfwGetTime();
+
+    float old_time = 0;
 
     while (!glfwWindowShouldClose(window))
     {
-        float startTime = glfwGetTime();
+        float dataTime = glfwGetTime();
         //uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
 
         //https://github.com/cisco/openh264/wiki/UsageExampleForDecoder
@@ -249,7 +252,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         fwrite(pBuf, _pixelSize, 1, vout);
         fclose(vout);
 
-        float timeDiff = glfwGetTime() - startTime;
+        float timeDiff = glfwGetTime() - dataTime;
        std::cout << "DATA TIME \t" << timeDiff << std::endl;
         
 
@@ -358,7 +361,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         */
 
       
-      std::cout << "CLIENT FRAME " << ++frame << std::endl;
+      
 
 
       //https://stackoverflow.com/questions/16809833/opencv-image-loading-for-opengl-texture
@@ -486,6 +489,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //usleep -- > 1 sec = 1,000,000
       //1,000,000 / 16 = 16,666
       // 1/2 of that is 8333
+
+      if ( (old_time + 1) < glfwGetTime() ) {
+            std::cout << "FPS " << frame << std::endl;
+            frame = 0;
+            old_time = glfwGetTime();
+        }
+        ++frame;
 
       
 
