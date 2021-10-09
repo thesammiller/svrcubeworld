@@ -95,7 +95,7 @@ void svrAppl::createImage() {
         std::cout << "TJ ERROR!" << std::endl;
     }
     //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 100;
+    const int JPEG_QUALITY = 80;
     const int COLOR_COMPONENTS = 3;
     int _width = m_width; //convert to signed integer
     int _height = m_height; 
