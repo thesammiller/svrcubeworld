@@ -134,7 +134,7 @@ void svrAppl::createImage() {
     //step 3: set option, during encoding process
     static int     g_LevelSetting = WELS_LOG_ERROR;
     encoder_->SetOption (ENCODER_OPTION_TRACE_LEVEL, &g_LevelSetting);
-    int videoFormat = videoFormatRGB;
+    int videoFormat = videoFormatI420;
     encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
 
     //step 4: encode and store output bitstream
@@ -154,7 +154,7 @@ void svrAppl::createImage() {
    
     rv = encoder_->EncodeFrame (&pic, &info);
     sleep(1);
-    std::cout << info.iLayerNum << std::endl;
+    std::cout << "LAYER NUMBER \t" << info.iLayerNum << std::endl;
     sleep(1);
     assert (rv == cmResultSuccess);
     FILE* file = fopen("test.264", "wb");
@@ -176,7 +176,7 @@ void svrAppl::createImage() {
                 pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
                 memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
                 jpegSize = iLayerSize;
-                std::cout << jpegSize << std::endl;
+                std::cout << "LAYER SIZE \t" << jpegSize << std::endl;
                 //it's writing data but i don't know what exactly the data is... 
                 //This layers concept might be something to read about
                 
