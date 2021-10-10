@@ -170,6 +170,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
     unsigned int pixelTexture;
+
+    float startTime = glfwGetTime();
+
+    int frame = 0;
+    float old_time = 0;
     
 
     while (!glfwWindowShouldClose(window))
@@ -198,6 +203,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         glfwPollEvents();
 
       glDeleteTextures(1, &pixelTexture);
+
+      if ( (old_time + 1) < glfwGetTime() ) {
+            std::cout << "FPS " << frame << std::endl;
+            frame = 0;
+            old_time = glfwGetTime();
+        }
+        ++frame;
       
 
     }
