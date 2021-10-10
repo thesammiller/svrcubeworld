@@ -40,6 +40,8 @@ private:
   CORBA::ORB_var orb_;
   Simple_Server::pixels_slice* imageData;
   bool dataSet = false;
+  Simple_Server::pixels_slice* value = Simple_Server::pixels_alloc();
+
   
 };
 
