@@ -24,7 +24,7 @@ const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 1024;
 
 
-unsigned int loadTexture(const char *path);
+unsigned int loadTexture(unsigned char *data);
 
 ACE_Thread_Mutex m_mutex;
 Simple_Server::pixels_slice* p = Simple_Server::pixels_alloc();
@@ -152,7 +152,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         1.0f, -1.0f, 1.0f, 0.0f,
         1.0f, 1.0f, 1.0f, 1.0f     };
 
-    unsigned int texture2 = loadTexture("container.jpg");
+    
 
     unsigned int quadVBO, quadVAO;
     glGenVertexArrays(1, &quadVAO);
@@ -169,9 +169,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
     unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
-
     unsigned int pixelTexture;
-    glGenTextures(1, &pixelTexture);
+    
 
     while (!glfwWindowShouldClose(window))
     {
@@ -190,25 +189,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       pixels = server->sendImageData();
 
-      
-      
-      
-      glBindTexture(GL_TEXTURE_2D, pixelTexture);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      pixelTexture = loadTexture(pixels);
 
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
-
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       glfwSwapBuffers(window);
         glfwPollEvents();
 
+      glDeleteTextures(1, &pixelTexture);
       
 
     }
@@ -294,13 +283,15 @@ Worker::run_test (void)
 }
 
 
-unsigned int loadTexture(char const * path)
+unsigned int loadTexture(unsigned char* data)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
 
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    int width = 1024;
+    int height = 1024;
+    int nrComponents = 3;
+    //unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
     if (data)
     {
         GLenum format;
@@ -320,11 +311,11 @@ unsigned int loadTexture(char const * path)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        stbi_image_free(data);
+        free(data);
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
+        std::cout << "Texture failed to load data: " << std::endl;
         stbi_image_free(data);
     }
 
