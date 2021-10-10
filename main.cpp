@@ -76,11 +76,8 @@ int main(int argc, char* argv[])
 
         //TODO: SAVE RENDER TO PIXELS ON THE SERVER
         // SO THAT WHEN CLIENT REQUESTS DATA, IT'S THERE
-        unsigned char* m_pixels = (unsigned char*) malloc (1024 * 1024 * 3);
-
-        memcpy(m_pixels, myAppl.pixels, sizeof(unsigned char) * 1024 * 1024 * 3);
-        myServer.setImage(m_pixels);
-        delete(m_pixels);
+        myServer.setImage(myAppl.pixels);
+        
 
     }
 
