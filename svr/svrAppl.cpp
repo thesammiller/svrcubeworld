@@ -62,12 +62,8 @@ svrAppl::svrAppl() {
 }
 
 void svrAppl::createImage() {
-    unsigned char* p = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, p);
-    memcpy(pixels, p, sizeof(unsigned char) * m_width * m_height *3);
-    delete(p);
-
+    glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, pixels);
 }
 
 
