@@ -36,6 +36,8 @@ static ovrCubeVertices cubeVertices = {
      Vector4f(1.0f, 0.0f, 0.0f, 1.0f)},
 };
 
+
+
 static const unsigned short cubeIndices[36] = {
     0, 2, 1, 2, 0, 3, // top
     4, 6, 5, 6, 4, 7, // bottom
