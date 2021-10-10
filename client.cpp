@@ -168,9 +168,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-      unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
+    unsigned char *pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
 
-      
+    unsigned int pixelTexture;
+    glGenTextures(1, &pixelTexture);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -186,14 +187,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       renderBufferShader.use();
       glBindVertexArray(quadVAO);
       
-      unsigned char* local_pixels = (unsigned char*)malloc(SCR_WIDTH * SCR_HEIGHT * 3);
-      local_pixels = server->sendImageData();
+      
+      pixels = server->sendImageData();
 
-      memcpy(p, local_pixels, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-      memcpy(pixels, p, sizeof(unsigned char) * SCR_WIDTH * SCR_HEIGHT * 3);
-
-      unsigned int pixelTexture;
-      glGenTextures(1, &pixelTexture);
+      
+      
       
       glBindTexture(GL_TEXTURE_2D, pixelTexture);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
@@ -210,6 +208,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       glfwSwapBuffers(window);
         glfwPollEvents();
+
+      
 
     }
 
