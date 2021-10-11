@@ -233,8 +233,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-
-    CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
+    CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
     //CORBA::Octet* jpegBuff;
     
     int frame = 0;
@@ -338,8 +337,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
             int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
             int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-            
-            yuv420_rgb24_std(800, 600, pData[0], pData[1], pData[2], 0, 0, uncompressedBuffer, 0, YCBCR_JPEG);
+            std::cout << "0 >>" << stride0 << std::endl;
+            std::cout << "1 >>" << stride1 << std::endl;
+            yuv420_rgb24_std((uint32_t) 800, (uint32_t) 600, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (2400), YCBCR_JPEG);
+
+            FILE *f = fopen("data.tga", "wb");
+            fwrite(uncompressedBuffer, 1024 * 1024 * 3, 1, f);
+            fclose(f);
 
             //Select the GL Shader for Framebuffer
             renderBufferShader.use();
