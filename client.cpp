@@ -38,6 +38,39 @@ std::vector<CORBA::Octet*> textureBufferList;
 
 unsigned int loadTexture(unsigned char *data);
 
+typedef enum
+{
+	YCBCR_JPEG,
+	YCBCR_601,
+	YCBCR_709
+} YCbCrType;
+
+void yuv420_rgb24_std(
+	uint32_t width, uint32_t height, 
+	const uint8_t *y, const uint8_t *u, const uint8_t *v, uint32_t y_stride, uint32_t uv_stride, 
+	uint8_t *rgb, uint32_t rgb_stride, 
+	YCbCrType yuv_type);
+
+  typedef struct
+{
+	uint8_t cb_factor;   // [(255*CbNorm)/CbRange]
+	uint8_t cr_factor;   // [(255*CrNorm)/CrRange]
+	uint8_t g_cb_factor; // [Bf/Gf*(255*CbNorm)/CbRange]
+	uint8_t g_cr_factor; // [Rf/Gf*(255*CrNorm)/CrRange]
+	uint8_t y_factor;    // [(YMax-YMin)/255]
+	uint8_t y_offset;    // YMin
+} YUV2RGBParam;
+
+#define FIXED_POINT_VALUE(value, precision) ((int)(((value)*(1<<precision))+0.5))
+
+#define YUV2RGB_PARAM(Rf, Bf, YMin, YMax, CbCrRange) \
+{.cb_factor=FIXED_POINT_VALUE(255.0*(2.0*(1-Bf))/CbCrRange, 6), \
+.cr_factor=FIXED_POINT_VALUE(255.0*(2.0*(1-Rf))/CbCrRange, 6), \
+.g_cb_factor=FIXED_POINT_VALUE(Bf/(1.0-Bf-Rf)*255.0*(2.0*(1-Bf))/CbCrRange, 7), \
+.g_cr_factor=FIXED_POINT_VALUE(Rf/(1.0-Bf-Rf)*255.0*(2.0*(1-Rf))/CbCrRange, 7), \
+.y_factor=FIXED_POINT_VALUE(255.0/(YMax-YMin), 7), \
+.y_offset=YMin}
+
 ACE_Thread_Mutex m_mutex;
 
 const ACE_TCHAR *ior = ACE_TEXT("file://test.ior");
@@ -201,7 +234,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glGenTextures(1, &pixelTexture);
 
 
-    CORBA::Octet* uncompressedBuffer;
+    CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
     //CORBA::Octet* jpegBuff;
     
     int frame = 0;
@@ -269,11 +302,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         Simple_Server::pixels* pixelBuff = server->sendImageData();
         unsigned char *pBuf = (*pixelBuff).get_buffer(true);
 
-        //FILE* vout = fopen("client_in.264", "a+");
-        //fwrite(hBuf, _headerSize, 1, vout);
-        //fwrite(pBuf, _pixelSize, 1, vout);
-        //fclose(vout);
-
+        
        //float timeDiff = glfwGetTime() - dataTime;
        //std::cout << "DATA TIME \t" << timeDiff << std::endl;
         
@@ -289,14 +318,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         memcpy(newBuf+_headerSize, pBuf, iSize);
         memcpy (newBuf + _headerSize + iSize, &uiStartCode[0], 4);
 
-        
-
         //WE"RE FAILING HERE
         //I NEED TO READ UP ON THIS PART OF THE API
         DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
-
-        
-
 
         if (iRet != 0) {
           std::cout << iRet << std::endl;
@@ -311,254 +335,42 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         if (sDstBufInfo.iBufferStatus==1){
             //output handling (pData[0], pData[1], pData[2])
             std::cout << "SUCCESS" << std::endl;
+
+            int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
+            int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+            
+            yuv420_rgb24_std(800, 600, pData[0], pData[1], pData[2], 0, 0, uncompressedBuffer, 0, YCBCR_JPEG);
+
+            //Select the GL Shader for Framebuffer
+            renderBufferShader.use();
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glDisable(GL_DEPTH_TEST);
+            //Clear screen (to white)
+            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            //Bind the Framebuffer Quad Vertex
+            glBindVertexArray(quadVAO);
+
+            pixelTexture = loadTexture(uncompressedBuffer);
+            glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            
+            //PSwap framebuffer to front buffer
+            glfwSwapBuffers(window);
+            glfwPollEvents();
+
+            
+            //Release GL data
+            //glDeleteTextures(1, &pixelTexture);
+            glFinish();
+            glFlush();
+
+
         }
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
           }
-
-        //https://stackoverflow.com/questions/53742981/converting-yuv-420-file-to-rgb-not-getting-expected-output
-        //yuv420 to rgb
-        
-        int l_nSize = 800 * 600 * 1.5;
-        unsigned char *g_pcRGBbuffer;
-        unsigned char *g_pcYUVBuffer;
-        g_pcYUVBuffer = new unsigned char[l_nSize];
-        g_pcRGBbuffer = new unsigned char[800 * 600 * 3];
-      
-        int l_ny, l_nu, l_nv, l_ni, RGBval;
-        int l_dr, l_dg, l_db;
-        int l_nj; 
-
-        unsigned char *rgbBuffer = new unsigned char[800 * 600 *3];
-
-        if(iRet == 0) {
-          unsigned char *l_pcRGBbuffer = g_pcRGBbuffer;
-          for (int j = 0; j < 600; j++) {
-              for (int i = 0; i < 1024; i++) {
-                // position for yuv components for yuv planar
-                //wikipedia
-                      int Y = g_pcYUVBuffer[j * 800 + i];
-                      int U = g_pcYUVBuffer[((j / 2) * 400) + (i / 2) + (800 * 600)];
-                      int V = g_pcYUVBuffer[((j / 2) * 400) + (i / 2) + (800 * 600) + ((800 * 600) / 4)];
-
-                       int R = 1.164*(Y - 16) + 1.596*(V - 128);
-                       int G = 1.164*(Y - 16) - 0.813*(V - 128) - 0.391*(U - 128);
-                       int B = 1.164*(Y - 16) + 2.018*(U - 128);
-
-
-
-                       if (R>255)R = 255;
-                       if (R<0)R = 0;
-                       if (G>255)G = 255;
-                       if (G<0)G = 0;
-                       if (B>255)B = 255;
-                       if (B<0)B = 0;
-
-
-                       l_pcRGBbuffer[0] = R;
-                       l_pcRGBbuffer[1] = G;
-                       l_pcRGBbuffer[2] = B;
-                       l_pcRGBbuffer += 3;
-              }
-          }
-          
-        }
-        
-        
-         //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
-         //no-delay decoding can also be realized by directly calling DecodeFrame2() again with NULL input, as in the following. In this case, decoder would immediately reconstruct the input data. This can also be used similarly for Parsing only. Consequent decoding error and output indication should also be considered as above.
-         //iRet = pSvcDecoder->DecodeFrame2(NULL, 0, pData, &sDstBufInfo);
-
-
-        //https://stackoverflow.com/questions/57212966/how-to-convert-openh264-decodeframenodelay-output-format-to-opencv-matrix
-
-        int width = 800;
-        int height = 600;
-        
-        /*
-        int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-                int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-        
-        std::cout << stride0 << std::endl;
-
-
-        cv::Mat imageYuvCh[3] {
-           cv::Mat(width, height, CV_8UC1, pData[0]), 
-          cv::Mat(width/2, height/2, CV_8UC1, pData[1]), 
-          cv::Mat(width/2, height/2, CV_8UC1, pData[2])
-        };
-        cv::Mat imageYuvMiniCh[3] = {
-          cv::Mat(width, height, CV_8UC1, pData[0]), 
-          cv::Mat(width/2, height/2, CV_8UC1, pData[1]), 
-          cv::Mat(width/2, height/2, CV_8UC1, pData[2])
-        };
-
-        
-        copyWithStride(imageYuvCh[0].data, pData[0], width, height, stride0);
-        copyWithStride(imageYuvMiniCh[1].data, pData[1], width/2, height/2, stride1);
-        copyWithStride(imageYuvMiniCh[2].data, pData[2], width/2, height/2, stride1);
-        
-
-        //imageYuvCh[0].data = (unsigned char*) malloc (width * height * sizeof(unsigned char));
-        //imageYuvMiniCh[1].data = (unsigned char*) malloc (width/2 * height/2 * sizeof(unsigned char));
-        //imageYuvMiniCh[2].data = (unsigned char*) malloc (width/2 * height/2 * sizeof(unsigned char));
-
-        //memcpy(imageYuvCh[0].data, pData[0], width * height);
-        //memcpy(imageYuvMiniCh[1].data, pData[1], width/2 * height/2);
-        //memcpy(imageYuvMiniCh[2].data, pData[2], width/2 * height/2);
-
-
-        cv::resize(imageYuvMiniCh[1], imageYuvCh[1], cv::Size(width, height));
-        cv::resize(imageYuvMiniCh[2], imageYuvCh[2], cv::Size(width, height));
-
-        cv::Mat *mv = imageYuvCh; 
-        size_t n = 3;
-        cv::Mat resultYuv;
-        int i;
-        int depth = mv[0].depth();
-
-        for( i = 0; i < n; i++ )
-        {
-            std::cout << "mv " << i << " size \t" << mv[i].size << "\t0\t" << mv[0].size;
-            std::cout << "mv " << i << "depth \t" << mv[i].depth() << "\t0\t" <<  depth;
-            
-        }
-            
-        //cv::Mat resultYuv;
-        cv::merge(imageYuvCh, 3, resultYuv);
-
-        cv::Mat image = cv::Mat();
-        
-        //cv::Mat result;
-        cvtColor(resultYuv, image, cv::COLOR_YUV2BGR);
-
-        cv::imwrite("file.tga", image);
-
-        */
-
-
-      //https://stackoverflow.com/questions/16809833/opencv-image-loading-for-opengl-texture
-
-      /*
-      
-      unsigned int textureTrash;
-      glGenTextures(1, &textureTrash);
-      glBindTexture(GL_TEXTURE_2D, textureTrash);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        // Set texture clamping method
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-
-      glTexImage2D(GL_TEXTURE_2D,     // Type of texture
-                     0,                 // Pyramid level (for mip-mapping) - 0 is the top level
-                     GL_RGB,            // Internal colour format to convert to
-                     width,          // Image width  i.e. 640 for Kinect in standard mode
-                     height,          // Image height i.e. 480 for Kinect in standard mode
-                     0,                 // Border width in pixels (can either be 1 or 0)
-                     GL_BGR, // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)
-                     GL_UNSIGNED_BYTE,  // Image data type
-                     pData[0]);        // The actual image data itself
-
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      unsigned int _textures[3];
-
-
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  
-      glGenTextures(3, _textures);  
-      const unsigned char *pixels[3] = { pData[0], pData[1], pData[2] };  
-      const unsigned int widths[3]  = { width, width / 2, width / 2 };  
-      const unsigned int heights[3] = { height, height / 2, height / 2 };  
-      for (int i = 0; i < 3; ++i) {  
-          glBindTexture(GL_TEXTURE_2D, _textures[i]);  
-          glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, widths[i],heights[i],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,pixels[i]);  
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  
-          glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  
-          glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      
-      
-      }
-
-      static const GLfloat texCoords[] = { 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f };  
-      static const GLfloat vertices[]= {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
-
-
-      
-
-      
-
-       GLint _uniformSamplers[3];
-      _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "s_texture_y");
-      _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "s_texture_u");
-      _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "s_texture_v");
-
-      
-     */
-
-      //Select the GL Shader for Framebuffer
-      renderBufferShader.use();
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glDisable(GL_DEPTH_TEST);
-      //Clear screen (to white)
-      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT);
-      //Bind the Framebuffer Quad Vertex
-      glBindVertexArray(quadVAO);
-
-      
-      //glVertexAttribPointer(GL_ATTRIBUTE_VERTEX, 2, GL_FLOAT, 0, 0, vertices);  
-      //glEnableVertexAttribArray(ATTRIBUTE_VERTEX);  
-      //glVertexAttribPointer(ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, 0, 0, texCoords);  
-      //glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
-      //glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer); 
-
-      /*
-        for (int i = 0; i < 3; ++i) {  
-          glActiveTexture(GL_TEXTURE0 + i);  
-          glBindTexture(GL_TEXTURE_2D, _textures[i]);  
-          glUniform1i(_uniformSamplers[i], i);  
-          glDrawArrays(GL_TRIANGLES, 0, 6);
-          
-      }*/  
-      
-      
-
-      //CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
-
-      //OPENGL TEXTURE LOAD AND DRAW
-      pixelTexture = loadTexture(g_pcRGBbuffer);
-      glBindTexture(GL_TEXTURE_2D, pixelTexture); 
-
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-      
-      
-      
-      //PSwap framebuffer to front buffer
-      glfwSwapBuffers(window);
-      glfwPollEvents();
-
-      
-      //Release GL data
-      //glDeleteTextures(1, &pixelTexture);
-      glFinish();
-      glFlush();
-
-      //delete(uncompressedBuffer);
-      //textureBufferList.erase(textureBufferList.begin());
-
-      //SLEEP
-      //-----
-      //This helps...
-      //TODO: NOT OPTIMAL
-      //But trying 120 frames per second
-      //usleep -- > 1 sec = 1,000,000
-      //1,000,000 / 16 = 16,666
-      // 1/2 of that is 8333
 
       if ( (old_time + 1) < glfwGetTime() ) {
             std::cout << "FPS " << frame << std::endl;
@@ -566,10 +378,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             old_time = glfwGetTime();
         }
         ++frame;
-
-    
-
-     
       
   }
 
@@ -718,3 +526,82 @@ unsigned int loadTexture(unsigned char* data)
     return textureID;
 }
 
+uint8_t clamp(int16_t value)
+{
+	return value<0 ? 0 : (value>255 ? 255 : value);
+}
+
+
+
+static const YUV2RGBParam YUV2RGB[3] = {
+	// ITU-T T.871 (JPEG)
+	YUV2RGB_PARAM(0.299, 0.114, 0.0, 255.0, 255.0),
+	// ITU-R BT.601-7
+	YUV2RGB_PARAM(0.299, 0.114, 16.0, 235.0, 224.0),
+	// ITU-R BT.709-6
+	YUV2RGB_PARAM(0.2126, 0.0722, 16.0, 235.0, 224.0)
+};
+
+
+
+//From https://raw.githubusercontent.com/descampsa/yuv2rgb/master/yuv_rgb.c
+void yuv420_rgb24_std(
+	uint32_t width, uint32_t height, 
+	const uint8_t *Y, const uint8_t *U, const uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
+	uint8_t *RGB, uint32_t RGB_stride, 
+	YCbCrType yuv_type)
+{
+	const YUV2RGBParam *const param = &(YUV2RGB[yuv_type]);
+	uint32_t x, y;
+	for(y=0; y<(height-1); y+=2)
+	{
+		const uint8_t *y_ptr1=Y+y*Y_stride,
+			*y_ptr2=Y+(y+1)*Y_stride,
+			*u_ptr=U+(y/2)*UV_stride,
+			*v_ptr=V+(y/2)*UV_stride;
+		
+		uint8_t *rgb_ptr1=RGB+y*RGB_stride,
+			*rgb_ptr2=RGB+(y+1)*RGB_stride;
+		
+		for(x=0; x<(width-1); x+=2)
+		{
+			int8_t u_tmp, v_tmp;
+			u_tmp = u_ptr[0]-128;
+			v_tmp = v_ptr[0]-128;
+			
+			//compute Cb Cr color offsets, common to four pixels
+			int16_t b_cb_offset, r_cr_offset, g_cbcr_offset;
+			b_cb_offset = (param->cb_factor*u_tmp)>>6;
+			r_cr_offset = (param->cr_factor*v_tmp)>>6;
+			g_cbcr_offset = (param->g_cb_factor*u_tmp + param->g_cr_factor*v_tmp)>>7;
+			
+			int16_t y_tmp;
+			y_tmp = (param->y_factor*(y_ptr1[0]-param->y_offset))>>7;
+			rgb_ptr1[0] = clamp(y_tmp + r_cr_offset);
+			rgb_ptr1[1] = clamp(y_tmp - g_cbcr_offset);
+			rgb_ptr1[2] = clamp(y_tmp + b_cb_offset);
+			
+			y_tmp = (param->y_factor*(y_ptr1[1]-param->y_offset))>>7;
+			rgb_ptr1[3] = clamp(y_tmp + r_cr_offset);
+			rgb_ptr1[4] = clamp(y_tmp - g_cbcr_offset);
+			rgb_ptr1[5] = clamp(y_tmp + b_cb_offset);
+			
+			y_tmp = (param->y_factor*(y_ptr2[0]-param->y_offset))>>7;
+			rgb_ptr2[0] = clamp(y_tmp + r_cr_offset);
+			rgb_ptr2[1] = clamp(y_tmp - g_cbcr_offset);
+			rgb_ptr2[2] = clamp(y_tmp + b_cb_offset);
+			
+			y_tmp = (param->y_factor*(y_ptr2[1]-param->y_offset))>>7;
+			rgb_ptr2[3] = clamp(y_tmp + r_cr_offset);
+			rgb_ptr2[4] = clamp(y_tmp - g_cbcr_offset);
+			rgb_ptr2[5] = clamp(y_tmp + b_cb_offset);
+			
+			rgb_ptr1 += 6;
+			rgb_ptr2 += 6;
+			y_ptr1 += 2;
+			y_ptr2 += 2;
+			u_ptr += 1;
+			v_ptr += 1;
+		}
+	}
+}
