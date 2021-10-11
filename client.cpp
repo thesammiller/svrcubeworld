@@ -172,7 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     glfwMakeContextCurrent(window);
 
-        Shader renderBufferShader("shaders/renderBuffer.vs", "shaders/yuvShader.fs");
+        Shader renderBufferShader("shaders/renderBuffer.vs", "shaders/renderBuffer.fs");
 
       float quadVertices[] = {
         // positions  //texcoords
@@ -227,6 +227,29 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     float old_time = 0;
 
+    //decoder declaration
+        ISVCDecoder *pSvcDecoder;
+
+    int rv = WelsCreateDecoder(&pSvcDecoder);
+    assert (rv == 0);
+    ISVCDecoder* decoder_;
+    //assert (decoder_ != NULL);
+
+
+    SDecodingParam sDecParam = {0};
+    sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
+    sDecParam.bParseOnly = false;
+    //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
+    pSvcDecoder->Initialize(&sDecParam);
+
+    //output: [0~2] for Y,U,V buffer for Decoding only
+        unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
+        //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
+        SBufferInfo sDstBufInfo;
+        memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
+        
+
+
     while (!glfwWindowShouldClose(window))
     {
         float dataTime = glfwGetTime();
@@ -234,8 +257,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         //https://github.com/cisco/openh264/wiki/UsageExampleForDecoder
 
-        //decoder declaration
-        ISVCDecoder *pSvcDecoder;
+        
 
         //input: encoded bitstream start position; should include start code prefix
         
@@ -257,11 +279,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         
         //input: encoded bit stream length; should include the size of start code prefix
         int iSize  = _pixelSize;
-        //output: [0~2] for Y,U,V buffer for Decoding only
-        unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
-        //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
-        SBufferInfo sDstBufInfo;
-        memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
         
         //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
@@ -270,29 +287,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
         memcpy(newBuf, hBuf, _headerSize);
         memcpy(newBuf+_headerSize, pBuf, iSize);
-        
         memcpy (newBuf + _headerSize + iSize, &uiStartCode[0], 4);
 
-        int rv = WelsCreateDecoder(&pSvcDecoder);
-        assert (rv == 0);
-        ISVCDecoder* decoder_;
-        //assert (decoder_ != NULL);
-
-
-        SDecodingParam sDecParam = {0};
-        sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
-        sDecParam.bParseOnly = false;
-        //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
-        pSvcDecoder->Initialize(&sDecParam);
-
+        
 
         //WE"RE FAILING HERE
         //I NEED TO READ UP ON THIS PART OF THE API
         DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
 
+        
+
+
         if (iRet != 0) {
           std::cout << iRet << std::endl;
-          return -1;
+          //return -1;
         }
         
         if (iRet == 0) {
@@ -307,6 +315,54 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
           }
+
+        //https://stackoverflow.com/questions/53742981/converting-yuv-420-file-to-rgb-not-getting-expected-output
+        //yuv420 to rgb
+        
+        int l_nSize = 800 * 600 * 1.5;
+        unsigned char *g_pcRGBbuffer;
+        unsigned char *g_pcYUVBuffer;
+        g_pcYUVBuffer = new unsigned char[l_nSize];
+        g_pcRGBbuffer = new unsigned char[800 * 600 * 3];
+      
+        int l_ny, l_nu, l_nv, l_ni, RGBval;
+        int l_dr, l_dg, l_db;
+        int l_nj; 
+
+        unsigned char *rgbBuffer = new unsigned char[800 * 600 *3];
+
+        if(iRet == 0) {
+          unsigned char *l_pcRGBbuffer = g_pcRGBbuffer;
+          for (int j = 0; j < 600; j++) {
+              for (int i = 0; i < 1024; i++) {
+                // position for yuv components for yuv planar
+                //wikipedia
+                      int Y = g_pcYUVBuffer[j * 800 + i];
+                      int U = g_pcYUVBuffer[((j / 2) * 400) + (i / 2) + (800 * 600)];
+                      int V = g_pcYUVBuffer[((j / 2) * 400) + (i / 2) + (800 * 600) + ((800 * 600) / 4)];
+
+                       int R = 1.164*(Y - 16) + 1.596*(V - 128);
+                       int G = 1.164*(Y - 16) - 0.813*(V - 128) - 0.391*(U - 128);
+                       int B = 1.164*(Y - 16) + 2.018*(U - 128);
+
+
+
+                       if (R>255)R = 255;
+                       if (R<0)R = 0;
+                       if (G>255)G = 255;
+                       if (G<0)G = 0;
+                       if (B>255)B = 255;
+                       if (B<0)B = 0;
+
+
+                       l_pcRGBbuffer[0] = R;
+                       l_pcRGBbuffer[1] = G;
+                       l_pcRGBbuffer[2] = B;
+                       l_pcRGBbuffer += 3;
+              }
+          }
+          
+        }
         
         
          //no-delay decoding can be realized by directly calling DecodeFrameNoDelay(), which is the recommended usage.
@@ -382,6 +438,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       //https://stackoverflow.com/questions/16809833/opencv-image-loading-for-opengl-texture
+
+      /*
       
       unsigned int textureTrash;
       glGenTextures(1, &textureTrash);
@@ -407,8 +465,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       glGenerateMipmap(GL_TEXTURE_2D);
 
-
-      
       unsigned int _textures[3];
 
 
@@ -432,7 +488,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       static const GLfloat vertices[]= {-1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
 
 
-      renderBufferShader.use();
+      
 
       
 
@@ -442,12 +498,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "s_texture_v");
 
       
-     
+     */
 
       //Select the GL Shader for Framebuffer
-  
-      //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      //glDisable(GL_DEPTH_TEST);
+      renderBufferShader.use();
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glDisable(GL_DEPTH_TEST);
       //Clear screen (to white)
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
@@ -461,22 +517,24 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //glEnableVertexAttribArray(ATTRIBUTE_TEXCOORD);  
       //glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer); 
 
-      
+      /*
         for (int i = 0; i < 3; ++i) {  
           glActiveTexture(GL_TEXTURE0 + i);  
           glBindTexture(GL_TEXTURE_2D, _textures[i]);  
           glUniform1i(_uniformSamplers[i], i);  
           glDrawArrays(GL_TRIANGLES, 0, 6);
           
-      }  
+      }*/  
       
       
 
       //CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
 
       //OPENGL TEXTURE LOAD AND DRAW
-      //pixelTexture = loadTexture(uncompressedBuffer);
-      //glBindTexture(GL_TEXTURE_2D, textureTrash); 
+      pixelTexture = loadTexture(g_pcRGBbuffer);
+      glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+
+      glDrawArrays(GL_TRIANGLES, 0, 6);
       
       
       
@@ -509,8 +567,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
         ++frame;
 
-      
-
+    
 
      
       
