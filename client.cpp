@@ -239,8 +239,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     int frame = 0;
 
   
-    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 2);
-    for (int i=0; i < 2; i++) {
+    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 1);
+    for (int i=0; i < 1; i++) {
       FrameWorker frameWorker(orb.in());
 
       if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
