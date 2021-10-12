@@ -339,12 +339,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
             std::cout << "0 >>" << stride0 << std::endl;
             std::cout << "1 >>" << stride1 << std::endl;
+            //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere... 
             yuv420_rgb24_std((uint32_t) 800, (uint32_t) 600, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (2400), YCBCR_JPEG);
-
-            FILE *f = fopen("data.tga", "wb");
-            fwrite(uncompressedBuffer, 1024 * 1024 * 3, 1, f);
-            fclose(f);
-
+            
             //Select the GL Shader for Framebuffer
             renderBufferShader.use();
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
