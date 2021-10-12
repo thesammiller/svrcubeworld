@@ -113,15 +113,6 @@ parse_args (int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-//https://stackoverflow.com/questions/57212966/how-to-convert-openh264-decodeframenodelay-output-format-to-opencv-matrix
-inline void copyWithStride(void* dst, const void* src, size_t width, size_t height, size_t stride
-) {
-    for (size_t row = 0; row < height; ++row) {
-        uint8_t* posFrom = (uint8_t*)src + row * stride;
-        uint8_t* posTo = (uint8_t*)dst + row * width;
-        memcpy(posTo, posFrom, width);
-    }
-}
 
 
 class FrameWorker : public ACE_Task_Base
