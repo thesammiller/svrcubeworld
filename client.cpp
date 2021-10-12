@@ -233,16 +233,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
+    //CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
     //CORBA::Octet* jpegBuff;
     
     int frame = 0;
 
     
 
-    /*
-    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 1);
-    for (int i=0; i < 1; i++) {
+    
+    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 8);
+    for (int i=0; i < 8; i++) {
       FrameWorker frameWorker(orb.in());
 
       if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
@@ -253,95 +253,27 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       currentWorker = &frameWorker;
       usleep(16666);
 
-    }*/
+    }
 
      float startTime = glfwGetTime();
 
     float old_time = 0;
 
-    //decoder declaration
-        ISVCDecoder *pSvcDecoder;
-
-    int rv = WelsCreateDecoder(&pSvcDecoder);
-    assert (rv == 0);
-    ISVCDecoder* decoder_;
-    //assert (decoder_ != NULL);
-
-
-    SDecodingParam sDecParam = {0};
-    sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
-    sDecParam.bParseOnly = false;
-    //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
-    pSvcDecoder->Initialize(&sDecParam);
-
-    //output: [0~2] for Y,U,V buffer for Decoding only
-        unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
-        //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
-        SBufferInfo sDstBufInfo;
-        memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
-        
-
+    
 
     while (!glfwWindowShouldClose(window))
     {
+
+      if (textureBufferList.size() < 2) {
+        continue;
+      }
         float dataTime = glfwGetTime();
         //uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
 
         //https://github.com/cisco/openh264/wiki/UsageExampleForDecoder
 
-        
-
         //input: encoded bitstream start position; should include start code prefix
         
-        long unsigned int _headerSize = server->sendHeaderSize();      
-        Simple_Server::header* headerBuff = server->sendHeaderData();
-        unsigned char *hBuf = (*headerBuff).get_buffer(true);
-
-        long unsigned int _pixelSize = server->sendJpegSize();      
-        Simple_Server::pixels* pixelBuff = server->sendImageData();
-        unsigned char *pBuf = (*pixelBuff).get_buffer(true);
-
-        
-       //float timeDiff = glfwGetTime() - dataTime;
-       //std::cout << "DATA TIME \t" << timeDiff << std::endl;
-        
-        //input: encoded bit stream length; should include the size of start code prefix
-        int iSize  = _pixelSize;
-        
-        //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
-
-        uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
-        uint8_t uiStartCode[4] = {0, 0, 0, 1};
-
-        memcpy(newBuf, hBuf, _headerSize);
-        memcpy(newBuf+_headerSize, pBuf, iSize);
-        memcpy (newBuf + _headerSize + iSize, &uiStartCode[0], 4);
-
-        //WE"RE FAILING HERE
-        //I NEED TO READ UP ON THIS PART OF THE API
-        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
-
-        if (iRet != 0) {
-          std::cout << iRet << std::endl;
-          //return -1;
-        }
-        
-        if (iRet == 0) {
-          std::cout << "SUCCESS" << std::endl;
-        }
-
-        
-        if (sDstBufInfo.iBufferStatus==1){
-            //output handling (pData[0], pData[1], pData[2])
-            std::cout << "SUCCESS" << std::endl;
-
-            int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-            int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-            std::cout << "0 >>" << stride0 << std::endl;
-            std::cout << "1 >>" << stride1 << std::endl;
-            //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere... 
-            yuv420_rgb24_std((uint32_t) 800, (uint32_t) 600, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (2400), YCBCR_JPEG);
-            
             //Select the GL Shader for Framebuffer
             renderBufferShader.use();
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -352,6 +284,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             //Bind the Framebuffer Quad Vertex
             glBindVertexArray(quadVAO);
 
+            //m_mutex.acquire();
+            CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
             pixelTexture = loadTexture(uncompressedBuffer);
             glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
@@ -361,25 +295,24 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             glfwSwapBuffers(window);
             glfwPollEvents();
 
-            
+            delete(uncompressedBuffer);
+            textureBufferList.erase(textureBufferList.begin());
+            //m_mutex.release();
+
             //Release GL data
             //glDeleteTextures(1, &pixelTexture);
             glFinish();
             glFlush();
 
+            usleep(16333);
 
-        }
-        else { 
-          std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
-          }
-
-      if ( (old_time + 1) < glfwGetTime() ) {
-            std::cout << "FPS " << frame << std::endl;
-            frame = 0;
-            old_time = glfwGetTime();
-        }
-        ++frame;
-      
+            if ( (old_time + 1) < glfwGetTime() ) {
+                  std::cout << "FPS " << frame << std::endl;
+                  frame = 0;
+                  old_time = glfwGetTime();
+              }
+              ++frame;
+          
   }
 
 
@@ -488,8 +421,85 @@ FrameWorker::run_test (void)
       Simple_Server_var server =
         Simple_Server::_narrow (object.in ());
 
+        //decoder declaration
+        ISVCDecoder *pSvcDecoder;
+
+    int rv = WelsCreateDecoder(&pSvcDecoder);
+    assert (rv == 0);
+    ISVCDecoder* decoder_;
+    //assert (decoder_ != NULL);
+
+
+    SDecodingParam sDecParam = {0};
+    sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
+    sDecParam.bParseOnly = false;
+    //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
+    pSvcDecoder->Initialize(&sDecParam);
+
+    //output: [0~2] for Y,U,V buffer for Decoding only
+        unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
+        //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
+        SBufferInfo sDstBufInfo;
+        memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
+
+        
+        
+
         
       while(true) {
+        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
+
+        long unsigned int _headerSize = server->sendHeaderSize();      
+        Simple_Server::header* headerBuff = server->sendHeaderData();
+        unsigned char *hBuf = (*headerBuff).get_buffer(true);
+
+        long unsigned int _pixelSize = server->sendJpegSize();      
+        Simple_Server::pixels* pixelBuff = server->sendImageData();
+        unsigned char *pBuf = (*pixelBuff).get_buffer(true);
+
+        //input: encoded bit stream length; should include the size of start code prefix
+        int iSize  = _pixelSize;
+        
+        //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
+
+        uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
+        uint8_t uiStartCode[4] = {0, 0, 0, 1};
+
+        memcpy(newBuf, hBuf, _headerSize);
+        memcpy(newBuf+_headerSize, pBuf, iSize);
+        memcpy (newBuf + _headerSize + iSize, &uiStartCode[0], 4);
+
+
+        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
+
+        if (iRet != 0) {
+          std::cout << iRet << std::endl;
+          //return -1;
+        }
+        
+        if (iRet == 0) {
+          std::cout << "SUCCESS" << std::endl;
+        }
+
+        
+        if (sDstBufInfo.iBufferStatus==1){
+            //output handling (pData[0], pData[1], pData[2])
+            std::cout << "SUCCESS" << std::endl;
+
+            int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
+            int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+            std::cout << "0 >>" << stride0 << std::endl;
+            std::cout << "1 >>" << stride1 << std::endl;
+            //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere... 
+           yuv420_rgb24_std((uint32_t) 800, (uint32_t) 600, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (2400), YCBCR_JPEG);
+
+            m_mutex.acquire();
+            textureBufferList.push_back(uncompressedBuffer); 
+            m_mutex.release();
+         }
+        else { 
+          std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
+          }
 
 
 
