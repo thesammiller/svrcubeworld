@@ -68,7 +68,7 @@ svrAppl::svrAppl() {
     param.fMaxFrameRate = 60.0f;
     param.iPicWidth = 800;
     param.iPicHeight = 600;
-    param.iTargetBitrate = 5000000;
+    param.iTargetBitrate = 8500000;
     
 
     
