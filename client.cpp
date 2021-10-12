@@ -287,7 +287,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFlush();
 
 
-      if ( (int) (glfwGetTime() * 100) % 10 == 0) {
+      //Clear the cache every 0.005 seconds
+      //Keeps the client in real time without frame jitter
+      if ( (int) (glfwGetTime() * 100) % 5 == 0) {
         textureBufferList.clear();
       }
 

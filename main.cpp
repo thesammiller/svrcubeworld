@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
     float startTime = glfwGetTime();
 
     Worker worker(myServer.orb.in());
-    
+
      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
                            "(%P|%t) Cannot activate worker threads\n"),
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
         }
         ++frame;
 
-        usleep(32666);
+        
 
     }
 
