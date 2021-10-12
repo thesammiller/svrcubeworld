@@ -134,9 +134,9 @@ void svrAppl::createImage() {
     //Step 3b: Preparing image data
     //Preparing our data for OpenCV Material type
     cv::Mat rawData(1, jpegSize, CV_8UC1, (void*)jpeg_pixels);
-    cv::Mat image = cv::imdecode(rawData, cv::IMREAD_COLOR);
-    
-    //Using https://stackoverflow.com/questions/51287413/how-do-i-properly-use-the-openh264-usage-code-example-for-encoding
+    cv::Mat image (600, 800, CV_8UC3, (void *) srcBuf); //cv::imdecode(rawData, cv::IMREAD_COLOR);
+
+    //U800stackoverflow.com/questions/51287413/how-do-i-properly-use-the-openh264-usage-code-example-for-encoding
     //Thanks to TimSC on StackOverflow
     cv::Mat imageResized, imageYuv, imageYuvMini; 
     resize(image, imageResized, cv::Size(width, height));
