@@ -84,7 +84,6 @@ void svrAppl::createImage() {
     //OPEN GL
     //Read uncompressed image buffer as source
 
-
     float read_buffer_time = glfwGetTime();
     unsigned char* srcBuf = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
@@ -93,8 +92,6 @@ void svrAppl::createImage() {
     float read_buffer_end_time = glfwGetTime();
 
     std::cout << "GLREADBUFFER TIME:\t" << read_buffer_end_time - read_buffer_time << "\t";
-
-
 
     float jpeg_time = glfwGetTime();
     unsigned char *jpeg_pixels;
@@ -109,7 +106,7 @@ void svrAppl::createImage() {
         std::cout << "TJ ERROR!" << std::endl;
     }
     //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 50;
+    const int JPEG_QUALITY = 100;
     const int COLOR_COMPONENTS = 3;
     int _width = m_width; //convert to signed integer
     int _height = m_height; 

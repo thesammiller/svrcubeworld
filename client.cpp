@@ -238,11 +238,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     
     int frame = 0;
 
-    
-
-    
-    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 8);
-    for (int i=0; i < 8; i++) {
+  
+    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 16);
+    for (int i=0; i < 16; i++) {
       FrameWorker frameWorker(orb.in());
 
       if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
@@ -251,7 +249,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       FrameWorker * currentWorker = fw+i;
       currentWorker = &frameWorker;
-      usleep(16666);
+      usleep(8666);
 
     }
 
@@ -260,7 +258,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     float old_time = 0;
 
     
-
     while (!glfwWindowShouldClose(window))
     {
 
@@ -269,7 +266,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
         float dataTime = glfwGetTime();
 
-  
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -299,7 +295,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
       glFlush();
 
-      usleep(16333);
+      //usleep(16333);
 
       if ( (old_time + 1) < glfwGetTime() ) {
             std::cout << "FPS " << frame << std::endl;

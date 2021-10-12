@@ -108,6 +108,8 @@ int main(int argc, char* argv[])
         }
         ++frame;
 
+        usleep(32666);
+
     }
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
