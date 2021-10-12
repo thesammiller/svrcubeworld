@@ -94,46 +94,11 @@ void svrAppl::createImage() {
     std::cout << "GLREADBUFFER TIME:\t" << read_buffer_end_time - read_buffer_time << "\t";
 
     float jpeg_time = glfwGetTime();
-    unsigned char *jpeg_pixels;
 
     int width = 800;
     int height = 600;
 
-    //COMPRESSION -- TURBO JPEG
-    tjhandle handle = tjInitCompress();
-    if (handle == NULL)
-    {
-        std::cout << "TJ ERROR!" << std::endl;
-    }
-    //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 100;
-    const int COLOR_COMPONENTS = 3;
-    int _width = m_width; //convert to signed integer
-    int _height = m_height; 
-    long unsigned int _jpegSize = 0;
-    pixels = NULL; //!< Memory is allocated by tjCompress2 if _jpegSize == 0
-    int pitch = _width * COLOR_COMPONENTS;
-    int pixelFormat = TJPF_RGB;
-    int jpegSubsamp = TJSAMP_420;
-    int flags = TJFLAG_FASTDCT;
-
-    //Compress Image
-    //pixels is a class property field
-    tjCompress2(handle, srcBuf, _width, pitch, _height, pixelFormat,
-            &jpeg_pixels, &_jpegSize, jpegSubsamp, JPEG_QUALITY,
-            flags);
-
-    jpegSize = _jpegSize;
-
-    tjDestroy(handle);
-
-    float jpeg_end = glfwGetTime();
-    std::cout << "JPEG TIME:\t" << jpeg_end - jpeg_time << "\t";
-
-
-    //Step 3b: Preparing image data
-    //Preparing our data for OpenCV Material type
-    cv::Mat rawData(1, jpegSize, CV_8UC1, (void*)jpeg_pixels);
+    
     cv::Mat image (600, 800, CV_8UC3, (void *) srcBuf); //cv::imdecode(rawData, cv::IMREAD_COLOR);
 
     //U800stackoverflow.com/questions/51287413/how-do-i-properly-use-the-openh264-usage-code-example-for-encoding
@@ -147,7 +112,7 @@ void svrAppl::createImage() {
     split(imageYuvMini, imageYuvMiniCh);
     float opencv_end_time = glfwGetTime();
 
-    std::cout << "OPENCV TIME:\t" << opencv_end_time - jpeg_end << "\t";
+    std::cout << "OPENCV TIME:\t" << opencv_end_time - read_buffer_end_time << "\t";
 
     //step 4: encode and store output bitstream
     SFrameBSInfo info;

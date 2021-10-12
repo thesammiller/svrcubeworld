@@ -498,9 +498,10 @@ FrameWorker::run_test (void)
          }
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
+          std::cout << "DIDN'T COMPLETE " << std::endl;
           }
 
-          std::cout << "DIDN'T COMPLETE " << std::endl;
+          
 
           total++;
 
