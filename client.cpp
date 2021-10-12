@@ -239,8 +239,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     int frame = 0;
 
   
-    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 16);
-    for (int i=0; i < 16; i++) {
+    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 2);
+    for (int i=0; i < 2; i++) {
       FrameWorker frameWorker(orb.in());
 
       if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
@@ -249,7 +249,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       FrameWorker * currentWorker = fw+i;
       currentWorker = &frameWorker;
-      usleep(8666);
+      usleep(2666);
 
     }
 
@@ -261,7 +261,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     while (!glfwWindowShouldClose(window))
     {
 
-      if (textureBufferList.size() < 2) {
+      if (textureBufferList.size() < 1) {
         continue;
       }
         float dataTime = glfwGetTime();
@@ -433,7 +433,11 @@ FrameWorker::run_test (void)
         SBufferInfo sDstBufInfo;
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
 
+        int success = 0;
+        int total = 0;
+
       while(true) {
+        float startTime = glfwGetTime();
         CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
 
         long unsigned int _headerSize = server->sendHeaderSize();      
@@ -443,6 +447,10 @@ FrameWorker::run_test (void)
         long unsigned int _pixelSize = server->sendJpegSize();      
         Simple_Server::pixels* pixelBuff = server->sendImageData();
         unsigned char *pBuf = (*pixelBuff).get_buffer(true);
+
+        float dataTime = glfwGetTime();
+
+        std::cout << "TAO DATA TIME: \t" << dataTime - startTime << "\t";
 
         //input: encoded bit stream length; should include the size of start code prefix
         int iSize  = _pixelSize;
@@ -468,25 +476,39 @@ FrameWorker::run_test (void)
           //std::cout << "SUCCESS" << std::endl;
         }
 
-        
+        float decodeTime = glfwGetTime();
+
+        std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
+
+
         if (sDstBufInfo.iBufferStatus==1){
             //output handling (pData[0], pData[1], pData[2])
             //std::cout << "SUCCESS" << std::endl;
 
             int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
             int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-            std::cout << "0 >>" << stride0 << std::endl;
-            std::cout << "1 >>" << stride1 << std::endl;
+            //std::cout << "0 >>" << stride0 << std::endl;
+            //std::cout << "1 >>" << stride1 << std::endl;
             //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere... 
            yuv420_rgb24_std((uint32_t) 800, (uint32_t) 600, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (2400), YCBCR_JPEG);
 
             m_mutex.acquire();
             textureBufferList.push_back(uncompressedBuffer); 
             m_mutex.release();
+
+            std::cout << "YUV2RGB TIME:\t" << glfwGetTime() - decodeTime << std::endl;
+            success++;
          }
         else { 
           std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
           }
+
+          std::cout << "DIDN'T COMPLETE " << std::endl;
+
+          total++;
+
+          std::cout << "SUCCESS\t" << success << "\tTOTAL\t" << total << std::endl;
+
 
 
 
@@ -543,6 +565,9 @@ static const YUV2RGBParam YUV2RGB[3] = {
 
 
 //From https://raw.githubusercontent.com/descampsa/yuv2rgb/master/yuv_rgb.c
+//Stolen function directly from code
+//Thank you to the developer for making it freely available.
+//This is not an optimal implementation.
 void yuv420_rgb24_std(
 	uint32_t width, uint32_t height, 
 	const uint8_t *Y, const uint8_t *U, const uint8_t *V, uint32_t Y_stride, uint32_t UV_stride, 
