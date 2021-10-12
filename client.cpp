@@ -286,12 +286,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
       glFlush();
 
-      //usleep(16333);
+      if ( (int) (glfwGetTime() * 10) % 2 == 0) {
+        textureBufferList.clear();
+      }
 
       if ( (old_time + 1) < glfwGetTime() ) {
             std::cout << "FPS " << frame << std::endl;
             frame = 0;
             old_time = glfwGetTime();
+            
         }
         ++frame;
     
