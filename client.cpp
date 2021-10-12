@@ -286,7 +286,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glFinish();
       glFlush();
 
-      if ( (int) (glfwGetTime() * 10) % 2 == 0) {
+
+      if ( (int) (glfwGetTime() * 100) % 10 == 0) {
         textureBufferList.clear();
       }
 
