@@ -15,6 +15,7 @@
 
 
 
+
 //TAO
 int niterations = 10;
 int nthreads = 1;
@@ -25,8 +26,6 @@ void processInput(svrAppl appl);
 // GL Window Settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-
-
 
 
 
@@ -61,6 +60,14 @@ int main(int argc, char* argv[])
 
     float startTime = glfwGetTime();
 
+    Worker worker(myServer.orb.in());
+    
+     if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           "(%P|%t) Cannot activate worker threads\n"),
+                          1);
+
+
     int frame = 0;
     float old_time = 0;
     
@@ -68,9 +75,6 @@ int main(int argc, char* argv[])
     // -----------
     while (!glfwWindowShouldClose(myAppl.window))
     {
-        if (myServer.orb->work_pending()) {
-            myServer.orb->perform_work();
-        }
 
         // input
         // -----
