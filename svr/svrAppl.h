@@ -17,6 +17,19 @@
 
 #include "shader_s.h"
 
+//TODO: Can I get around the Jpeg and OpenCV?
+//Convert to JPG
+#include "extern/libjpeg-turbo/turbojpeg.h"
+//Convert to h264
+#include "extern/openh264/codec/api/svc/codec_api.h"
+//Get information for h264
+#include <opencv2/core.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+#include <opencv2/core/mat.hpp>
+
+
 
 
 // OVR VertexAttributes 
@@ -117,6 +130,9 @@ class svrAppl {
         float lastX;
         float lastY;
         float fov;
+
+        ISVCEncoder*  encoder_;
+        SEncParamBase param;
 
        
 

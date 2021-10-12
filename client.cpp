@@ -268,51 +268,46 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         continue;
       }
         float dataTime = glfwGetTime();
-        //uncompressedBuffer = (unsigned char*) malloc (SCR_WIDTH * SCR_HEIGHT * 3);
 
-        //https://github.com/cisco/openh264/wiki/UsageExampleForDecoder
+  
+      //Select the GL Shader for Framebuffer
+      renderBufferShader.use();
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glDisable(GL_DEPTH_TEST);
+      //Clear screen (to white)
+      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT);
+      //Bind the Framebuffer Quad Vertex
+      glBindVertexArray(quadVAO);
 
-        //input: encoded bitstream start position; should include start code prefix
-        
-            //Select the GL Shader for Framebuffer
-            renderBufferShader.use();
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glDisable(GL_DEPTH_TEST);
-            //Clear screen (to white)
-            glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
-            //Bind the Framebuffer Quad Vertex
-            glBindVertexArray(quadVAO);
+      CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
+      pixelTexture = loadTexture(uncompressedBuffer);
+      glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
-            //m_mutex.acquire();
-            CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
-            pixelTexture = loadTexture(uncompressedBuffer);
-            glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      
+      //PSwap framebuffer to front buffer
+      glfwSwapBuffers(window);
+      glfwPollEvents();
 
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            
-            //PSwap framebuffer to front buffer
-            glfwSwapBuffers(window);
-            glfwPollEvents();
+      delete(uncompressedBuffer);
+      textureBufferList.erase(textureBufferList.begin());
+      //m_mutex.release();
 
-            delete(uncompressedBuffer);
-            textureBufferList.erase(textureBufferList.begin());
-            //m_mutex.release();
+      //Release GL data
+      //glDeleteTextures(1, &pixelTexture);
+      glFinish();
+      glFlush();
 
-            //Release GL data
-            //glDeleteTextures(1, &pixelTexture);
-            glFinish();
-            glFlush();
+      usleep(16333);
 
-            usleep(16333);
-
-            if ( (old_time + 1) < glfwGetTime() ) {
-                  std::cout << "FPS " << frame << std::endl;
-                  frame = 0;
-                  old_time = glfwGetTime();
-              }
-              ++frame;
-          
+      if ( (old_time + 1) < glfwGetTime() ) {
+            std::cout << "FPS " << frame << std::endl;
+            frame = 0;
+            old_time = glfwGetTime();
+        }
+        ++frame;
+    
   }
 
 
@@ -442,10 +437,6 @@ FrameWorker::run_test (void)
         SBufferInfo sDstBufInfo;
         memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
 
-        
-        
-
-        
       while(true) {
         CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
 
@@ -478,13 +469,13 @@ FrameWorker::run_test (void)
         }
         
         if (iRet == 0) {
-          std::cout << "SUCCESS" << std::endl;
+          //std::cout << "SUCCESS" << std::endl;
         }
 
         
         if (sDstBufInfo.iBufferStatus==1){
             //output handling (pData[0], pData[1], pData[2])
-            std::cout << "SUCCESS" << std::endl;
+            //std::cout << "SUCCESS" << std::endl;
 
             int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
             int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];

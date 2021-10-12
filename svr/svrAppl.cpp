@@ -2,14 +2,6 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "extern/libjpeg-turbo/turbojpeg.h"
-#include "extern/openh264/codec/api/svc/codec_api.h"
-
-#include <opencv2/core.hpp>
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
-#include <opencv2/core/mat.hpp>
 
 
 
@@ -66,6 +58,20 @@ enum VertexAttributeLocation {
 
 
 svrAppl::svrAppl() {
+
+    int rv = WelsCreateSVCEncoder (&encoder_);
+    assert (rv == 0);
+    assert (encoder_ != NULL);
+
+    memset (&param, 0, sizeof (SEncParamBase));
+    param.iUsageType = CAMERA_VIDEO_REAL_TIME; //from EUsageType enum
+    param.fMaxFrameRate = 60.0f;
+    param.iPicWidth = 800;
+    param.iPicHeight = 600;
+    param.iTargetBitrate = 5000000;
+    
+
+    
 }
 
 /*
@@ -77,12 +83,20 @@ svrAppl::createImage()
 void svrAppl::createImage() {
     //OPEN GL
     //Read uncompressed image buffer as source
+
+
+    float read_buffer_time = glfwGetTime();
     unsigned char* srcBuf = (unsigned char*) malloc (m_width * m_height * 3);
     glReadBuffer(GL_COLOR_ATTACHMENT0);
     //Read pixels from the GL Draw
     glReadPixels(0, 0, m_width, m_height, GL_RGB, GL_UNSIGNED_BYTE, srcBuf);
+    float read_buffer_end_time = glfwGetTime();
 
-  
+    std::cout << "GLREADBUFFER TIME:\t" << read_buffer_end_time - read_buffer_time << "\t";
+
+
+
+    float jpeg_time = glfwGetTime();
     unsigned char *jpeg_pixels;
 
     int width = 800;
@@ -95,7 +109,7 @@ void svrAppl::createImage() {
         std::cout << "TJ ERROR!" << std::endl;
     }
     //TURBO JPEG VALUES
-    const int JPEG_QUALITY = 80;
+    const int JPEG_QUALITY = 50;
     const int COLOR_COMPONENTS = 3;
     int _width = m_width; //convert to signed integer
     int _height = m_height; 
@@ -114,35 +128,11 @@ void svrAppl::createImage() {
 
     jpegSize = _jpegSize;
 
-    FILE* jpeg_file = fopen("jpeg.jpg", "wb");
-    fwrite(jpeg_pixels, _jpegSize, 1, jpeg_file);
-    fclose(jpeg_file);
-
     tjDestroy(handle);
 
-    //An encoder with a basic parameter
+    float jpeg_end = glfwGetTime();
+    std::cout << "JPEG TIME:\t" << jpeg_end - jpeg_time << "\t";
 
-    //step 1: setup encoder
-    ISVCEncoder*  encoder_;
-    int rv = WelsCreateSVCEncoder (&encoder_);
-    assert (rv == 0);
-    assert (encoder_ != NULL);
-
-    //step 2: initialiaze with basic parameter
-    SEncParamBase param;
-    memset (&param, 0, sizeof (SEncParamBase));
-    param.iUsageType = CAMERA_VIDEO_REAL_TIME; //from EUsageType enum
-    param.fMaxFrameRate = 60.0f;
-    param.iPicWidth = width;
-    param.iPicHeight = height;
-    param.iTargetBitrate = 5000000;
-    encoder_->Initialize (&param);
-
-    //step 3: set option, during encoding process
-    static int     g_LevelSetting = WELS_LOG_ERROR;
-    encoder_->SetOption (ENCODER_OPTION_TRACE_LEVEL, &g_LevelSetting);
-    int videoFormat = videoFormatI420;
-    encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
 
     //Step 3b: Preparing image data
     //Preparing our data for OpenCV Material type
@@ -158,6 +148,9 @@ void svrAppl::createImage() {
     split(imageYuv, imageYuvCh);
     resize(imageYuv, imageYuvMini, cv::Size(width/2, height/2));
     split(imageYuvMini, imageYuvMiniCh);
+    float opencv_end_time = glfwGetTime();
+
+    std::cout << "OPENCV TIME:\t" << opencv_end_time - jpeg_end << "\t";
 
     //step 4: encode and store output bitstream
     SFrameBSInfo info;
@@ -174,53 +167,26 @@ void svrAppl::createImage() {
     pic.pData[1] = imageYuvMiniCh[1].data;
     pic.pData[2] = imageYuvMiniCh[2].data;
 
-    // << "iStride[0]\t" << imageYuvCh[0].step << "\t";
-    //std::cout << "iStride[1]\t" << imageYuvCh[1].step << "\t";
-    //std::cout << "iStride[2]\t" << imageYuvCh[2].step << "\t";
+    //initialize encoder
+    //Tried to refactor to constructor but ran into errors
+    encoder_->Initialize (&param);
+
+    //step 3: set option, during encoding process
+    static int     g_LevelSetting = WELS_LOG_ERROR;
+    encoder_->SetOption (ENCODER_OPTION_TRACE_LEVEL, &g_LevelSetting);
+    int videoFormat = videoFormatI420;
+    encoder_->SetOption (ENCODER_OPTION_DATAFORMAT, &videoFormat);
 
 
-   
-    rv = encoder_->EncodeFrame (&pic, &info);
-    //sbuf(1);
-    //std::cout << "LAYER NUMBER \t" << info.iLayerNum << std::endl;
-    //sleep(1);
-    assert (rv == cmResultSuccess);
+    int rve = encoder_->EncodeFrame (&pic, &info);
+    assert (rve == cmResultSuccess);
     
     if (info.eFrameType != videoFrameTypeSkip) {
-        //output bitstream handling --> it's not more than that
-
-        /*
-        for (int iLayer=0; iLayer < info.iLayerNum; iLayer++)
-            {
-                SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[iLayer];
-
-                int iLayerSize = 0;
-                int iNalIdx = pLayerBsInfo->iNalCount - 1;
-                do {
-                    iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
-                    --iNalIdx;
-                } while (iNalIdx >= 0);
-
-                
-                std::cout << "LAYER SIZE \t" << jpegSize << std::endl;
-                //it's writing data but i don't know what exactly the data is... 
-                //This layers concept might be something to read about
-                //First layer is 28 - propeties
-                //Second layer is the image data
-                //The image data is getting passed
-                //But not the property data
-                //pixels = (unsigned char *) malloc (iLayerSize * sizeof(unsigned char));
-                //memcpy(pixels, pLayerBsInfo->pBsBuf, iLayerSize);
-                //jpegSize = iLayerSize;
-                
-            }*/
-        
-        //save the header information
-        //Unroll the loop so that we can save data in two different places without conditional
+      
         SLayerBSInfo* pLayerBsInfo = &info.sLayerInfo[0];
         int iLayerSize = 0;
         int iNalIdx = pLayerBsInfo->iNalCount - 1;
-        std::cout << "iNalIdx\t" << iNalIdx << std::endl;
+        //std::cout << "iNalIdx\t" << iNalIdx << std::endl;
         do {
             iLayerSize += pLayerBsInfo->pNalLengthInByte[iNalIdx];
             --iNalIdx;
@@ -241,21 +207,9 @@ void svrAppl::createImage() {
         jpegSize = iLayerSize;
         memcpy(pixels, pLayerBsInfo->pBsBuf, jpegSize);
 
-        //FILE *f = fopen("svrout.264", "a+");
-        //fwrite(header, headerSize, 1, f);
-        //fwrite(pixels, jpegSize, 1, f);
-        //fclose(f);
-
-        
-
-
-
-
-        //save the pixels information
-
-
-
     }
+    float encode_end = glfwGetTime();
+    std::cout << "ENCODE END TIME:\t" << encode_end - opencv_end_time << std::endl;
 
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 

@@ -15,43 +15,43 @@ static ACE_Thread_Mutex m_mutex_pose;
 ///IMAGE DATA
 
 Simple_Server::pixels* Simple_Server_i::sendImageData() {
-  m_mutex.acquire();
+  
   Simple_Server::pixels* value = 0;
 
   ACE_NEW_THROW_EX(value, Simple_Server::pixels(jpegSize, this->imageData), CORBA::NO_MEMORY());
 
   //memcpy(value, this->imageData, jpegSize);
-  m_mutex.release();
+  
   return value;
 }
 
 void Simple_Server_i::setImageData(unsigned char* iData) {
-  m_mutex.acquire();
+  
   //free(this->imageData);
   this->imageData = (CORBA::Octet*) malloc (jpegSize);
   memcpy(this->imageData, iData, jpegSize); 
-  m_mutex.release();
+  
 }
 
 /// HEADER DATA
 
 Simple_Server::header* Simple_Server_i::sendHeaderData() {
-  m_mutex.acquire();
+  
   Simple_Server::header* value = 0;
 
   ACE_NEW_THROW_EX(value, Simple_Server::header(headerSize, this->headerData), CORBA::NO_MEMORY());
 
   //memcpy(value, this->imageData, jpegSize);
-  m_mutex.release();
+  
   return value;
 }
 
 void Simple_Server_i::setHeaderData(unsigned char* iData) {
-  m_mutex.acquire();
+  
   //free(this->headerData);
   this->headerData = (CORBA::Octet*) malloc (headerSize);
   memcpy(this->headerData, iData, headerSize); 
-  m_mutex.release();
+  
 }
 
 ///POSE DATA
@@ -71,18 +71,18 @@ Simple_Server_i::send_data (const CORBA::Long microsecond, const Simple_Server::
 	      headpose[4], headpose[5], headpose[6]));
   
 
-  m_mutex_pose.acquire();
+  
   memcpy(data, headpose, sizeof(float) * 7);
-  m_mutex_pose.release();
+  
 
 
   
 }
 
 void Simple_Server_i::get_data(float* in_data) {
-  m_mutex_pose.acquire();
+  
   memcpy(in_data, data, sizeof(float) * 7);
-  m_mutex_pose.release();
+  
   
 }
 

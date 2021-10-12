@@ -99,11 +99,12 @@ void svrServer::startWorker(Worker *worker, int nthreads) {
 //SET IMAGE DATA
 
 void svrServer::setImage(unsigned char *pixels) {
-  unsigned char* p = (unsigned char*) malloc (jpegSize);
-  memcpy(p, pixels, jpegSize);
-  server_impl.setImageData(p);
-  delete(p);
-
+  if (pixels != NULL) {
+    unsigned char* p = (unsigned char*) malloc (jpegSize);
+    memcpy(p, pixels, jpegSize);
+    server_impl.setImageData(p);
+    delete(p);
+  }
 }
 
 void svrServer::setJpegSize(unsigned long int js) {

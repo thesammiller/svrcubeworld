@@ -107,12 +107,6 @@ int main(int argc, char* argv[])
             old_time = glfwGetTime();
         }
         ++frame;
-       
-        //TODO: Adjust and synchronize frame rate with client
-        //NOTE: Using sleep is not optimal
-        //Will be about 25-30 FPS at this rate
-        //Anything more adds artifacts/glitches to the client
-        
 
     }
 
