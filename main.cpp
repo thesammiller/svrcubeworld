@@ -111,8 +111,8 @@ int main(int argc, char* argv[])
             old_time = glfwGetTime();
         }
         ++frame;
-
-	usleep(8167);
+	//This seems to impact performance negatively for OpenCV and OpenH264 encoding
+	//usleep(8167);
 
     }
 
