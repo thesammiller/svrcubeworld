@@ -234,7 +234,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       FrameWorker * currentWorker = fw+i;
       currentWorker = &frameWorker;
-      usleep(2666);
+      usleep(8333);
 
     }
 
