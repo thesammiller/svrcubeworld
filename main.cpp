@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
         }
         ++frame;
 
-        
+	usleep(8167);
 
     }
 
