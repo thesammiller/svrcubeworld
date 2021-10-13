@@ -23,12 +23,6 @@
 
 #include "extern/openh264/codec/api/svc/codec_api.h"
 
-#include <opencv2/core.hpp>
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
-#include <opencv2/core/mat.hpp>
-
 
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
