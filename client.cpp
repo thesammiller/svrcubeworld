@@ -30,8 +30,8 @@
 #include <opencv2/core/mat.hpp>
 
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 1024;
 
 std::vector<CORBA::Octet*> textureBufferList;
 
@@ -224,8 +224,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     unsigned int pixelTexture;
     glGenTextures(1, &pixelTexture);
 
-    //CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
-    //CORBA::Octet* jpegBuff;
     
     int frame = 0;
 
@@ -240,7 +238,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       FrameWorker * currentWorker = fw+i;
       currentWorker = &frameWorker;
-      usleep(2666);
+      usleep(8666);
+      
 
     }
 
@@ -248,14 +247,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     float old_time = 0;
 
+    sleep(1);
+  
     
     while (!glfwWindowShouldClose(window))
     {
-
-      if (textureBufferList.size() < 1) {
-        continue;
-      }
-        float dataTime = glfwGetTime();
+       
+      float dataTime = glfwGetTime();
 
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
@@ -267,7 +265,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
 
+      m_mutex.acquire();
       CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
+      m_mutex.release();
       pixelTexture = loadTexture(uncompressedBuffer);
       glBindTexture(GL_TEXTURE_2D, pixelTexture); 
 
@@ -277,8 +277,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glfwSwapBuffers(window);
       glfwPollEvents();
 
+
       delete(uncompressedBuffer);
-      textureBufferList.erase(textureBufferList.begin());
+      m_mutex.acquire();
+      if (textureBufferList.size() > 1) {
+        textureBufferList.erase(textureBufferList.begin());
+      }
+      m_mutex.release();
       //m_mutex.release();
 
       //Release GL data
@@ -289,9 +294,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       //Clear the cache every 0.005 seconds
       //Keeps the client in real time without frame jitter
-      if ( (int) (glfwGetTime() * 100) % 5 == 0) {
-        textureBufferList.clear();
-      }
+
 
       if ( (old_time + 1) < glfwGetTime() ) {
             std::cout << "FPS " << frame << std::endl;
@@ -435,7 +438,7 @@ FrameWorker::run_test (void)
 
       while(true) {
         float startTime = glfwGetTime();
-        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (800 * 600 * 3);
+        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
 
         long unsigned int _headerSize = server->sendHeaderSize();      
         Simple_Server::header* headerBuff = server->sendHeaderData();
@@ -479,6 +482,7 @@ FrameWorker::run_test (void)
 
 
         if (sDstBufInfo.iBufferStatus==1){
+            
             //output handling (pData[0], pData[1], pData[2])
             //std::cout << "SUCCESS" << std::endl;
 
@@ -486,8 +490,15 @@ FrameWorker::run_test (void)
             int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
             //std::cout << "0 >>" << stride0 << std::endl;
             //std::cout << "1 >>" << stride1 << std::endl;
-            //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere... 
-           yuv420_rgb24_std((uint32_t) 800, (uint32_t) 600, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (2400), YCBCR_709);
+            //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere...
+            std::cout << "WIDTH >> \t" << SCR_WIDTH << "\t";
+            std::cout << "HEIGHT >> \t" << SCR_HEIGHT << "\t";
+            std::cout << "pData[0] >> \t" << pData[0][0] << "\t";
+            std::cout << "pData[1] >>" << pData[1][0] << "\t";
+            std::cout << "pData[2] >> \t" << pData[2][0] << "\t";
+            std::cout << "stride0 >> \t" << stride0 << "\t";
+            std::cout << "stride1 >> \t" << stride1 << std::endl;
+           yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
 
             m_mutex.acquire();
             textureBufferList.push_back(uncompressedBuffer); 
@@ -506,6 +517,7 @@ FrameWorker::run_test (void)
           total++;
 
           std::cout << "SUCCESS\t" << success << "\tTOTAL\t" << total << std::endl;
+          usleep(8333);
 
 
 

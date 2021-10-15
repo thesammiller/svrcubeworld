@@ -24,8 +24,8 @@ int nthreads = 1;
 void processInput(svrAppl appl);
 
 // GL Window Settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1024;
+const unsigned int SCR_HEIGHT = 1024;
 
 
 

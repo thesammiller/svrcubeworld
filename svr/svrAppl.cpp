@@ -66,8 +66,8 @@ svrAppl::svrAppl() {
     memset (&param, 0, sizeof (SEncParamBase));
     param.iUsageType = CAMERA_VIDEO_REAL_TIME; //from EUsageType enum
     param.fMaxFrameRate = 60.0f;
-    param.iPicWidth = 800;
-    param.iPicHeight = 600;
+    param.iPicWidth = 1024;
+    param.iPicHeight = 1024;
     param.iTargetBitrate = 8500000;
     
 
@@ -95,11 +95,11 @@ void svrAppl::createImage() {
 
     float jpeg_time = glfwGetTime();
 
-    int width = 800;
-    int height = 600;
+    int width = 1024;
+    int height = 1024;
 
     
-    cv::Mat image (600, 800, CV_8UC3, (void *) srcBuf); //cv::imdecode(rawData, cv::IMREAD_COLOR);
+    cv::Mat image (1024, 1024, CV_8UC3, (void *) srcBuf); //cv::imdecode(rawData, cv::IMREAD_COLOR);
 
     //U800stackoverflow.com/questions/51287413/how-do-i-properly-use-the-openh264-usage-code-example-for-encoding
     //Thanks to TimSC on StackOverflow
@@ -506,8 +506,8 @@ void svrAppl::createCamera() {
     firstMouse = true;
     yaw   = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
     pitch =  0.0f;
-    lastX =  800.0f / 2.0;
-    lastY =  600.0 / 2.0;
+    lastX =  1024.0f / 2.0;
+    lastY =  1024.0 / 2.0;
     fov   =  45.0f;
 
 
