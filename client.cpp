@@ -252,6 +252,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     
     while (!glfwWindowShouldClose(window))
     {
+      if (textureBufferList.empty()) {
+        continue;
+      }
        
       float dataTime = glfwGetTime();
 
@@ -278,7 +281,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glfwPollEvents();
 
 
-      delete(uncompressedBuffer);
+      //delete(uncompressedBuffer);
       m_mutex.acquire();
       if (textureBufferList.size() > 1) {
         textureBufferList.erase(textureBufferList.begin());
@@ -437,88 +440,85 @@ FrameWorker::run_test (void)
         int total = 0;
 
       while(true) {
-        float startTime = glfwGetTime();
-        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
+        try {
+          float startTime = glfwGetTime();
+          CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
 
-        long unsigned int _headerSize = server->sendHeaderSize();      
-        Simple_Server::header* headerBuff = server->sendHeaderData();
-        unsigned char *hBuf = (*headerBuff).get_buffer(true);
+          long unsigned int _headerSize = server->sendHeaderSize();      
+          Simple_Server::header* headerBuff = server->sendHeaderData();
+          unsigned char *hBuf = (*headerBuff).get_buffer(true);
 
-        long unsigned int _pixelSize = server->sendJpegSize();      
-        Simple_Server::pixels* pixelBuff = server->sendImageData();
-        unsigned char *pBuf = (*pixelBuff).get_buffer(true);
+          long unsigned int _pixelSize = server->sendJpegSize();      
+          Simple_Server::pixels* pixelBuff = server->sendImageData();
+          unsigned char *pBuf = (*pixelBuff).get_buffer(true);
 
-        float dataTime = glfwGetTime();
-
-        std::cout << "TAO DATA TIME: \t" << dataTime - startTime << "\t";
-
-        //input: encoded bit stream length; should include the size of start code prefix
-        int iSize  = _pixelSize;
-        
-        //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
-
-        uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
-        uint8_t uiStartCode[4] = {0, 0, 0, 1};
-
-        memcpy(newBuf, hBuf, _headerSize);
-        memcpy(newBuf+_headerSize, pBuf, iSize);
-        memcpy (newBuf + _headerSize + iSize, &uiStartCode[0], 4);
-
-
-        DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
-
-        if (iRet != 0) {
-          std::cout << iRet << std::endl;
-          //return -1;
-        }
-        
-        if (iRet == 0) {
-          //std::cout << "SUCCESS" << std::endl;
-        }
-
-        float decodeTime = glfwGetTime();
-
-        std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
-
-
-        if (sDstBufInfo.iBufferStatus==1){
-            
-            //output handling (pData[0], pData[1], pData[2])
-            //std::cout << "SUCCESS" << std::endl;
-
-            int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-            int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-            //std::cout << "0 >>" << stride0 << std::endl;
-            //std::cout << "1 >>" << stride1 << std::endl;
-            //I don't know how I got to the magic 2400 below -- it's width * color, which I've seen elsewhere...
-            std::cout << "WIDTH >> \t" << SCR_WIDTH << "\t";
-            std::cout << "HEIGHT >> \t" << SCR_HEIGHT << "\t";
-            std::cout << "pData[0] >> \t" << pData[0][0] << "\t";
-            std::cout << "pData[1] >>" << pData[1][0] << "\t";
-            std::cout << "pData[2] >> \t" << pData[2][0] << "\t";
-            std::cout << "stride0 >> \t" << stride0 << "\t";
-            std::cout << "stride1 >> \t" << stride1 << std::endl;
-           yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
-
-            m_mutex.acquire();
-            textureBufferList.push_back(uncompressedBuffer); 
-            m_mutex.release();
-
-            std::cout << "YUV2RGB TIME:\t" << glfwGetTime() - decodeTime << std::endl;
-            success++;
-         }
-        else { 
-          std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
-          std::cout << "DIDN'T COMPLETE " << std::endl;
-          }
-
-          
-
-          total++;
-
-          std::cout << "SUCCESS\t" << success << "\tTOTAL\t" << total << std::endl;
           usleep(8333);
 
+          float dataTime = glfwGetTime();
+
+          std::cout << "TAO DATA TIME: \t" << dataTime - startTime << "\t";
+
+          //input: encoded bit stream length; should include the size of start code prefix
+          int iSize  = _pixelSize;
+          
+          //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
+
+          uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
+          uint8_t uiStartCode[4] = {0, 0, 0, 1};
+
+          memcpy(newBuf, hBuf, _headerSize);
+          memcpy(newBuf+_headerSize, pBuf, iSize);
+          memcpy(newBuf + _headerSize + iSize, &uiStartCode[0], 4);
+
+
+          DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
+
+          if (iRet != 0) {
+            std::cout << iRet << std::endl;
+            //return -1;
+          }
+          
+          if (iRet == 0) {
+            //std::cout << "SUCCESS" << std::endl;
+          }
+
+          float decodeTime = glfwGetTime();
+
+          std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
+
+
+          if (sDstBufInfo.iBufferStatus==1){
+              //output handling (pData[0], pData[1], pData[2])
+
+              int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
+              int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+              //the third stride is width * 3
+            yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
+
+              m_mutex.acquire();
+              textureBufferList.push_back(uncompressedBuffer); 
+              m_mutex.release();
+
+              std::cout << "YUV2RGB TIME:\t" << glfwGetTime() - decodeTime << std::endl;
+              success++;
+          }
+          else { 
+            std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
+            std::cout << "DIDN'T COMPLETE " << std::endl;
+            }
+
+            
+
+            total++;
+
+            std::cout << "SUCCESS\t" << success << "\tTOTAL\t" << total << std::endl;
+        }
+         catch (const CORBA::Exception& ex)
+          {
+            ex._tao_print_exception ("FrameException caught in thread (%t)\n");
+
+
+          }
 
 
 
