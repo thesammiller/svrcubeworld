@@ -360,7 +360,7 @@ void svrAppl::render() {
 
     // GLM Update Camera Postion
     // -------------------------
-    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    glm::mat4 view = updateView();// = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -513,7 +513,41 @@ void svrAppl::createCamera() {
 
 }
 
-void svrAppl::updateView(double xpos, double ypos) {
+glm::mat4 svrAppl::updateView() {
+
+    // Position.x
+    // Postion.y
+    // Position.z
+    //Orientation.x
+    //Orientation.y
+    //Orientation.z
+    //Orientation.w
+
+    ovrPosef *headpose = (ovrPosef *) malloc (sizeof(ovrPosef));
+    headpose->Position.x = headpose_data[0];
+    headpose->Position.y = headpose_data[1];
+    headpose->Position.z = headpose_data[2];
+    headpose->Orientation.x = headpose_data[3];
+    headpose->Orientation.y = headpose_data[4];
+    headpose->Orientation.z = headpose_data[5];
+    headpose->Orientation.w = headpose_data[6];
+
+    ovrMatrix4f rotation = ovrMatrix4f_CreateFromQuaternion(&headpose->Orientation);
+    ovrMatrix4f translation = ovrMatrix4f_CreateTranslation(headpose_data[0], headpose_data[1], headpose_data[2]);
+    ovrMatrix4f result = ovrMatrix4f_Multiply(&translation, &rotation);
+
+    glm::mat4 glm_result = glm::mat4(1.0f);
+    glm_result[0] = glm::vec4(result.M[0][0], result.M[0][1], result.M[0][2], result.M[0][3]);
+    glm_result[1] = glm::vec4(result.M[1][0], result.M[1][1], result.M[1][2], result.M[1][3]);
+    glm_result[2] = glm::vec4(result.M[2][0], result.M[2][1], result.M[2][2], result.M[2][3]);
+    glm_result[3] = glm::vec4(result.M[3][0], result.M[3][1], result.M[3][2], result.M[3][3]);
+    
+    return glm_result;
+    
+
+    /*
+    float xpos = pose[0];
+    float ypos = pose[1];
 
     //std::cout << "Moving mouse" << std::endl;
     if (firstMouse)
@@ -543,4 +577,5 @@ void svrAppl::updateView(double xpos, double ypos) {
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
+    */
 }

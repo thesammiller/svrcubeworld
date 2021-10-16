@@ -68,7 +68,7 @@ class svrAppl {
         int createWorld();
         void createCamera();
         void createFramebuffer();
-        void updateView(double xpos, double ypos);
+        glm::mat4 updateView();
         void render();
         void createImage();
         
@@ -133,6 +133,8 @@ class svrAppl {
 
         ISVCEncoder*  encoder_;
         SEncParamBase param;
+
+        float headpose_data[7];
 
        
 

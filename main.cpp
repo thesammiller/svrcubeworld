@@ -85,9 +85,8 @@ int main(int argc, char* argv[])
         //Controller Input
         // -----------------
         // Take the server data and update the view based on controller input
-        float in_data[7];
-        myServer.server_impl.get_data(in_data);
-        myAppl.updateView(in_data[0], in_data[1]);
+        
+        myServer.server_impl.get_data(myAppl.headpose_data);
         
         // OpenGL Draw & Create Image
         // --------------
