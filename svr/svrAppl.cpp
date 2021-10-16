@@ -555,7 +555,7 @@ void svrAppl::updateView() {
     */
     
     float xpos = headpose_data[3];
-    float ypos = headpose_data[4];
+    float ypos = headpose_data[4] * -1.0f;
 
     //std::cout << "Moving mouse" << std::endl;
     if (firstMouse)
