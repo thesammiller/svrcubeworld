@@ -529,7 +529,7 @@ void svrAppl::updateView(double xpos, double ypos) {
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-    float sensitivity = 2000.0f; //0.1f;
+    float sensitivity = 100.0f; //0.1f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     yaw += xoffset;
