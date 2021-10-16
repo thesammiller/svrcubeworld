@@ -557,6 +557,7 @@ void svrAppl::updateView() {
     float xpos = headpose_data[3];
     float ypos = headpose_data[4] * -1.0f;
 
+    
     //std::cout << "Moving mouse" << std::endl;
     if (firstMouse)
     {
@@ -571,7 +572,7 @@ void svrAppl::updateView() {
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
-    float sensitivity = 100.0f; //0.1f;
+    float sensitivity = 500.0f; //0.1f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
     yaw += xoffset;
@@ -585,4 +586,9 @@ void svrAppl::updateView() {
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
+
+    float value = headpose_data[3] < 0 ? -1.0f : 1.0f;
+    cameraPos -= value * glm::normalize(glm::cross(cameraFront, cameraUp));  
+
+
 }
