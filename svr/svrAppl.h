@@ -68,7 +68,7 @@ class svrAppl {
         int createWorld();
         void createCamera();
         void createFramebuffer();
-        glm::mat4 updateView();
+        void updateView();
         void render();
         void createImage();
         

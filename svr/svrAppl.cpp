@@ -360,7 +360,9 @@ void svrAppl::render() {
 
     // GLM Update Camera Postion
     // -------------------------
-    glm::mat4 view = updateView();// = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    updateView();
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp); 
+    
     unsigned int viewLoc = glGetUniformLocation(program.ID,"view");
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
@@ -513,7 +515,10 @@ void svrAppl::createCamera() {
 
 }
 
-glm::mat4 svrAppl::updateView() {
+void svrAppl::updateView() {
+
+    cameraPos = glm::vec3(headpose_data[0], headpose_data[1], headpose_data[3]);
+    //std::cout << headpose_data[0] << std::endl;
 
     // Position.x
     // Postion.y
@@ -523,6 +528,7 @@ glm::mat4 svrAppl::updateView() {
     //Orientation.z
     //Orientation.w
 
+    /*
     ovrPosef *headpose = (ovrPosef *) malloc (sizeof(ovrPosef));
     headpose->Position.x = headpose_data[0];
     headpose->Position.y = headpose_data[1];
@@ -546,11 +552,10 @@ glm::mat4 svrAppl::updateView() {
     delete(headpose);
     
     return glm_result;
+    */
     
-
-    /*
-    float xpos = pose[0];
-    float ypos = pose[1];
+    float xpos = headpose_data[3];
+    float ypos = headpose_data[4];
 
     //std::cout << "Moving mouse" << std::endl;
     if (firstMouse)
@@ -580,5 +585,4 @@ glm::mat4 svrAppl::updateView() {
     direction.y = sin(glm::radians(pitch));
     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(direction);
-    */
 }
