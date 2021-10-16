@@ -530,17 +530,20 @@ glm::mat4 svrAppl::updateView() {
     headpose->Orientation.x = headpose_data[3];
     headpose->Orientation.y = headpose_data[4];
     headpose->Orientation.z = headpose_data[5];
-    headpose->Orientation.w = headpose_data[6];
+    headpose->Orientation.w = 1.0f;
 
     ovrMatrix4f rotation = ovrMatrix4f_CreateFromQuaternion(&headpose->Orientation);
     ovrMatrix4f translation = ovrMatrix4f_CreateTranslation(headpose_data[0], headpose_data[1], headpose_data[2]);
-    ovrMatrix4f result = ovrMatrix4f_Multiply(&translation, &rotation);
+    ovrMatrix4f transform = ovrMatrix4f_Multiply(&translation, &rotation);
+    ovrMatrix4f result = ovrMatrix4f_Inverse(&transform);
 
     glm::mat4 glm_result = glm::mat4(1.0f);
     glm_result[0] = glm::vec4(result.M[0][0], result.M[0][1], result.M[0][2], result.M[0][3]);
     glm_result[1] = glm::vec4(result.M[1][0], result.M[1][1], result.M[1][2], result.M[1][3]);
     glm_result[2] = glm::vec4(result.M[2][0], result.M[2][1], result.M[2][2], result.M[2][3]);
     glm_result[3] = glm::vec4(result.M[3][0], result.M[3][1], result.M[3][2], result.M[3][3]);
+
+    delete(headpose);
     
     return glm_result;
     

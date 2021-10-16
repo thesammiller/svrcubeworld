@@ -50,7 +50,10 @@ int main(int argc, char* argv[])
     // Create the CubeWorld vertex data
     myAppl.createWorld();
     // Create the GLM Matrices for Cameras, set camera position
+    float hp[7] = { 1.0f, 1.0f, -2.0f, 1.0f, 1.0f, 1.0f, 1.0f };
+    memcpy(myAppl.headpose_data, hp, sizeof(float) * 7);
     myAppl.createCamera();
+
     myAppl.createFramebuffer();
 
     //Create a worker thread to run asynchronously
