@@ -568,7 +568,7 @@ void svrAppl::updateView() {
 
     //std::cout << "XPOS:/t" << xpos << "\tYPOS:\t" << ypos << std::endl;
         
-    float xoffset = xoffset = xpos - lastX;
+    float xoffset = xoffset = lastX-xpos;
     float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
