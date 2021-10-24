@@ -196,7 +196,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     glfwMakeContextCurrent(window);
 
-        Shader renderBufferShader("shaders/renderBuffer.vs", "shaders/renderBuffer.fs");
+        Shader renderBufferShader("shaders/renderBuffer.vs", "shaders/yuvBuffer.fs");
 
       float quadVertices[] = {
         // positions  //texcoords
@@ -221,8 +221,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 
-    unsigned int pixelTexture;
-    glGenTextures(1, &pixelTexture);
+    //unsigned int pixelTexture;
+    //glGenTextures(1, &pixelTexture);
 
     
     int frame = 0;
@@ -269,10 +269,53 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glBindVertexArray(quadVAO);
 
       m_mutex.acquire();
-      CORBA::Octet* uncompressedBuffer = (*textureBufferList.begin());
+      CORBA::Octet* pData0 = (*textureBufferList.begin());
+      CORBA::Octet* pData1 = (*textureBufferList.begin());
+      CORBA::Octet* pData2 = (*textureBufferList.begin());
       m_mutex.release();
-      pixelTexture = loadTexture(uncompressedBuffer);
-      glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+      
+      //pixelTexture = loadTexture(uncompressedBuffer);
+      //glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+
+      // SEND THE Y U V BUFFERS TO OPENGL AS UNIFORMS
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      unsigned int p[3];
+      glGenTextures(3, p);
+
+      unsigned int uniforms[3];
+      glGetnUniformiv(renderBufferShader.ID, uniforms[0], 1024 * 1024, 0);
+            glGetnUniformiv(renderBufferShader.ID, uniforms[1], 1024/2 * 1024/2, 0);
+                  glGetnUniformiv(renderBufferShader.ID, uniforms[2], 1024/2 * 1024/2, 0);
+
+      glBindTexture(GL_TEXTURE_2D, p[0]);
+      glTexImage2D(GL_TEXTURE_2D, 0,  GL_LUMINANCE, 1024, 1024, 0,  GL_LUMINANCE, GL_UNSIGNED_BYTE, pData0);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glUniform1i(uniforms[0], 0); 
+
+      glBindTexture(GL_TEXTURE_2D, p[1]);
+      glTexImage2D(GL_TEXTURE_2D, 0,  GL_LUMINANCE, 1024/2, 1024/2, 0,  GL_LUMINANCE, GL_UNSIGNED_BYTE, pData1);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glUniform1i(uniforms[1], 1); 
+
+      glBindTexture(GL_TEXTURE_2D, p[2]);
+      glTexImage2D(GL_TEXTURE_2D, 0,  GL_LUMINANCE, 1024/2, 1024/2, 0,  GL_LUMINANCE, GL_UNSIGNED_BYTE, pData2);
+
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glUniform1i(uniforms[2], 2); 
+
+
+
+
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
       
@@ -283,7 +326,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       //delete(uncompressedBuffer);
       m_mutex.acquire();
-      if (textureBufferList.size() > 1) {
+      if (textureBufferList.size() > 3) {
+        textureBufferList.erase(textureBufferList.begin());
+        textureBufferList.erase(textureBufferList.begin());
         textureBufferList.erase(textureBufferList.begin());
       }
       m_mutex.release();
@@ -493,10 +538,12 @@ FrameWorker::run_test (void)
               int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
               int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
               //the third stride is width * 3
-            yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
+             //yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
 
               m_mutex.acquire();
-              textureBufferList.push_back(uncompressedBuffer); 
+              textureBufferList.push_back(pData[0]); 
+              textureBufferList.push_back(pData[1]);
+              textureBufferList.push_back(pData[2]);
               m_mutex.release();
 
               std::cout << "YUV2RGB TIME:\t" << glfwGetTime() - decodeTime << std::endl;
