@@ -265,7 +265,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       //Clear screen (to white)
 
 
-      
+    //THANK YOU TO
+    //https://github.com/moonyl/yuv-player/blob/master/player/yuv-player.cpp
+    //FOR THE YUV LOGIC HERE
+      m_mutex.acquire();
      unsigned int textureY, textureU, textureV;
     glGenTextures(1, &textureY);
     glBindTexture(GL_TEXTURE_2D, textureY);
@@ -297,14 +300,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
     glGenerateMipmap(GL_TEXTURE_2D);
     textureBufferList.erase(textureBufferList.begin());
+    m_mutex.release();
+
+    glUseProgram(renderBufferShader.ID);
 
     glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureY"), 0);
 	glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureU"), 1);
 	glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureV"), 2);
 
+  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
-
 
   glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, textureY);
@@ -314,9 +321,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, textureV);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
 
       glUseProgram(renderBufferShader.ID);
         glBindVertexArray(quadVAO);
@@ -333,12 +337,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
 
       if ( (old_time + 1) < glfwGetTime() ) {
-            std::cout << "FPS " << frame << std::endl;
+            std::cout << "CLIENT FPS " << frame << std::endl;
             frame = 0;
             old_time = glfwGetTime();
             
         }
         ++frame;
+
+        usleep(16333);
     
   }
 
@@ -534,7 +540,6 @@ FrameWorker::run_test (void)
               textureBufferList.push_back(pData[2]);
               m_mutex.release();
 
-              std::cout << "YUV2RGB TIME:\t" << 0 << std::endl;
               success++;
           }
           else { 
