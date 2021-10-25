@@ -263,41 +263,64 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glDisable(GL_DEPTH_TEST);
       //Clear screen (to white)
-      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT);
-      //Bind the Framebuffer Quad Vertex
-      glBindVertexArray(quadVAO);
-      glEnable(GL_TEXTURE_2D);
+
 
       
-      unsigned int _uniformSamplers[3];
-      _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "YTex");
-      _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "UTex");
-      _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "VTex");
+     unsigned int textureY, textureU, textureV;
+    glGenTextures(1, &textureY);
+    glBindTexture(GL_TEXTURE_2D, textureY);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+    // set texture filtering parameters
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
 
-      unsigned int _textures[3];
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  
-      glGenTextures(3, _textures);  
-      //const unsigned char *pixels[3] = { pData0, pData1, pData2 };  
-      const unsigned int widths[3]  = { SCR_WIDTH, SCR_WIDTH / 2, SCR_WIDTH / 2 };  
-      const unsigned int heights[3] = { SCR_HEIGHT , SCR_HEIGHT / 2, SCR_HEIGHT / 2 };  
-      for (int i = 0; i < 3; ++i) {  
-          m_mutex.acquire();
-          glBindTexture(GL_TEXTURE_RECTANGLE_NV, _textures[i]);  
-          glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_LUMINANCE, widths[i],heights[i],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,*textureBufferList.begin());  
-          //The data is there... 
-          //std::cout << *textureBufferList.begin() << std::endl;
-          glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
-          glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  
-          glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  
-          glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
-          glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_DECAL); 
-          glActiveTexture(GL_TEXTURE0 + i);  
-          glBindTexture(GL_TEXTURE_RECTANGLE_NV, _textures[i]);  
-          glUniform1i(_uniformSamplers[i], i);  
-          textureBufferList.erase(textureBufferList.begin());
-          m_mutex.release();
-      }
+    glGenTextures(1, &textureU);
+    glBindTexture(GL_TEXTURE_2D, textureU);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+    
+    // set texture filtering parameters
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    textureBufferList.erase(textureBufferList.begin());
+
+    glGenTextures(1, &textureV);
+    glBindTexture(GL_TEXTURE_2D, textureV);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+    // set texture filtering parameters
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+    glGenerateMipmap(GL_TEXTURE_2D);
+    textureBufferList.erase(textureBufferList.begin());
+
+    glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureY"), 0);
+	glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureU"), 1);
+	glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureV"), 2);
+
+      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT);
+
+
+  glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textureY);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textureU);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, textureV);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+
+      glUseProgram(renderBufferShader.ID);
+        glBindVertexArray(quadVAO);
+
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
       
