@@ -1,33 +1,23 @@
-//precision lowp float;
 in vec2 TexCoords;
+ uniform sampler2DRect Ytex;
+ uniform sampler2DRect Utex,Vtex;
 
+void main(void) {
+    float nx,ny,r,g,b,y,u,v;
+    vec4 txl,ux,vx;
+    nx=TexCoords.x;
+    ny=1024.0-TexCoords.y;
+    y=texture2DRect(Ytex,vec2(nx,ny)).r;
+    u=texture2DRect(Utex,vec2(nx/2.0,ny/2.0)).r;
+    v=texture2DRect(Vtex,vec2(nx/2.0,ny/2.0)).r;
 
-uniform sampler2D samplerY;
-uniform sampler2D samplerU;
-uniform sampler2D samplerV;
+    y=1.1643*(y-0.0625);
+    u=u-0.5;
+    v=v-0.5;
 
+    r=y+1.5958*v;
+    g=y-0.39173*u-0.81290*v;
+    b=y+2.017*u;
 
-void main() {
-    float r, g, b, y, u, v, fYmul;
-    
-    vec3 rgb, yuv;
-
-    yuv.x = texture2D(samplerY, TexCoords).r;
-    yuv.y = texture2D(samplerU, TexCoords).r;
-    yuv.z = texture2D(samplerV, TexCoords).r;
-    
-    const vec3 offset = vec3(-0.0625, -0.5, -0.5);
-    // RGB coefficients
-    const vec3 Rcoeff = vec3( 1.164, 0.000,  1.596);
-    const vec3 Gcoeff = vec3( 1.164, -0.391, -0.813);
-    const vec3 Bcoeff = vec3( 1.164, 2.018,  0.000);
-    
-    yuv = clamp(yuv, 0.0, 1.0);
-    yuv += offset;
-
-    rgb.r = dot(yuv, Rcoeff);
-    rgb.g = dot(yuv, Gcoeff);
-    rgb.b = dot(yuv, Bcoeff);
-    gl_FragColor = vec4(rgb, 1.0);
-    //gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-}
+    gl_FragColor=vec4(r,g,b,1.0);
+  }

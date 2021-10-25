@@ -267,73 +267,37 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glClear(GL_COLOR_BUFFER_BIT);
       //Bind the Framebuffer Quad Vertex
       glBindVertexArray(quadVAO);
+      glEnable(GL_TEXTURE_2D);
 
-      m_mutex.acquire();
-      CORBA::Octet* pData0 = (unsigned char *) malloc (1024 * 1024); 
-      memcpy(pData0, *textureBufferList.begin(), 1024 * 1024 * sizeof(unsigned char));
-      textureBufferList.erase(textureBufferList.begin());
-      CORBA::Octet* pData1 = (unsigned char *) malloc ( 512 * 512);
-      memcpy(pData1, *textureBufferList.begin(), 512 * 512 * sizeof(unsigned char));
-      textureBufferList.erase(textureBufferList.begin());
-      CORBA::Octet* pData2 = (unsigned char *) malloc (512 * 512);
-      memcpy(pData2, *textureBufferList.begin(), 512 * 512 * sizeof(unsigned char));
-      textureBufferList.erase(textureBufferList.begin());
-      m_mutex.release();
       
-      //pixelTexture = loadTexture(uncompressedBuffer);
-      //glBindTexture(GL_TEXTURE_2D, pixelTexture); 
+      unsigned int _uniformSamplers[3];
+      _uniformSamplers[0] = glGetUniformLocation(renderBufferShader.ID, "YTex");
+      _uniformSamplers[1] = glGetUniformLocation(renderBufferShader.ID, "UTex");
+      _uniformSamplers[2] = glGetUniformLocation(renderBufferShader.ID, "VTex");
 
-      // SEND THE Y U V BUFFERS TO OPENGL AS UNIFORMS
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      unsigned int p[3];
-      glGenTextures(3, p);
-
-
-      unsigned int sy = glGetUniformLocation(renderBufferShader.ID, "samplerY");
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, p[0]);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, SCR_WIDTH, SCR_HEIGHT, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pData0);
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-      glUniform1i(sy, 0); 
-
-
-      unsigned int su = glGetUniformLocation(renderBufferShader.ID, "samplerU");
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, p[0]);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, SCR_WIDTH/2, SCR_HEIGHT/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pData1);
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-      glUniform1i(su, 1); 
-
-
-      unsigned int sv = glGetUniformLocation(renderBufferShader.ID, "samplerV");
-      glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, p[2]);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, SCR_WIDTH/2, SCR_HEIGHT/2, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, pData2);
-      glGenerateMipmap(GL_TEXTURE_2D);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-
-      glUniform1i(sv, 2); 
-
-
-
-
+      unsigned int _textures[3];
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);  
+      glGenTextures(3, _textures);  
+      //const unsigned char *pixels[3] = { pData0, pData1, pData2 };  
+      const unsigned int widths[3]  = { SCR_WIDTH, SCR_WIDTH / 2, SCR_WIDTH / 2 };  
+      const unsigned int heights[3] = { SCR_HEIGHT , SCR_HEIGHT / 2, SCR_HEIGHT / 2 };  
+      for (int i = 0; i < 3; ++i) {  
+          m_mutex.acquire();
+          glBindTexture(GL_TEXTURE_RECTANGLE_NV, _textures[i]);  
+          glTexImage2D(GL_TEXTURE_RECTANGLE_NV, 0, GL_LUMINANCE, widths[i],heights[i],0,GL_LUMINANCE,GL_UNSIGNED_BYTE,*textureBufferList.begin());  
+          //The data is there... 
+          //std::cout << *textureBufferList.begin() << std::endl;
+          glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+          glTexParameteri(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  
+          glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);  
+          glTexParameterf(GL_TEXTURE_RECTANGLE_NV, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); 
+          glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_DECAL); 
+          glActiveTexture(GL_TEXTURE0 + i);  
+          glBindTexture(GL_TEXTURE_RECTANGLE_NV, _textures[i]);  
+          glUniform1i(_uniformSamplers[i], i);  
+          textureBufferList.erase(textureBufferList.begin());
+          m_mutex.release();
+      }
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
       
@@ -341,29 +305,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glfwSwapBuffers(window);
       glfwPollEvents();
 
-      delete(pData0);
-      delete(pData1);
-      delete(pData2);
-
-
-      //delete(uncompressedBuffer);
-      m_mutex.acquire();
-      if (textureBufferList.size() > 3) {
-        
-        //textureBufferList.erase(textureBufferList.begin());
-        //textureBufferList.erase(textureBufferList.begin());
-      }
-      m_mutex.release();
-      //m_mutex.release();
-
-      //Release GL data
-      //glDeleteTextures(1, &pixelTexture);
       glFinish();
       glFlush();
-
-
-      //Clear the cache every 0.005 seconds
-      //Keeps the client in real time without frame jitter
 
 
       if ( (old_time + 1) < glfwGetTime() ) {
