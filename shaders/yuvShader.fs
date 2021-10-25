@@ -1,10 +1,10 @@
 #version 330 core
 
+out vec4 FragColor;
 in vec2 TexCoords;
 uniform sampler2D textureY;
 uniform sampler2D textureU;
 uniform sampler2D textureV;
-
 
 void main()
 {
@@ -21,6 +21,6 @@ void main()
 	g=y-0.39173*u-0.81290*v;
 	b=y+2.017*u;
 
-	gl_FragColor = vec4(r, g, b, 1.0);
+	FragColor = vec4(r, g, b, 1.0);
 
 }
