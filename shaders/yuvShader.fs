@@ -18,14 +18,23 @@ uniform sampler2D textureV;
 const vec3 offset = vec3(-0.0627451017, -0.501960814, -0.501960814);
 //const vec3 offset = vec3(-0.0625, -0.5, -0.5);
 
+//BT709
 // RGB coefficients \n"                           
 //const vec3 Rcoeff = vec3(1.1644,  0.000,  1.7927);
 //const vec3 Gcoeff = vec3(1.1644, -0.2132, -0.5329);
 //const vec3 Bcoeff = vec3(1.1644,  2.1124,  0.000);
 
-const vec3 Rcoeff = vec3(1.1644,  0.000,  1.596);           \
-const vec3 Gcoeff = vec3(1.1644, -0.3918, -0.813);          \
-const vec3 Bcoeff = vec3(1.1644,  2.0172,  0.000);
+
+//BT601
+//const vec3 Rcoeff = vec3(1.1644,  0.000,  1.596);           \
+//const vec3 Gcoeff = vec3(1.1644, -0.3918, -0.813);          \
+//const vec3 Bcoeff = vec3(1.1644,  2.0172,  0.000);
+
+
+//JPEG
+const vec3 Rcoeff = vec3(1,  0.000,  1.402);
+const vec3 Gcoeff = vec3(1, -0.3441, -0.7141);
+const vec3 Bcoeff = vec3(1,  1.772,  0.000);
 
 
 void main()
