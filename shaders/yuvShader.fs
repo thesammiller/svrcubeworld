@@ -15,12 +15,12 @@ uniform sampler2D textureV;
 const vec3 R_cf = vec3(1.164383,  0.000000,  1.596027);
 const vec3 G_cf = vec3(1.164383, -0.391762, -0.812968);
 const vec3 B_cf = vec3(1.164383,  2.017232,  0.000000);
-const vec3 offset = vec3(-1.0 * ( 1.0 - (1088.0/1024.0)), -1.0 * (544.0/1024.0), -1.0 * (544.0/1024.0));
+const vec3 offset = vec3(-0.0625, -0.5, -0.5);
 
 void main() {
-  float y = texture(textureY, TexCoords+vec2(offset.x, offset.x)).r;
-  float u = texture(textureU, TexCoords+vec2(offset.y, offset.y)).r;
-    float v = texture(textureV, TexCoords+vec2(offset.y, offset.y)).r;
+  float y = texture(textureY, TexCoords).r;
+  float u = texture(textureU, TexCoords).r;
+    float v = texture(textureV, TexCoords).r;
  vec3 yuv = vec3(y,u,v);
   yuv += offset;
   FragColor = vec4(0.0, 0.0, 0.0, 1.0);
