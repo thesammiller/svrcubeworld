@@ -264,66 +264,71 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glDisable(GL_DEPTH_TEST);
       //Clear screen (to white)
 
-
-    //THANK YOU TO
-    //https://github.com/moonyl/yuv-player/blob/master/player/yuv-player.cpp
-    //FOR THE YUV LOGIC HERE
+      //ACQUIRE TEXTUREBUFFERLIST MUTEX
       m_mutex.acquire();
-     unsigned int textureY, textureU, textureV;
-    glGenTextures(1, &textureY);
-    glBindTexture(GL_TEXTURE_2D, textureY);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-    // set texture filtering parameters
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    
 
-    glGenTextures(1, &textureU);
-    glBindTexture(GL_TEXTURE_2D, textureU);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-    
-    // set texture filtering parameters
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    textureBufferList.erase(textureBufferList.begin());
 
-    glGenTextures(1, &textureV);
-    glBindTexture(GL_TEXTURE_2D, textureV);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
-    // set texture filtering parameters
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
-    glGenerateMipmap(GL_TEXTURE_2D);
-    textureBufferList.erase(textureBufferList.begin());
-    m_mutex.release();
+      //THANK YOU TO
+      //https://github.com/moonyl/yuv-player/blob/master/player/yuv-player.cpp
+      //FOR THE YUV LOGIC HERE
 
-    glUseProgram(renderBufferShader.ID);
+      unsigned int textureY, textureU, textureV;
+      glGenTextures(1, &textureY);
+      glBindTexture(GL_TEXTURE_2D, textureY);
+      // set the texture wrapping parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+      // set texture filtering parameters
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+      glGenerateMipmap(GL_TEXTURE_2D);
+      
 
-    glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureY"), 0);
-	glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureU"), 1);
-	glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureV"), 2);
+      glGenTextures(1, &textureU);
+      glBindTexture(GL_TEXTURE_2D, textureU);
+      // set the texture wrapping parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+      
+      // set texture filtering parameters
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+      glGenerateMipmap(GL_TEXTURE_2D);
+      textureBufferList.erase(textureBufferList.begin());
 
-  glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      glGenTextures(1, &textureV);
+      glBindTexture(GL_TEXTURE_2D, textureV);
+      // set the texture wrapping parameters
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
+      // set texture filtering parameters
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+      glGenerateMipmap(GL_TEXTURE_2D);
+      textureBufferList.erase(textureBufferList.begin());
+      
+      // RELEASE MUTEX
+      m_mutex.release();
+
+      glUseProgram(renderBufferShader.ID);
+
+      glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureY"), 0);
+      glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureU"), 1);
+      glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureV"), 2);
+
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
 
-  glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureY);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, textureY);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, textureU);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, textureU);
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, textureV);
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, textureV);
 
       glUseProgram(renderBufferShader.ID);
-        glBindVertexArray(quadVAO);
+      glBindVertexArray(quadVAO);
 
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -344,7 +349,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
         ++frame;
 
-        usleep(16333);
+        //Quick hack to cut down framerate
+        //usleep(16333);
     
   }
 
@@ -531,6 +537,9 @@ FrameWorker::run_test (void)
 
               int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
               int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
+
+              std::cout << "STRIDE0\t" << stride0;
+              std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
               //the third stride is width * 3
              //yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
 
