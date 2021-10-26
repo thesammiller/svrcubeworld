@@ -274,12 +274,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       unsigned int textureY, textureU, textureV;
       glGenTextures(1, &textureY);
-      glPixelStorei(GL_UNPACK_ROW_LENGTH, 1088);
+      
       glBindTexture(GL_TEXTURE_2D, textureY);
       // set the texture wrapping parameters
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
       // set texture filtering parameters
+      glPixelStorei(GL_UNPACK_ROW_LENGTH, 1088);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
@@ -287,7 +288,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
 
       glGenTextures(1, &textureU);
-      glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
+      
       glBindTexture(GL_TEXTURE_2D, textureU);
       
       // set the texture wrapping parameters
@@ -295,18 +296,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
       
       // set texture filtering parameters
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
 
       glGenTextures(1, &textureV);
-      glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
+
       glBindTexture(GL_TEXTURE_2D, textureV);
       
       // set the texture wrapping parameters
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
       // set texture filtering parameters
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       textureBufferList.erase(textureBufferList.begin());
@@ -548,8 +551,9 @@ FrameWorker::run_test (void)
               int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
               int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
 
-              //std::cout << "STRIDE0\t" << stride0;
-              //std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
+              std::cout << std::endl;
+              std::cout << "STRIDE0\t" << stride0;
+              std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
               //the third stride is width * 3
              //yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
 
