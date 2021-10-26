@@ -345,6 +345,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glUseProgram(renderBufferShader.ID);
       glBindVertexArray(quadVAO);
 
+      glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
+      glPixelStorei (GL_PACK_ALIGNMENT, 1);
+      glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
+      glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
+
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
       
