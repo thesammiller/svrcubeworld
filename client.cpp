@@ -274,6 +274,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       unsigned int textureY, textureU, textureV;
       glGenTextures(1, &textureY);
+      glPixelStorei(GL_UNPACK_ROW_LENGTH, 1088);
       glBindTexture(GL_TEXTURE_2D, textureY);
       // set the texture wrapping parameters
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
@@ -281,10 +282,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // set texture filtering parameters
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
+      textureBufferList.erase(textureBufferList.begin());
       
 
       glGenTextures(1, &textureU);
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
       glBindTexture(GL_TEXTURE_2D, textureU);
+      
       // set the texture wrapping parameters
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
@@ -292,10 +297,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // set texture filtering parameters
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
-      textureBufferList.erase(textureBufferList.begin());
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
 
       glGenTextures(1, &textureV);
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
       glBindTexture(GL_TEXTURE_2D, textureV);
+      
       // set the texture wrapping parameters
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_LINEAR);	// set texture wrapping to GL_REPEAT (default wrapping method)
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_LINEAR);
@@ -303,6 +310,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       textureBufferList.erase(textureBufferList.begin());
+      glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
       
       // RELEASE MUTEX
       m_mutex.release();
@@ -484,6 +492,7 @@ FrameWorker::run_test (void)
         int success = 0;
         int total = 0;
 
+
       while(true) {
         try {
           float startTime = glfwGetTime();
@@ -508,14 +517,15 @@ FrameWorker::run_test (void)
           
           //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
-          uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
-          uint8_t uiStartCode[4] = {0, 0, 0, 1};
+      
+            uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
+            uint8_t uiStartCode[4] = {0, 0, 0, 1};
 
-          memcpy(newBuf, hBuf, _headerSize);
-          memcpy(newBuf+_headerSize, pBuf, iSize);
-          memcpy(newBuf + _headerSize + iSize, &uiStartCode[0], 4);
-
-
+            memcpy(newBuf, hBuf, _headerSize);
+            memcpy(newBuf+_headerSize, pBuf, iSize);
+            memcpy(newBuf + _headerSize + iSize, &uiStartCode[0], 4);
+  
+       
           DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
 
           if (iRet != 0) {
@@ -538,8 +548,8 @@ FrameWorker::run_test (void)
               int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
               int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
 
-              std::cout << "STRIDE0\t" << stride0;
-              std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
+              //std::cout << "STRIDE0\t" << stride0;
+              //std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
               //the third stride is width * 3
              //yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
 
