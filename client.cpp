@@ -32,7 +32,6 @@
 
 const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 1024;
-
 std::vector<CORBA::Octet*> textureBufferList;
 
 
@@ -277,12 +276,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       
       glBindTexture(GL_TEXTURE_2D, textureY);
       // set the texture wrapping parameters
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	// set texture wrapping to GL_REPEAT (default wrapping method)
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       // set texture filtering parameters
       glPixelStorei(GL_UNPACK_ROW_LENGTH, 1088);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1024, 1024, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
       textureBufferList.erase(textureBufferList.begin());
@@ -299,7 +298,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // set texture filtering parameters 
       glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT /2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
 
@@ -313,7 +312,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // set texture filtering parameters
       glPixelStorei(GL_UNPACK_ROW_LENGTH,544);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH / 2, SCR_HEIGHT / 2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 512, 512, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       textureBufferList.erase(textureBufferList.begin());
       glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
@@ -343,6 +342,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glBindTexture(GL_TEXTURE_2D, textureV);
 
       glUseProgram(renderBufferShader.ID);
+      
       glBindVertexArray(quadVAO);
 
       glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
@@ -350,6 +350,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
       glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
 
+      
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
       

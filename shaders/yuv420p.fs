@@ -36,11 +36,6 @@ const vec3 Bcoeff = vec3(1.1644,  2.1124,  0.000);
 //const vec3 Gcoeff = vec3(1, -0.3441, -0.7141);
 //const vec3 Bcoeff = vec3(1,  1.772,  0.000);
 
-int clamp(int value)
-{
-	return value<0 ? 0 : (value>255 ? 255 : value);
-}
-
 
 void main()
 {
@@ -55,48 +50,18 @@ void main()
    tcoord -= vec2(0.5, 0.5);
     yuv.y = texture(textureU, tcoord).r;
     yuv.z = texture(textureV, tcoord).r;
-
-    vec3 xyz;
-    int y_tmp = int(yuv.x * 255);
-    int u_tmp =  int(yuv.y * 255);
-    int v_tmp = int(yuv.z * 255);
                              
-   	float Rf = 0.2126;
-     float Bf =  0.0722;
-     float YMin = 16.0;
-     float YMax = 235.0;
-     float CbCrRange =  224.0;
+   // Do the color transform 
+    //yuv += offset;
+    //rgb.r = dot(yuv, Rcoeff);
+    //rgb.g = dot(yuv, Gcoeff);
+    //rgb.b = dot(yuv, Bcoeff);
 
-    float value;
-    int p;
-    int cb_factor=int(((255.0*(2.0*(1-Bf))/CbCrRange)*(1<<6))+0.5);
-    int cr_factor=int(((255.0*(2.0*(1-Rf))/CbCrRange)*(1<<6))+0.5);
-    
-    value = Bf/(1.0-Bf-Rf)*255.0*(2.0*(1-Bf))/CbCrRange;
-    p = 7;
-    int  g_cb_factor= int(((value)*(1<<p))+0.5);
-
-    value = Rf/(1.0-Bf-Rf)*255.0*(2.0*(1-Rf))/CbCrRange;
-    p = 7;
-    int g_cr_factor=int(((value)*(1<<p))+0.5);
-
-    value = 255.0/(YMax-YMin);
-    p = 7;
-    int y_factor=int(((value)*(1<<p))+0.5);
-    int y_offset=int(YMin);
-		
-    //compute Cb Cr color offsets, common to four pixels
-    int b_cb_offset, r_cr_offset, g_cbcr_offset;
-    b_cb_offset = (cb_factor*u_tmp)>>6;
-    r_cr_offset = (cr_factor*v_tmp)>>6;
-    g_cbcr_offset = (g_cb_factor*u_tmp + g_cr_factor*v_tmp)>>7;
-    
-    y_tmp = (y_factor*(y_tmp-y_offset))>>7;
-    rgb.r = clamp(y_tmp + r_cr_offset);
-    rgb.g = clamp(y_tmp - g_cbcr_offset);
-    rgb.b = clamp(y_tmp + b_cb_offset);
-    
-    FragColor = vec4(rgb, 1.0);
-		
-	
+    rgb = mat3(1.0,1.0,1.0,
+                     0.0,-0.39425,2.03211,
+                     1.13983,-0.5806,0.0)*yuv;
+       //Output pixel color
+        FragColor = vec4(rgb.r, 0.0, 0.0,1.0);
+    // That was easy. :) \n"                
+    //FragColor = vec4(0.0, rgb.g, 0.0, 1.0);
 }
