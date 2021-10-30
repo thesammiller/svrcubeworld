@@ -507,7 +507,7 @@ FrameWorker::run_test (void)
 
           (*vWorkers[vWorkerIndex]).activate (THR_NEW_LWP | THR_JOINABLE, nthreads);
 
-          if (vWorkerIndex = 15) {
+          if (vWorkerIndex = 3) {
             vWorkerIndex = 0;
           }
 
