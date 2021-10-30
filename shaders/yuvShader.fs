@@ -49,17 +49,18 @@ void main()
                                                             
     // Get the Y value \n"                                     
     tcoord = TexCoords;
+
     yuv.x = texture(textureY, tcoord).r;
                                                             
   // Get the U and V values \n"                             
-   tcoord -= vec2(0.5, 0.5);
+   //tcoord -= vec2(0.5, 0.5);
     yuv.y = texture(textureU, tcoord).r;
     yuv.z = texture(textureV, tcoord).r;
 
     vec3 xyz;
     int y_tmp = int(yuv.x * 255);
-    int u_tmp =  int(yuv.y * 255);
-    int v_tmp = int(yuv.z * 255);
+    int u_tmp =  int(yuv.y * 255) - 128;
+    int v_tmp = int(yuv.z * 255) - 128;
                              
    	float Rf = 0.2126;
      float Bf =  0.0722;
@@ -69,8 +70,13 @@ void main()
 
     float value;
     int p;
-    int cb_factor=int(((255.0*(2.0*(1-Bf))/CbCrRange)*(1<<6))+0.5);
-    int cr_factor=int(((255.0*(2.0*(1-Rf))/CbCrRange)*(1<<6))+0.5);
+    value = (255.0*(2.0*(1-Bf))/CbCrRange);
+    p = 6;
+    int cb_factor=int((value*(1<<p))+0.5);
+
+    value = (255.0*(2.0*(1-Rf))/CbCrRange);
+    p = 6;
+    int cr_factor=int((value*(1<<p))+0.5);
     
     value = Bf/(1.0-Bf-Rf)*255.0*(2.0*(1-Bf))/CbCrRange;
     p = 7;
@@ -96,7 +102,7 @@ void main()
     rgb.g = clamp(y_tmp - g_cbcr_offset);
     rgb.b = clamp(y_tmp + b_cb_offset);
     
-    FragColor = vec4(rgb, 1.0);
+    FragColor = vec4(rgb.r, rgb.g, 0.0, 1.0);
 		
 	
 }
