@@ -80,7 +80,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 class VideoWorker : public ACE_Task_Base
 {
 public:
-  VideoWorker (CORBA::ORB_ptr orb, unsigned long int headerSize, unsigned long int pSize);
+  VideoWorker (CORBA::ORB_ptr orb, unsigned long int headerSize, unsigned long int pSize, ISVCDecoder *decoder);
   // Constructor
 
   virtual void run_test (void);
@@ -92,6 +92,7 @@ public:
 private:
   CORBA::ORB_var orb_;
   long unsigned int hSize, pSize;
+  ISVCDecoder *decoder;
   // The ORB reference
 };
 
@@ -479,6 +480,17 @@ FrameWorker::run_test (void)
       int vWorkerIndex = 0;
       VideoWorker *vWorkers[16];
 
+      float dataTime = glfwGetTime();
+       ISVCDecoder *decoder;
+       SDecodingParam sDecParam;
+
+       int rv = WelsCreateDecoder(&decoder);
+
+       sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
+        sDecParam.bParseOnly = false;
+
+        decoder->Initialize(&sDecParam);
+
       while(true) {
         try {
           float startTime = glfwGetTime();
@@ -529,11 +541,12 @@ FrameWorker::run_test (void)
 	  }
 
 
-VideoWorker::VideoWorker (CORBA::ORB_ptr orb, unsigned long int headerSize, unsigned long int pixelSize) 
+VideoWorker::VideoWorker (CORBA::ORB_ptr orb, unsigned long int headerSize, unsigned long int pixelSize, ISVCDecoder *decoder) 
 {
   orb_ = CORBA::ORB::_duplicate (orb);
   hSize = headerSize;
    pSize = pixelSize;
+   decoder = decoder;
   
 }
 
@@ -558,16 +571,7 @@ VideoWorker::run_test (void)
 {
     try {
 
-       float dataTime = glfwGetTime();
-       ISVCDecoder *decoder;
-       SDecodingParam sDecParam;
-
-       int rv = WelsCreateDecoder(&decoder);
-
-       sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
-        sDecParam.bParseOnly = false;
-
-        decoder->Initialize(&sDecParam);
+        float dataTime = glfwGetTime();
 
         //output: [0~2] for Y,U,V buffer for Decoding only
         unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
