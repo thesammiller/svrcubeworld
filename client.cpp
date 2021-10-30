@@ -23,17 +23,12 @@
 
 #include "extern/openh264/codec/api/svc/codec_api.h"
 
-#include <opencv2/core.hpp>
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/highgui.hpp"
-#include "opencv2/imgproc.hpp"
-#include <opencv2/core/mat.hpp>
-
-
 const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 1024;
 std::vector<CORBA::Octet*> textureBufferList;
 std::vector<CORBA::Octet*> frameBufferList;
+
+
 
 
 
@@ -96,8 +91,6 @@ public:
 
 private:
   CORBA::ORB_var orb_;
-  unsigned char *hBuffer;
-  unsigned char *pBuffer;
   long unsigned int hSize, pSize;
   // The ORB reference
 };
@@ -137,12 +130,17 @@ private:
   // The ORB reference
 };
 
+
+
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-
+  
   try
     {
+
+
       CORBA::ORB_var orb =
         CORBA::ORB_init (argc, argv);
 
@@ -227,6 +225,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       FrameWorker * currentWorker = fw+i;
       currentWorker = &frameWorker;
       usleep(8666);
+
       
 
     }
@@ -236,7 +235,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     float old_time = 0;
 
     sleep(1);
-  
+
+    
+      
     
     while (!glfwWindowShouldClose(window))
     {
@@ -462,6 +463,7 @@ FrameWorker::svc (void)
 }
 
 
+
 void
 FrameWorker::run_test (void)
 {
@@ -470,37 +472,12 @@ FrameWorker::run_test (void)
 
       Simple_Server_var server =
         Simple_Server::_narrow (object.in ());
-
-
-    /*
-        //decoder declaration
-        ISVCDecoder *pSvcDecoder;
-
-    int rv = WelsCreateDecoder(&pSvcDecoder);
-    assert (rv == 0);
-    ISVCDecoder* decoder_;
-    //assert (decoder_ != NULL);
-
-
-    SDecodingParam sDecParam = {0};
-    sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
-    sDecParam.bParseOnly = false;
-    //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
-    pSvcDecoder->Initialize(&sDecParam);
-
-    //output: [0~2] for Y,U,V buffer for Decoding only
-        unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
-        //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
-        SBufferInfo sDstBufInfo;
-        memset(&sDstBufInfo, 0, sizeof(SBufferInfo));
-
-        int success = 0;
-        int total = 0;
-
-        */
+    
+      int success = 0;
+      int total = 0;
 
       int vWorkerIndex = 0;
-      VideoWorker *vWorkers[60];
+      VideoWorker *vWorkers[16];
 
       while(true) {
         try {
@@ -515,101 +492,28 @@ FrameWorker::run_test (void)
           Simple_Server::pixels* pixelBuff = server->sendImageData();
           unsigned char *pBuf = (*pixelBuff).get_buffer(true);
 
-          //usleep(8333);
 
           float dataTime = glfwGetTime();
 
           std::cout << "CLIENT TAO DATA TIME: \t" << dataTime - startTime << std::endl;
 
-          //TODO: 
-          //SPIN OFF A THREAD HERE
-          // SO THAT THIS THREAD CAN JUST BE GETTING THE DATA
-          //Right now this whole thing can take as long as 1/10th of a second
-          //At least concurrency would get to 20 fps... 
 
           f_mutex.acquire();
-
           frameBufferList.push_back(hBuf);
           frameBufferList.push_back(pBuf);
-
           f_mutex.release();
-
 
           vWorkers[++vWorkerIndex] = new VideoWorker (orb_.in(), _headerSize, _pixelSize);
 
           (*vWorkers[vWorkerIndex]).activate (THR_NEW_LWP | THR_JOINABLE, nthreads);
 
-          if (vWorkerIndex = 59) {
+          if (vWorkerIndex = 15) {
             vWorkerIndex = 0;
           }
 
+          usleep(16566);
 
-
-          /*
-          //input: encoded bit stream length; should include the size of start code prefix
-          int iSize  = _pixelSize;
           
-          //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
-
-      
-            uint8_t* newBuf = new uint8_t[4 + _headerSize + iSize];
-            uint8_t uiStartCode[4] = {0, 0, 0, 1};
-
-            memcpy(newBuf, hBuf, _headerSize);
-            memcpy(newBuf+_headerSize, pBuf, iSize);
-            memcpy(newBuf + _headerSize + iSize, &uiStartCode[0], 4);
-  
-       
-          DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+_headerSize+4, pData, &sDstBufInfo);
-
-          if (iRet != 0) {
-            std::cout << iRet << std::endl;
-            //return -1;
-          }
-          
-          if (iRet == 0) {
-            //std::cout << "SUCCESS" << std::endl;
-          }
-
-          float decodeTime = glfwGetTime();
-
-          std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
-
-
-          if (sDstBufInfo.iBufferStatus==1){
-              //output handling (pData[0], pData[1], pData[2])
-
-              int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-              int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-
-              std::cout << std::endl;
-              std::cout << "STRIDE0\t" << stride0;
-              std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
-              //the third stride is width * 3
-             //yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
-
-              m_mutex.acquire();
-              textureBufferList.push_back(pData[0]); 
-              textureBufferList.push_back(pData[1]);
-              textureBufferList.push_back(pData[2]);
-              m_mutex.release();
-
-              success++;
-          }
-          else { 
-            std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
-            std::cout << "DIDN'T COMPLETE " << std::endl;
-            }
-
-
-            
-
-            total++;
-
-            std::cout << "SUCCESS\t" << success << "\tTOTAL\t" << total << std::endl;
-            */
-
-            
         }
          catch (const CORBA::Exception& ex)
           {
@@ -629,9 +533,8 @@ VideoWorker::VideoWorker (CORBA::ORB_ptr orb, unsigned long int headerSize, unsi
 {
   orb_ = CORBA::ORB::_duplicate (orb);
   hSize = headerSize;
-  hBuffer = (unsigned char *) malloc (headerSize);
    pSize = pixelSize;
-  pBuffer = (unsigned char *) malloc (pSize);
+  
 }
 
 int
@@ -656,28 +559,16 @@ VideoWorker::run_test (void)
     try {
 
        float dataTime = glfwGetTime();
+       ISVCDecoder *decoder;
+       SDecodingParam sDecParam;
 
-       
+       int rv = WelsCreateDecoder(&decoder);
 
-        //decoder declaration
-        ISVCDecoder *pSvcDecoder;
-
-        int rv = WelsCreateDecoder(&pSvcDecoder);
-        assert (rv == 0);
-        ISVCDecoder* decoder_;
-        //assert (decoder_ != NULL);
-
-
-        SDecodingParam sDecParam = {0};
-        sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
+       sDecParam.sVideoProperty.eVideoBsType = VIDEO_BITSTREAM_AVC;
         sDecParam.bParseOnly = false;
-        //sDecParam.eEcActiveIdc = ERROR_CON_SLICE_COPY;
-        pSvcDecoder->Initialize(&sDecParam);
 
-        
+        decoder->Initialize(&sDecParam);
 
-
-        
         //output: [0~2] for Y,U,V buffer for Decoding only
         unsigned char *pData[3]  = {nullptr, nullptr, nullptr};
         //in-out: for Decoding only: declare and initialize the output buffer info, this should never co-exist with Parsing only
@@ -687,64 +578,39 @@ VideoWorker::run_test (void)
         int success = 0;
         int total = 0;
 
-
         float startTime = glfwGetTime();
-        CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
-        
-
-
-        
-        
-        f_mutex.acquire();
-        memcpy(hBuffer, *frameBufferList.begin(), hSize);
-        frameBufferList.erase(frameBufferList.begin());
-        memcpy(pBuffer, *frameBufferList.begin(), pSize);
-        frameBufferList.erase(frameBufferList.begin());
-        f_mutex.release();
-
 
         //input: encoded bit stream length; should include the size of start code prefix
         int iSize  = pSize;
-        
-        //memcpy(&sDstBufInfo.UsrData, hBuf, _headerSize);
 
-    
-          uint8_t* newBuf = new uint8_t[4 + hSize + iSize];
-          uint8_t uiStartCode[4] = {0, 0, 0, 1};
+        //Allocate new buffer and set magic start code
+        uint8_t* newBuf = new uint8_t[4 + hSize + iSize];
+        uint8_t uiStartCode[4] = {0, 0, 0, 1};
 
-
-          memcpy(newBuf, hBuffer, hSize);
-          memcpy(newBuf+hSize, pBuffer, iSize);
-          memcpy(newBuf + hSize + iSize, &uiStartCode[0], 4);
+        //Copy Header from buffer
+        memcpy(newBuf, *frameBufferList.begin(), hSize);
+        frameBufferList.erase(frameBufferList.begin());
+        //Copy Pixels from Buffer
+        memcpy(newBuf+hSize,  *frameBufferList.begin(), iSize);
+        frameBufferList.erase(frameBufferList.begin());
+        //Copy start code
+        memcpy(newBuf + hSize + iSize, &uiStartCode[0], 4);
   
-      
-          DECODING_STATE iRet = pSvcDecoder->DecodeFrameNoDelay(newBuf, iSize+hSize+4, pData, &sDstBufInfo);
+        DECODING_STATE iRet = decoder->DecodeFrameNoDelay(newBuf, iSize+hSize+4, pData, &sDstBufInfo);
           
+          //int iRet = 0;
           if (iRet != 0) {
             std::cout << iRet << std::endl;
             //return -1;
           }
-          
-          if (iRet == 0) {
-            //std::cout << "SUCCESS" << std::endl;
-          }
 
-          float decodeTime = glfwGetTime();
-
-          std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
-
-
+        
           if (sDstBufInfo.iBufferStatus==1){
               //output handling (pData[0], pData[1], pData[2])
 
-              int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
-              int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
-
-              std::cout << std::endl;
-              std::cout << "STRIDE0\t" << stride0;
-              std::cout << "\tSTRIDE1\t" << stride1 << std::endl;
+              //int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];
+              //int stride1 = sDstBufInfo.UsrData.sSystemBuffer.iStride[1];
               //the third stride is width * 3
-             //yuv420_rgb24_std(SCR_WIDTH, SCR_HEIGHT, pData[0], pData[1], pData[2], (uint32_t) stride0, (uint32_t) stride1, uncompressedBuffer, (uint32_t) (1024 * 3), YCBCR_709);
 
               m_mutex.acquire();
               textureBufferList.push_back(pData[0]); 
@@ -752,21 +618,17 @@ VideoWorker::run_test (void)
               textureBufferList.push_back(pData[2]);
               m_mutex.release();
 
-              success++;
           }
           else { 
             std::cout << "FAILURE STATUS " << sDstBufInfo.iBufferStatus << std::endl; 
             std::cout << "DIDN'T COMPLETE " << std::endl;
             }
+          
+          float decodeTime = glfwGetTime();
 
-            
+          std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
 
-            total++;
 
-            std::cout << "SUCCESS\t" << success << "\tTOTAL\t" << total << std::endl;
-
-            
-        
       }
       catch (const CORBA::Exception& ex)
           {
