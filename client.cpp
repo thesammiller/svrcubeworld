@@ -588,11 +588,13 @@ VideoWorker::run_test (void)
         uint8_t uiStartCode[4] = {0, 0, 0, 1};
 
         //Copy Header from buffer
+        f_mutex.acquire();
         memcpy(newBuf, *frameBufferList.begin(), hSize);
         frameBufferList.erase(frameBufferList.begin());
         //Copy Pixels from Buffer
         memcpy(newBuf+hSize,  *frameBufferList.begin(), iSize);
         frameBufferList.erase(frameBufferList.begin());
+        f_mutex.release();
         //Copy start code
         memcpy(newBuf + hSize + iSize, &uiStartCode[0], 4);
   
