@@ -228,7 +228,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           1);
       FrameWorker * currentWorker = fw+i;
       currentWorker = &frameWorker;
-      usleep(8666);
+      usleep(2666);
 
       
 
@@ -524,7 +524,7 @@ FrameWorker::run_test (void)
           sizeList.push_back(_headerSize);
           
           f_mutex.release();
-          usleep(16333);
+          usleep(4333);
 
           
 
@@ -663,7 +663,7 @@ VideoWorker::run_test (void)
 
             std::cout << "DECODE TIME: \t" << decodeTime - dataTime << "\t";
 
-            usleep(16333);
+            //usleep(16333);
 
 
         }
