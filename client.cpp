@@ -301,6 +301,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_HEIGHT/2, SCR_WIDTH/2, 0, GL_RED, GL_UNSIGNED_BYTE, *textureBufferList.begin());
       glGenerateMipmap(GL_TEXTURE_2D);
       glPixelStorei(GL_UNPACK_ROW_LENGTH,0);
+      textureBufferList.erase(textureBufferList.begin());
 
       glGenTextures(1, &textureV);
 

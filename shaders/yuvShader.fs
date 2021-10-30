@@ -102,7 +102,7 @@ void main()
     rgb.g = clamp(y_tmp - g_cbcr_offset);
     rgb.b = clamp(y_tmp + b_cb_offset);
     
-    FragColor = vec4(rgb.r, rgb.g, 0.0, 1.0);
+    FragColor = vec4(rgb.r/255.0, rgb.g/255.0, rgb.b/255.0, 1.0);
 		
 	
 }
