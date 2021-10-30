@@ -238,20 +238,29 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     float old_time = 0;
 
-    sleep(1);
-
-
-    
 
     videoWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads);
-
-    sleep(1);
-
       
     
     while (!glfwWindowShouldClose(window))
     {
       if (textureBufferList.size() < 3) {
+        continue;
+      }
+      if (textureBufferList.size() > 6) {
+        m_mutex.acquire();
+        f_mutex.acquire();
+        for (int i=0; i < textureBufferList.size(); i ++) {
+          textureBufferList.erase(textureBufferList.begin());
+        }
+        for (int i=0; i < frameBufferList.size(); i ++) {
+          frameBufferList.erase(frameBufferList.begin());
+        }
+        for (int i = 0; i < sizeList.size(); i++) {
+          sizeList.erase(sizeList.begin());
+        }
+        f_mutex.release();
+        m_mutex.release();
         continue;
       }
       
