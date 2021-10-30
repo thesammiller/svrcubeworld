@@ -254,7 +254,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (textureBufferList.size() < 3) {
         continue;
       }
-       
+      
       float dataTime = glfwGetTime();
 
       //Select the GL Shader for Framebuffer
@@ -520,7 +520,7 @@ FrameWorker::run_test (void)
           Simple_Server::pixels* pixelBuff = server->sendImageData();
           unsigned char *pBuf = (*pixelBuff).get_buffer(true);
 
-          usleep(8333);
+          //usleep(8333);
 
           float dataTime = glfwGetTime();
 
