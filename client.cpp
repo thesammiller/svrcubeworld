@@ -485,7 +485,6 @@ FrameWorker::svc (void)
 }
 
 
-
 void
 FrameWorker::run_test (void)
 {
@@ -503,10 +502,13 @@ FrameWorker::run_test (void)
       while(true) {
         try {
           float startTime = glfwGetTime();
-          CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
 
           Simple_Server::frameData *fd = server->sendFrameData();
           Simple_Server::frameData m_fd = (*fd);
+
+          if (fd->m_header[0] == 0xde && fd->m_header[1] == 0xad && fd->m_header [2] == 0xbe && fd->m_header [3] == 0xef) {
+            continue;
+          }
 
           long unsigned int _headerSize = m_fd.m_headerSize;
           Simple_Server::header *hb = &m_fd.m_header;
@@ -526,10 +528,6 @@ FrameWorker::run_test (void)
           sizeList.push_back(_headerSize);
           
           f_mutex.release();
-          usleep(4333);
-
-          
-
           
         }
          catch (const CORBA::Exception& ex)

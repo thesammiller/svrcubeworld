@@ -16,14 +16,20 @@ static ACE_Thread_Mutex m_mutex_pose;
 
 Simple_Server::frameData* Simple_Server_i::sendFrameData() {
 
-  while (!newFrame) {}
-
   Simple_Server::frameData fd;
-  fd.m_header =  Simple_Server::header(this->headerSize, this->headerData);
-  fd.m_headerSize = this->headerSize;
-  fd.m_pixels = Simple_Server::pixels(this->jpegSize, this->imageData);
-  fd.m_pixelSize = this->jpegSize;
-  
+  if (!newFrame) { 
+    unsigned char deadbeef[4] = {0xde, 0xad, 0xbe, 0xef};
+    fd.m_header = Simple_Server::header(4, deadbeef);
+
+  }
+
+  else {
+    fd.m_header =  Simple_Server::header(this->headerSize, this->headerData);
+    fd.m_headerSize = this->headerSize;
+    fd.m_pixels = Simple_Server::pixels(this->jpegSize, this->imageData);
+    fd.m_pixelSize = this->jpegSize;
+  }
+
   Simple_Server::frameData* value = 0;
 
   ACE_NEW_THROW_EX(value, Simple_Server::frameData(fd), CORBA::NO_MEMORY());
