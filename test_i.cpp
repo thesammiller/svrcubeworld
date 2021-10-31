@@ -14,11 +14,17 @@ static ACE_Thread_Mutex m_mutex_pose;
 
 ///IMAGE DATA
 
-Simple_Server::pixels* Simple_Server_i::sendImageData() {
-  
-  Simple_Server::pixels* value = 0;
+Simple_Server::frameData* Simple_Server_i::sendFrameData() {
 
-  ACE_NEW_THROW_EX(value, Simple_Server::pixels(jpegSize, this->imageData), CORBA::NO_MEMORY());
+  Simple_Server::frameData fd;
+  fd.m_header =  Simple_Server::header(this->headerSize, this->headerData);
+  fd.m_headerSize = this->headerSize;
+  fd.m_pixels = Simple_Server::pixels(this->jpegSize, this->imageData);
+  fd.m_pixelSize = this->jpegSize;
+  
+  Simple_Server::frameData* value = 0;
+
+  ACE_NEW_THROW_EX(value, Simple_Server::frameData(fd), CORBA::NO_MEMORY());
 
   //memcpy(value, this->imageData, jpegSize);
   
@@ -33,18 +39,6 @@ void Simple_Server_i::setImageData(unsigned char* iData) {
   
 }
 
-/// HEADER DATA
-
-Simple_Server::header* Simple_Server_i::sendHeaderData() {
-  
-  Simple_Server::header* value = 0;
-
-  ACE_NEW_THROW_EX(value, Simple_Server::header(headerSize, this->headerData), CORBA::NO_MEMORY());
-
-  //memcpy(value, this->imageData, jpegSize);
-  
-  return value;
-}
 
 void Simple_Server_i::setHeaderData(unsigned char* iData) {
   
@@ -86,17 +80,8 @@ void Simple_Server_i::get_data(float* in_data) {
   
 }
 
-CORBA::Long Simple_Server_i::sendJpegSize() {
-  return jpegSize;
-}
-
 void Simple_Server_i::setJpegSize(long unsigned int js) {
   jpegSize = js;
-}
-
-
-CORBA::Long Simple_Server_i::sendHeaderSize() {
-  return headerSize;
 }
 
 void Simple_Server_i::setHeaderSize(long unsigned int hs) {

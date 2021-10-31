@@ -505,14 +505,16 @@ FrameWorker::run_test (void)
           float startTime = glfwGetTime();
           CORBA::Octet* uncompressedBuffer = (unsigned char*) malloc (1024 * 1024 * 3);
 
-          long unsigned int _headerSize = server->sendHeaderSize();      
-          Simple_Server::header* headerBuff = server->sendHeaderData();
-          unsigned char *hBuf = (*headerBuff).get_buffer(true);
+          Simple_Server::frameData *fd = server->sendFrameData();
+          Simple_Server::frameData m_fd = (*fd);
 
-          long unsigned int _pixelSize = server->sendJpegSize();      
-          Simple_Server::pixels* pixelBuff = server->sendImageData();
-          unsigned char *pBuf = (*pixelBuff).get_buffer(true);
+          long unsigned int _headerSize = m_fd.m_headerSize;
+          Simple_Server::header *hb = &m_fd.m_header;
+          unsigned char *hBuf = hb->get_buffer(true);
 
+          long unsigned int _pixelSize = m_fd.m_pixelSize;      
+          Simple_Server::pixels* pixelBuff = &m_fd.m_pixels;
+          unsigned char *pBuf = pixelBuff->get_buffer(true);
 
           float dataTime = glfwGetTime();
 

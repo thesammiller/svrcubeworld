@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:451
 
-#ifndef _TAO_IDL_TESTS_ADDVVM_H_
-#define _TAO_IDL_TESTS_ADDVVM_H_
+#ifndef _TAO_IDL_TESTS_IREVP9_H_
+#define _TAO_IDL_TESTS_IREVP9_H_
 
 
 #include "testC.h"
@@ -115,6 +115,19 @@ namespace TAO
           >
   {
   };
+
+  // TAO_IDL - Generated from
+  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_arg_traits.cpp:945
+
+  template<>
+  class SArg_Traits< ::Simple_Server::frameData>
+    : public
+        Var_Size_SArg_Traits_T<
+            ::Simple_Server::frameData,
+            TAO::Any_Insert_Policy_Stream
+          >
+  {
+  };
 }
 
 TAO_END_VERSIONED_NAMESPACE_DECL
@@ -167,39 +180,9 @@ public:
   // TAO_IDL - Generated from
   // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_sh.cpp:36
 
-  virtual ::Simple_Server::pixels * sendImageData () = 0;
+  virtual ::Simple_Server::frameData * sendFrameData () = 0;
 
-  static void sendImageData_skel (
-      TAO_ServerRequest &server_request,
-      TAO::Portable_Server::Servant_Upcall *servant_upcall,
-      TAO_ServantBase *servant);
-
-  // TAO_IDL - Generated from
-  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_sh.cpp:36
-
-  virtual ::Simple_Server::header * sendHeaderData () = 0;
-
-  static void sendHeaderData_skel (
-      TAO_ServerRequest &server_request,
-      TAO::Portable_Server::Servant_Upcall *servant_upcall,
-      TAO_ServantBase *servant);
-
-  // TAO_IDL - Generated from
-  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_sh.cpp:36
-
-  virtual ::CORBA::Long sendJpegSize () = 0;
-
-  static void sendJpegSize_skel (
-      TAO_ServerRequest &server_request,
-      TAO::Portable_Server::Servant_Upcall *servant_upcall,
-      TAO_ServantBase *servant);
-
-  // TAO_IDL - Generated from
-  // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_visitor_operation/operation_sh.cpp:36
-
-  virtual ::CORBA::Long sendHeaderSize () = 0;
-
-  static void sendHeaderSize_skel (
+  static void sendFrameData_skel (
       TAO_ServerRequest &server_request,
       TAO::Portable_Server::Servant_Upcall *servant_upcall,
       TAO_ServantBase *servant);

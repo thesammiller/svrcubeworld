@@ -30,15 +30,13 @@ public:
   // = The Simple_Server methods.
   void send_data (const CORBA::Long microsecond, const Simple_Server::HeadPoseArray headpose );
   void get_data(float *in_pose);
-  Simple_Server::pixels* sendImageData();
-  Simple_Server::header* sendHeaderData();
+  Simple_Server::frameData* sendFrameData();
   
   void setImageData(unsigned char* iData);
   void setHeaderData(unsigned char* iData);
   
   void shutdown (void);
-  CORBA::Long sendJpegSize();
-  CORBA::Long sendHeaderSize();
+
   void setJpegSize(long unsigned int js);
   void setHeaderSize(long unsigned int hs);
 
