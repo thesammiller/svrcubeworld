@@ -5,5 +5,5 @@
 #!/bin/sh
 
 ./out/build/svr_cubeworld &
-sleep 5
+sleep 2
 ./out/build/client

@@ -104,7 +104,8 @@ int main(int argc, char* argv[])
         
         myServer.setHeaderSize(myAppl.headerSize);
         myServer.setHeader(myAppl.header);
-        
+        myServer.server_impl.newFrame = true;
+
         // Calculate Frame Rate
         // -------------------
         if ( (old_time + 1) < glfwGetTime() ) {

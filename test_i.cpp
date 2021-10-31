@@ -16,6 +16,8 @@ static ACE_Thread_Mutex m_mutex_pose;
 
 Simple_Server::frameData* Simple_Server_i::sendFrameData() {
 
+  while (!newFrame) {}
+
   Simple_Server::frameData fd;
   fd.m_header =  Simple_Server::header(this->headerSize, this->headerData);
   fd.m_headerSize = this->headerSize;
@@ -26,7 +28,7 @@ Simple_Server::frameData* Simple_Server_i::sendFrameData() {
 
   ACE_NEW_THROW_EX(value, Simple_Server::frameData(fd), CORBA::NO_MEMORY());
 
-  //memcpy(value, this->imageData, jpegSize);
+  newFrame = false;
   
   return value;
 }

@@ -40,6 +40,8 @@ public:
   void setJpegSize(long unsigned int js);
   void setHeaderSize(long unsigned int hs);
 
+  bool newFrame;
+
 
 private:
   /// The ORB
