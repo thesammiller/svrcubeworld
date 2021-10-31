@@ -25,8 +25,8 @@
 // TAO_IDL - Generated from
 // /home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/extern/ACE_wrappers/build/default/TAO/TAO_IDL/be/be_codegen.cpp:149
 
-#ifndef _TAO_IDL_TESTC_NL7LR2_H_
-#define _TAO_IDL_TESTC_NL7LR2_H_
+#ifndef _TAO_IDL_TESTC_2RQKWF_H_
+#define _TAO_IDL_TESTC_2RQKWF_H_
 
 
 #include /**/ "ace/config-all.h"
@@ -226,7 +226,7 @@ public:
 
   class  header
     : public
-        ::TAO::bounded_value_sequence< ::CORBA::Octet,300000>
+        ::TAO::bounded_value_sequence< ::CORBA::Octet,100000>
   {
   public:
     header ();

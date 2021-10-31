@@ -7,7 +7,7 @@
 
 
   typedef sequence<octet, 300000> pixels;
-    typedef sequence<octet, 300000> header;
+    typedef sequence<octet, 100000> header;
 
     struct frameData 
     {

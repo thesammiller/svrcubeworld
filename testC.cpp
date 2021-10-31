@@ -270,7 +270,7 @@ Simple_Server::header::header (
     ::CORBA::ULong length,
     ::CORBA::Octet * buffer,
     ::CORBA::Boolean release)
-  : ::TAO::bounded_value_sequence< ::CORBA::Octet,300000>
+  : ::TAO::bounded_value_sequence< ::CORBA::Octet,100000>
     (length, buffer, release)
 {}
 
@@ -309,13 +309,13 @@ namespace TAO
     {
       TAO::TypeCode::Sequence< ::CORBA::TypeCode_ptr const *,
                               TAO::Null_RefCount_Policy>
-        Simple_Server_header_300000 (
+        Simple_Server_header_100000 (
           ::CORBA::tk_sequence,
           &CORBA::_tc_octet,
-          300000U);
+          100000U);
         
-      ::CORBA::TypeCode_ptr const tc_Simple_Server_header_300000 =
-        &Simple_Server_header_300000;
+      ::CORBA::TypeCode_ptr const tc_Simple_Server_header_100000 =
+        &Simple_Server_header_100000;
     }
   }
 }
@@ -331,7 +331,7 @@ static TAO::TypeCode::Alias<char const *,
     ::CORBA::tk_alias,
     "IDL:Simple_Server/header:1.0",
     "header",
-    &TAO::TypeCode::tc_Simple_Server_header_300000);
+    &TAO::TypeCode::tc_Simple_Server_header_100000);
   
 ::CORBA::TypeCode_ptr const Simple_Server::_tc_header =
   &_tao_tc_Simple_Server_header;
