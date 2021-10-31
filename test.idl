@@ -1,27 +1,20 @@
-
-
-
-  interface Simple_Server
-  {
-    typedef float HeadPoseArray[7];
-
+interface Simple_Server
+{
+  typedef float HeadPoseArray[7];
 
   typedef sequence<octet, 300000> pixels;
-    typedef sequence<octet, 100000> header;
+  typedef sequence<octet, 100000> header;
 
-    struct frameData 
-    {
-      pixels m_pixels;
-      header m_header; 
-      long m_pixelSize;
-      long m_headerSize;
-    };
-
-
-
-    oneway void send_data(in long microsecond, in HeadPoseArray headpose);
-
-  
-    frameData sendFrameData();
-
+  struct frameData 
+  {
+    pixels m_pixels;
+    header m_header; 
+    long m_pixelSize;
+    long m_headerSize;
   };
+
+  oneway void send_data(in long microsecond, in HeadPoseArray headpose);
+  
+  frameData sendFrameData();
+
+};
