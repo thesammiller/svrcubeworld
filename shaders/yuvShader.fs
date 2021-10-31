@@ -41,6 +41,8 @@ void main()
     int y_tmp = int(yuv.x * 255);
     int u_tmp =  int(yuv.y * 255) - 128;
     int v_tmp = int(yuv.z * 255) - 128;
+
+    //TODO: Refactor the below out as uniforms?
                              
    	float Rf = 0.2126;
      float Bf =  0.0722;

@@ -30,4 +30,7 @@ class svrServer {
         
         long unsigned int jpegSize;
         long unsigned int headerSize;
+
+        bool newFrame = false;
+
 };

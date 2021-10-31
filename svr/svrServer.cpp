@@ -32,6 +32,8 @@ int svrServer::createOrb(int argc, char* argv[]) {
     orb =
         CORBA::ORB_init (argc, argv);
 
+        
+
       CORBA::Object_var poa_object =
         orb->resolve_initial_references("RootPOA");
 
