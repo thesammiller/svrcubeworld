@@ -506,7 +506,12 @@ FrameWorker::run_test (void)
           Simple_Server::frameData *fd = server->sendFrameData();
           Simple_Server::frameData m_fd = (*fd);
 
-          if (fd->m_header[0] == 0xde && fd->m_header[1] == 0xad && fd->m_header [2] == 0xbe && fd->m_header [3] == 0xef) {
+          //If the response is 0xdeadbeef no new data
+          if (fd->m_header[0] == 0xde && 
+              fd->m_header[1] == 0xad && f
+              d->m_header [2] == 0xbe && 
+              fd->m_header [3] == 0xef) {
+            usleep(4333);
             continue;
           }
 
@@ -705,9 +710,4 @@ unsigned int loadTexture(unsigned char* data)
     }
 
     return textureID;
-}
-
-uint8_t clamp(int16_t value)
-{
-	return value<0 ? 0 : (value>255 ? 255 : value);
 }
