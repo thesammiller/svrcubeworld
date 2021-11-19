@@ -1,7 +1,5 @@
 # External Modules
-This project has three external dependencies. GLFW and GLM are included through git submodules and should be installed with the git init recursive command. The third library, TAO+ACE, needs to be installed manually.
-
-*Libjpeg-Turbo also needs to be built per the instrcutions on Libjpeg-Turbo repo*
+This project has three external dependencies. GLFW and GLM are included through git submodules and should be installed with the git init recursive command. The third library, TAO+ACE, needs to be installed manually. OpenH264 also needs to be installed manually.
 
 Future work includes using the ACE+TAO library as a submodule. However, at this point in time, it needs to be installed separately.     
 Please see the instructions below for the Ubuntu platform. This should also work on other Linux/Unix (Mac OS) systems.    
