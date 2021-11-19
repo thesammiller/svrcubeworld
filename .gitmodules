@@ -13,3 +13,6 @@
 [submodule "extern/opencv"]
 	path = extern/opencv
 	url = https://github.com/opencv/opencv
+[submodule "extern/ovr_client/VrSamples"]
+	path = extern/ovr_client/VrSamples
+	url = https://github.com/thesammiller/svrcubeworld-client
