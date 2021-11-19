@@ -21,9 +21,9 @@ Run `./full.sh` to run through all steps and tests
 # How to Build and Run the OVR Client
 This is the client that runs on the Oculus Quest.
 1. Download the Oculus Mobile SDK https://developer.oculus.com/downloads/package/oculus-mobile-sdk/
-1. Replace the VrSamples directory with the one located in extern/ovr_client/VrSamples
-1. Run the build.sh in the VrCubeWorld_Framework/Project/Android folder
+1. Replace the VrSamples directory with the one located in `extern/ovr_client/VrSamples`
+1. Run `build.sh` in the `VrCubeWorld_Framework/Project/Android` folder
 1. Project will build and install if an Oculus Quest is connected.
 
-The OVR application client code is located in the folder extern/ovr_client/VrSamples/VrCubeWorld_Framework/Src/
+The OVR application client code is located in the folder `extern/ovr_client/VrSamples/VrCubeWorld_Framework/Src/`
 
