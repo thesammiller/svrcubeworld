@@ -2,7 +2,7 @@
 
 This project implements a Cloud VR pipeline using the Oculus Mobile SDK sample project, "CubeWorld" and TAO, a CORBA service for distributed communication based on the ACE C++ framework.
 
-Build instructions below.
+Build instructions below. Please see the README in the `extern` folder for instructions on loading submodules and libraries.
 
 # Original Copyright #
 Created		:	March, 2015    
