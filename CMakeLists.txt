@@ -8,10 +8,10 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-narrowing")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O1")
 
-
 set(ACE_ROOT "extern/ACE_wrappers/build/default")
 set(TAO_ROOT "${ACE_ROOT}/TAO")
 set(ORBSVCS_ROOT "${TAO_ROOT}/orbsvcs")
+
 
 
 set(OPENH264_ROOT "extern/openh264")
@@ -27,12 +27,28 @@ FetchContent_MakeAvailable(googletest)
 
 set(ACE_LIB ${ACE_ROOT}/lib)
 set(OPENCV_LIB ${OPENCV_ROOT}/build/lib)
+
+
+
+find_library(TAO_Svc_Utils SHARED TAO_Svc_Utils PATHS "${ACE_LIB}") 
+find_library(TAO_IFR_Client SHARED TAO_IFR_Client PATHS "${ACE_LIB}")
+find_library(TAO_DynamicInterface SHARED TAO_DynamicInterface PATHS "${ACE_LIB}")
+find_library(TAO_Messaging SHARED TAO_Messaging PATHS "${ACE_LIB}")
+find_library(TAO_PI SHARED TAO_PI PATHS "${ACE_LIB}")
+find_library(TAO_CodecFactory SHARED TAO_CodecFactory PATHS "${ACE_LIB}")
+find_library(TAO_Valuetype SHARED TAO_ValueType PATHS "${ACE_LIB}")
+
+
+
+find_library(libTAO_CosNaming SHARED TAO_CosNaming PATHS "${ACE_LIB}")
+find_library(libTAO_CosEvent_Skel SHARED TAO_CosEvent_Skel PATHS "${ACE_LIB}")
+find_library(libTAO_CosEvent_Serv SHARED TAO_CosEvent_Serv PATHS "${ACE_LIB}")
+find_library(libTAO_CosEvent SHARED TAO_CosEvent PATHS "${ACE_LIB}")
 find_library(libTAO_IORTable SHARED TAO_IORTable PATHS "${ACE_LIB}")
 find_library(libTAO_PortableServer SHARED TAO_PortableServer PATHS "${ACE_LIB}")
 find_library(libTAO_AnyTypeCode SHARED TAO_AnyTypeCode PATHS "${ACE_LIB}")
 find_library(libTAO SHARED TAO PATHS "${ACE_LIB}")
 find_library(libACE SHARED ACE PATHS "${ACE_LIB}")
-
 message(STATUS "${ACE_LIB}")
 
 
@@ -44,6 +60,7 @@ find_library(libopencv_imgproc SHARED opencv_imgproc PATHS "${OPENCV_LIB}")
 add_executable(${PROJECT_NAME} main.cpp testC.cpp  test_i.cpp  testS.cpp svr/svrWorker.cpp svr/svrAppl.cpp shader_s.cpp svr/svrCubeWorld.cpp svr/svrServer.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(${PROJECT_NAME} PRIVATE ${ORBSVCS_ROOT})
+
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -64,15 +81,22 @@ include_directories(${LIBJPEG_ROOT})
 include_directories(${OPENH264_ROOT})
 include_directories(${OPENCV_ROOT})
 include_directories(extern/opencv/modules/core/include/)
+include_directories(${ORBSVCS_ROOT})
 
-
-target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libopencv_imgproc}" "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(${PROJECT_NAME} OpenGL::GL glfw glm "${libopencv_imgproc}" "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libTAO_CosNaming}" "${libTAO_CosEvent}" "${libTAO_CosEvent_Serv}" "${libTAO_CosEvent_Skel}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 add_executable(
   client
   client.cpp testC.cpp shader_s.cpp
   )
 target_link_libraries(client OpenGL::GL glfw glm "${libopencv_imgproc}" "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+
+add_executable(
+  Service
+  Service.cpp
+)
+
+target_link_libraries(Service "${libTAO_CosEvent_Serv}" "${libTAO_CosNaming}" "${TAO_Svc_Utils}" "${TAO_IFR_Client}" "${TAO_DynamicInterface}" "${TAO_Messaging}" "${TAO_PI}" "${TAO_CodecFactory}" "${TAO_ValueType}" "${libTAO_CosEvent_Skel}" "${libTAO_PortableServer}" "${libTAO_CosEvent}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 enable_testing()
 

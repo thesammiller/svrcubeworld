@@ -5,8 +5,9 @@
 #include "ace/OS_NS_stdio.h"
 #include "ace/Task.h"
 #include "svr/svrWorker.h"
-#include "orbsvcs/CosEvent/CEC_EventChannel.h"
-#include "orbsvcs/CosEvent/CEC_Default_Factory.h"
+
+#include "../TAO/orbsvcs/orbsvcs/CosEvent/CEC_EventChannel.h"
+#include "../TAO/orbsvcs/orbsvcs/CosEvent/CEC_Default_Factory.h"
 #include "ace/Get_Opt.h"
 #include "ace/OS_NS_stdio.h"
 
