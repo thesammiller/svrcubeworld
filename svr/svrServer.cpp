@@ -2,6 +2,10 @@
 #include <iostream>
 
 
+const ACE_TCHAR *ior = ACE_TEXT ("file://ec.ior");
+
+
+
 
 int svrServer::parse_args (int argc, ACE_TCHAR *argv[])
 {
@@ -48,21 +52,47 @@ int svrServer::createOrb(int argc, char* argv[]) {
 
       poa_manager =
         root_poa->the_POAManager ();
+      
+      poa_manager->activate ();
+
+
+        
+
 
       if (parse_args (argc, argv) != 0)
         return 1;
 }
 
 int svrServer::createServer() {
-      TAO_CEC_EventChannel_Attributes attributes (root_poa.in (),
-                                                  root_poa.in ());
 
-      TAO_CEC_EventChannel ec_impl (attributes);
-      ec_impl.activate ();
+        // Obtain the event channel, we could use a naming service, a
+      // command line argument or resolve_initial_references(), but
+      // this is simpler...
+     
+      CORBA::Object_var poa_object =
+                 orb->string_to_object (ior);
 
+           // Pure CORBA
+        // 1 The cleiint first binds with the Event Channel...
+        // of course, the event channel must be started first
       CosEventChannelAdmin::EventChannel_var event_channel =
-        ec_impl._this ();
+        CosEventChannelAdmin::EventChannel::_narrow (poa_object.in ());
 
+      // The canonical protocol to connect to the EC
+      CosEventChannelAdmin::SupplierAdmin_var supplier_admin =
+        event_channel->for_suppliers ();
+
+      consumer =
+        supplier_admin->obtain_push_consumer ();
+
+      CosEventComm::PushSupplier_var supplier =
+        this->_this ();
+
+      consumer->connect_push_supplier (supplier.in ());
+
+
+
+      /*
 
         server_impl = Simple_Server_i (orb.in ());
 
@@ -100,8 +130,16 @@ int svrServer::createServer() {
       ACE_OS::fclose (output_file);
 
       poa_manager->activate ();
+      */
+
 }
 
+int svrServer::run() {
+  return 1;
+}
+
+/// The skeleton methods.
+void svrServer::disconnect_push_supplier () {}
 
 void svrServer::startWorker(Worker *worker, int nthreads) {
    
