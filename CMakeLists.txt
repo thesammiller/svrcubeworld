@@ -11,8 +11,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O1")
 
 set(ACE_ROOT "extern/ACE_wrappers/build/default")
 set(TAO_ROOT "${ACE_ROOT}/TAO")
+set(ORBSVCS_ROOT "${TAO_ROOT}/orbsvcs")
 
-set(TURBOJPEG_ROOT "extern/libjpeg-turbo")
+
 set(OPENH264_ROOT "extern/openh264")
 
 set(OPENCV_ROOT "extern/opencv")
@@ -34,7 +35,7 @@ find_library(libACE SHARED ACE PATHS "${ACE_LIB}")
 
 message(STATUS "${ACE_LIB}")
 
-find_library(libturbojpeg SHARED turbojpeg PATHS "${TURBOJPEG_ROOT}")
+
 find_library(libopenh264 SHARED openh264 PATHS "${OPENH264_ROOT}")
 find_library(libopencv_core SHARED opencv_core PATHS "${OPENCV_LIB}")
 find_library(libopencv_imgcodecs SHARED opencv_imgcodecs PATHS "${OPENCV_LIB}")
@@ -42,6 +43,7 @@ find_library(libopencv_imgproc SHARED opencv_imgproc PATHS "${OPENCV_LIB}")
 
 add_executable(${PROJECT_NAME} main.cpp testC.cpp  test_i.cpp  testS.cpp svr/svrWorker.cpp svr/svrAppl.cpp shader_s.cpp svr/svrCubeWorld.cpp svr/svrServer.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${ORBSVCS_ROOT})
 
 # OpenGL
 find_package(OpenGL REQUIRED)

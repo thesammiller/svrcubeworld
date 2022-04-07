@@ -1,6 +1,8 @@
 #include "svr/svrServer.h"
 #include <iostream>
 
+
+
 int svrServer::parse_args (int argc, ACE_TCHAR *argv[])
 {
   ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("o:"));
@@ -52,6 +54,16 @@ int svrServer::createOrb(int argc, char* argv[]) {
 }
 
 int svrServer::createServer() {
+      TAO_CEC_EventChannel_Attributes attributes (root_poa.in (),
+                                                  root_poa.in ());
+
+      TAO_CEC_EventChannel ec_impl (attributes);
+      ec_impl.activate ();
+
+      CosEventChannelAdmin::EventChannel_var event_channel =
+        ec_impl._this ();
+
+
         server_impl = Simple_Server_i (orb.in ());
 
       PortableServer::ObjectId_var id =

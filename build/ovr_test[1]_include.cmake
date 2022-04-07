@@ -1,0 +1,5 @@
+if(EXISTS "/home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/build/ovr_test[1]_tests.cmake")
+  include("/home/smiller/Development/Vandy/Term4/SoftEng/renderer/svr-cubeworld/GLFW-CMake-starter/build/ovr_test[1]_tests.cmake")
+else()
+  add_test(ovr_test_NOT_BUILT ovr_test_NOT_BUILT)
+endif()
