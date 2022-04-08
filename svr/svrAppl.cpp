@@ -217,9 +217,7 @@ void svrAppl::createImage() {
     value <<= fd;
     //push the frame value to the consumer
 
-   
     myServer.consumer->push(value);
-
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 
     //or by the Compress/Decompress) after you are done working on it:

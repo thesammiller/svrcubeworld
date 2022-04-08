@@ -23,6 +23,11 @@
 
 #include "extern/openh264/codec/api/svc/codec_api.h"
 
+#include "../TAO/orbsvcs/orbsvcs/CosEventCommS.h"
+#include "../TAO/orbsvcs/orbsvcs/CosEventChannelAdminS.h"
+
+
+
 const unsigned int SCR_WIDTH = 1024;
 const unsigned int SCR_HEIGHT = 1024;
 std::vector<CORBA::Octet*> textureBufferList;
@@ -38,7 +43,7 @@ unsigned int loadTexture(unsigned char *data);
 ACE_Thread_Mutex m_mutex;
 ACE_Thread_Mutex f_mutex;
 
-const ACE_TCHAR *ior = ACE_TEXT("file://test.ior");
+const ACE_TCHAR *ior = ACE_TEXT("file://ec.ior");
 int niterations = 10;
 int nthreads = 1;
 int do_shutdown = 0;
@@ -134,12 +139,47 @@ private:
   // The ORB reference
 };
 
+class Consumer : public POA_CosEventComm::PushConsumer
+{
+public:
+  /// Constructor
+  Consumer (void);
+
+  /// Run the test
+  int run (int argc, ACE_TCHAR* argv[]);
+
+  // = The CosEventComm::PushConsumer methods
+
+  /// The skeleton methods.
+  virtual void push (const CORBA::Any &value);
+  virtual void disconnect_push_consumer (void);
+
+  CosEventChannelAdmin::ProxyPushSupplier_var supplier;
+
+private:
+  /// Keep track of the number of events received.
+  CORBA::ULong event_count_;
+
+  /// The orb, just a pointer because the ORB does not outlive the
+  /// run() method...
+  CORBA::ORB_ptr orb_;
+};
+
+
+
 
 
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  Consumer consumer;
+  consumer.run(argc, argv);
+
+  return 0;
+}
+
+int Consumer::run(int argc, char** argv) {
   
   try
     {
@@ -166,9 +206,43 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
      CORBA::Object_var object =
         orb->string_to_object (ior);
 
-      Simple_Server_var server =
-        Simple_Server::_narrow (object.in ());
+      //Simple_Server_var server =
+    //Simple_Server::_narrow (object.in ());
 
+ CosEventChannelAdmin::EventChannel_var event_channel =
+        CosEventChannelAdmin::EventChannel::_narrow (object.in ());
+
+      if (event_channel == NULL) {
+        ACE_DEBUG ((LM_DEBUG,
+                  "Could not find EventChannel"));
+        return 2;
+      }
+      ACE_DEBUG((LM_DEBUG, "Event Channel found"));
+
+      // The canonical protocol to connect to the EC
+      // Pure CORBA
+      // 2. The client obtains an Admin object from the Event Channel
+      // A consumer needs a consumerAdmin object and a Supplier needs a SupplierAdmin object
+      CosEventChannelAdmin::ConsumerAdmin_var consumer_admin =
+        event_channel->for_consumers ();
+
+      // Pure CORBA (using a proxy pull)
+      // 3. The client obtains a proxy object from the Admin object
+      // (a Consumer Proxy for a Supplier client,
+      // and a Supplier Proxy for a Consumer client)
+      supplier =
+        consumer_admin->obtain_push_supplier ();
+      
+
+      // TODO:
+      // I DON"T REALLY KNOW WHAT THIS DOES
+      CosEventComm::PushConsumer_var consumer =
+        this->_this ();
+
+      //Pure CORBA p. 538
+      // 4. The client adds the Supplier or COnsumer to the Event Channel
+      // via a connect() call
+      supplier->connect_push_consumer (consumer.in ());
            
        // glfw: initialize and configure
     // ------------------------------
@@ -264,7 +338,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         continue;
       }
       
-      float dataTime = glfwGetTime();
+      //float dataTime = glfwGetTime();
 
       //Select the GL Shader for Framebuffer
       renderBufferShader.use();
@@ -484,29 +558,43 @@ FrameWorker::svc (void)
   return 0;
 }
 
+void
+FrameWorker::run_test() {
+
+}
+
+Consumer::Consumer() {}  
 
 void
-FrameWorker::run_test (void)
+Consumer::disconnect_push_consumer (void)
 {
-      CORBA::Object_var object =
-        orb_->string_to_object (ior);
+  // In this example we shutdown the ORB when we disconnect from the
+  // EC (or rather the EC disconnects from us), but this doesn't have
+  // to be the case....
+  this->orb_->shutdown (false);
+}
 
-      Simple_Server_var server =
-        Simple_Server::_narrow (object.in ());
+
+void
+Consumer::push(const CORBA::Any& value )
+{
+     
     
       int success = 0;
       int total = 0;
 
-      float dataTime = glfwGetTime();
+      //float dataTime = glfwGetTime();
       
-      while(true) {
-        try {
+      //while(true) {
+      //  try {
           float startTime = glfwGetTime();
 
-          Simple_Server::frameData *fd = server->sendFrameData();
+          const Simple_Server::frameData* fd;
+          value >>= fd;
           Simple_Server::frameData m_fd = (*fd);
 
           //If the header is 0xdeadbeef no new data
+          /*
           if (fd->m_header[0] == 0xde && 
                 fd->m_header[1] == 0xad && 
                   fd->m_header[2] == 0xbe && 
@@ -514,6 +602,7 @@ FrameWorker::run_test (void)
             usleep(4333);
             continue;
           }
+          */
 
           long unsigned int _headerSize = m_fd.m_headerSize;
           Simple_Server::header *hb = &m_fd.m_header;
@@ -523,9 +612,9 @@ FrameWorker::run_test (void)
           Simple_Server::pixels* pixelBuff = &m_fd.m_pixels;
           unsigned char *pBuf = pixelBuff->get_buffer(true);
 
-          float dataTime = glfwGetTime();
+          //float dataTime = glfwGetTime();
 
-          std::cout << "CLIENT TAO DATA TIME: \t" << dataTime - startTime << std::endl;
+          //std::cout << "CLIENT TAO DATA TIME: \t" << dataTime - startTime << std::endl;
           f_mutex.acquire();
           frameBufferList.push_back(hBuf);
           frameBufferList.push_back(pBuf);
@@ -535,18 +624,7 @@ FrameWorker::run_test (void)
           f_mutex.release();
           
         }
-         catch (const CORBA::Exception& ex)
-          {
-            ex._tao_print_exception ("FrameException caught in thread (%t)\n");
-
-
-          }
-
-
-
-      }
-
-	  }
+ 
 
 
 VideoWorker::VideoWorker () 

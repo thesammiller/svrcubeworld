@@ -89,7 +89,7 @@ add_executable(
   client
   client.cpp testC.cpp shader_s.cpp
   )
-target_link_libraries(client OpenGL::GL glfw glm "${libopencv_imgproc}" "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_PortableServer}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
+target_link_libraries(client OpenGL::GL glfw glm "${libopencv_imgproc}" "${libopencv_imgcodecs}" "${libopencv_core}" "${libopenh264}" "${libturbojpeg}" "${libTAO_IORTable}" "${libTAO_CosEvent_Serv}" "${libTAO_CosNaming}" "${TAO_Svc_Utils}" "${TAO_IFR_Client}" "${TAO_DynamicInterface}" "${TAO_Messaging}" "${TAO_PI}" "${TAO_CodecFactory}" "${TAO_ValueType}" "${libTAO_CosEvent_Skel}" "${libTAO_PortableServer}" "${libTAO_CosEvent}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
 add_executable(
   Service
