@@ -185,26 +185,26 @@ int Consumer::run(int argc, char** argv) {
     {
 
 
-      CORBA::ORB_var orb =
+      orb_ =
         CORBA::ORB_init (argc, argv);
 
       if (parse_args (argc, argv) != 0)
         return 1;
 
-      Worker worker (orb.in ());
+      //Worker worker (orb_->in ());
 
-      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "(%P|%t) Cannot activate worker threads\n"),
-                          1);
+      //if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
+      //  ACE_ERROR_RETURN ((LM_ERROR,
+      //                     "(%P|%t) Cannot activate worker threads\n"),
+      //                    1);
 
       ACE_Time_Value tv (5, 0);
 
-      orb->run (tv);
+      orb_->run (tv);
 
   
      CORBA::Object_var object =
-        orb->string_to_object (ior);
+        orb_->string_to_object (ior);
 
       //Simple_Server_var server =
     //Simple_Server::_narrow (object.in ());
@@ -291,22 +291,7 @@ int Consumer::run(int argc, char** argv) {
     
     int frame = 0;
 
-  
-    FrameWorker* fw = (FrameWorker *) malloc (sizeof(FrameWorker) * 1);
-    for (int i=0; i < 1; i++) {
-      FrameWorker frameWorker(orb.in());
 
-      if (frameWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           "(%P|%t) Cannot activate worker threads\n"),
-                          1);
-      FrameWorker * currentWorker = fw+i;
-      currentWorker = &frameWorker;
-      usleep(2666);
-
-      
-
-    }
 
      float startTime = glfwGetTime();
 
@@ -463,9 +448,9 @@ int Consumer::run(int argc, char** argv) {
   }
 
 
-    worker.thr_mgr ()->wait ();
+    //worker.thr_mgr ()->wait ();
 
-      orb->destroy ();
+      orb_->destroy ();
     
 
   return 0;
