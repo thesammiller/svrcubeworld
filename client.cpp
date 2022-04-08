@@ -198,9 +198,7 @@ int Consumer::run(int argc, char** argv) {
       //                     "(%P|%t) Cannot activate worker threads\n"),
       //                    1);
 
-      ACE_Time_Value tv (5, 0);
-
-      orb_->run (tv);
+      
 
   
      CORBA::Object_var object =
@@ -217,7 +215,10 @@ int Consumer::run(int argc, char** argv) {
                   "Could not find EventChannel"));
         return 2;
       }
-      ACE_DEBUG((LM_DEBUG, "Event Channel found"));
+      ACE_DEBUG((LM_DEBUG, "Event Channel found\n"));
+      //but not a line past this!
+
+      // we get this far
 
       // The canonical protocol to connect to the EC
       // Pure CORBA
@@ -226,23 +227,35 @@ int Consumer::run(int argc, char** argv) {
       CosEventChannelAdmin::ConsumerAdmin_var consumer_admin =
         event_channel->for_consumers ();
 
+       //ACE_DEBUG((LM_DEBUG, "For Consumers\n"));
+
       // Pure CORBA (using a proxy pull)
       // 3. The client obtains a proxy object from the Admin object
       // (a Consumer Proxy for a Supplier client,
       // and a Supplier Proxy for a Consumer client)
       supplier =
         consumer_admin->obtain_push_supplier ();
-      
+
+         //      ACE_DEBUG((LM_DEBUG, "Obtain Push Supplier\n"));
+
 
       // TODO:
       // I DON"T REALLY KNOW WHAT THIS DOES
+      //it makes this object the consumer object -- there's magic here
       CosEventComm::PushConsumer_var consumer =
         this->_this ();
+
+           //    ACE_DEBUG((LM_DEBUG, "FPush Consumer assignment\n"));
+
 
       //Pure CORBA p. 538
       // 4. The client adds the Supplier or COnsumer to the Event Channel
       // via a connect() call
       supplier->connect_push_consumer (consumer.in ());
+
+    // didn't hit this yet
+             //ACE_DEBUG((LM_DEBUG, "After Connect Push Consumer\n"));
+
            
        // glfw: initialize and configure
     // ------------------------------
@@ -298,11 +311,14 @@ int Consumer::run(int argc, char** argv) {
     float old_time = 0;
 
 
-    videoWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads);
+    //videoWorker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads);
       
     
     while (!glfwWindowShouldClose(window))
     {
+
+      orb_->perform_work();
+
       if (textureBufferList.size() < 3) {
         continue;
       }
@@ -556,7 +572,7 @@ Consumer::disconnect_push_consumer (void)
   // In this example we shutdown the ORB when we disconnect from the
   // EC (or rather the EC disconnects from us), but this doesn't have
   // to be the case....
-  this->orb_->shutdown (false);
+  //this->orb_->shutdown (false);
 }
 
 
@@ -564,6 +580,7 @@ void
 Consumer::push(const CORBA::Any& value )
 {
      
+     ACE_DEBUG((LM_DEBUG, "PUSH\n"));
     
       int success = 0;
       int total = 0;
