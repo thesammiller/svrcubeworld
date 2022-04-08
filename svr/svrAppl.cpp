@@ -181,28 +181,6 @@ void svrAppl::createImage() {
     float encode_end = glfwGetTime();
     std::cout << "ENCODE END TIME:\t" << encode_end - opencv_end_time << std::endl;
 
-    /********************************************************
-     * TODO:
-     * How do we then push the image from here?
-     * ******************************************************/
-
-    /*
-    fd.m_header =  Simple_Server::header(this->headerSize, this->headerData);
-        fd.m_headerSize = this->headerSize;
-        fd.m_pixels = Simple_Server::pixels(this->jpegSize, this->imageData);
-        fd.m_pixelSize = this->jpegSize;
-    }
-
-    Simple_Server::frameData* value = 0;
-
-    ACE_NEW_THROW_EX(value, Simple_Server::frameData(fd), CORBA::NO_MEMORY());
-
-    newFrame = false;
-    
-    return value;
-    */
-
-    // consumer->push(framedata)
 
     //format the frame data
     fd.m_header =  Simple_Server::header(headerSize, header);
@@ -214,9 +192,9 @@ void svrAppl::createImage() {
 
     //ACE_NEW_THROW_EX(value, Simple_Server::frameData(fd), CORBA::NO_MEMORY());
 
+    //Convert Special IDL value to CORBA::Any value
     value <<= fd;
     //push the frame value to the consumer
-
     myServer.consumer->push(value);
 
     //to free the memory allocated by TurboJPEG (either by tjAlloc(), 

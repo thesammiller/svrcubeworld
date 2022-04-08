@@ -333,12 +333,15 @@ int Consumer::run(int argc, char** argv) {
     while (!glfwWindowShouldClose(window))
     {
 
-      ACE_Time_Value tv(5, 0);
-      orb_->run(tv);
+      //ACE_Time_Value tv(5, 0);
+      //orb_->run(tv);
+      orb->perform_work();
 
+      
       if (textureBufferList.size() < 3) {
         continue;
       }
+      /*
       if (textureBufferList.size() > 6) {
         m_mutex.acquire();
         f_mutex.acquire();
@@ -355,6 +358,7 @@ int Consumer::run(int argc, char** argv) {
         m_mutex.release();
         continue;
       }
+      */
       
       //float dataTime = glfwGetTime();
 
@@ -431,9 +435,6 @@ int Consumer::run(int argc, char** argv) {
       glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureU"), 1);
       glUniform1i(glGetUniformLocation(renderBufferShader.ID, "textureV"), 2);
 
-      
-      
-
       glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
       glClear(GL_COLOR_BUFFER_BIT);
 
@@ -455,7 +456,6 @@ int Consumer::run(int argc, char** argv) {
       glPixelStorei (GL_UNPACK_SKIP_ROWS, 0);
       glPixelStorei (GL_UNPACK_SKIP_PIXELS, 0);
 
-      
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
       
@@ -466,12 +466,10 @@ int Consumer::run(int argc, char** argv) {
       glFinish();
       glFlush();
 
-
       if ( (old_time + 1) < glfwGetTime() ) {
             std::cout << "CLIENT FPS " << frame << std::endl;
             frame = 0;
             old_time = glfwGetTime();
-            
         }
         ++frame;
 
@@ -665,6 +663,8 @@ Consumer::push(const CORBA::Any& event )
 
     
       if (sDstBufInfo.iBufferStatus==1){
+
+        ACE_DEBUG((LM_DEBUG, "Pushing back data"));
           //output handling (pData[0], pData[1], pData[2])
 
           //int stride0 = sDstBufInfo.UsrData.sSystemBuffer.iStride[0];

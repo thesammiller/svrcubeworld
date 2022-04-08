@@ -98,13 +98,6 @@ add_executable(
 
 target_link_libraries(Service "${libTAO_CosEvent_Serv}" "${libTAO_CosNaming}" "${TAO_Svc_Utils}" "${TAO_IFR_Client}" "${TAO_DynamicInterface}" "${TAO_Messaging}" "${TAO_PI}" "${TAO_CodecFactory}" "${TAO_ValueType}" "${libTAO_CosEvent_Skel}" "${libTAO_PortableServer}" "${libTAO_CosEvent}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
 
-add_executable(
-  Consumer
-  Consumer.cpp
-)
-
-target_link_libraries(Consumer "${libTAO_CosEvent_Serv}" "${libTAO_CosNaming}" "${TAO_Svc_Utils}" "${TAO_IFR_Client}" "${TAO_DynamicInterface}" "${TAO_Messaging}" "${TAO_PI}" "${TAO_CodecFactory}" "${TAO_ValueType}" "${libTAO_CosEvent_Skel}" "${libTAO_PortableServer}" "${libTAO_CosEvent}" "${libTAO_AnyTypeCode}" "${libTAO}" "${libACE}")
-
 
 enable_testing()
 
