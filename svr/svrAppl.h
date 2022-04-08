@@ -29,6 +29,9 @@
 #include "opencv2/imgproc.hpp"
 #include <opencv2/core/mat.hpp>
 
+#include "svrServer.h"
+#include "../test_i.h"
+
 
 
 
@@ -62,7 +65,7 @@ class svrAppl {
 
 
     public:
-        svrAppl();
+        svrAppl(int argc, char** argv);
         void createShader();
         int createWindow(unsigned int width, unsigned int height, char *name);
         int createWorld();
@@ -135,6 +138,9 @@ class svrAppl {
         SEncParamBase param;
 
         float headpose_data[7];
+
+        svrServer myServer;
+        Simple_Server::frameData fd;
 
        
 

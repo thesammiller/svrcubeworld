@@ -33,15 +33,16 @@ int main(int argc, char* argv[])
 {
 
     
-   
+   /*
     svrServer myServer = svrServer();
     //Create orb
     myServer.createOrb(argc, argv);
     //Create server implementation
-    myServer.createServer();     
+    myServer.createServer();   
+    */  
     
     //Initialize the application
-    svrAppl myAppl = svrAppl();
+    svrAppl myAppl = svrAppl(argc, argv);
     // Create main window
     myAppl.createWindow(SCR_WIDTH, SCR_HEIGHT, "CubeWorld");
     //Create shader program for GPU
@@ -63,7 +64,7 @@ int main(int argc, char* argv[])
 
     float startTime = glfwGetTime();
 
-    Worker worker(myServer.orb.in());
+    Worker worker(myAppl.myServer.orb.in());
 
      if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
         // -----------------
         // Take the server data and update the view based on controller input
         
-        myServer.server_impl.get_data(myAppl.headpose_data);
+        //myAppl.myServer.server_impl.get_data(myAppl.headpose_data);
         
         // OpenGL Draw & Create Image
         // --------------
@@ -99,12 +100,14 @@ int main(int argc, char* argv[])
         // --------------------
         //Take the data from OpenGL and set Server Data
         //TODO: Are the classes in an appropriate relationship?
-        myServer.setJpegSize(myAppl.jpegSize);
-        myServer.setImage(myAppl.pixels);
+        /*
+        myAppl.myServer.setJpegSize(myAppl.jpegSize);
+        myAppl.myServer.setImage(myAppl.pixels);
         
-        myServer.setHeaderSize(myAppl.headerSize);
-        myServer.setHeader(myAppl.header);
-        myServer.server_impl.newFrame = true;
+        myAppl.myServer.setHeaderSize(myAppl.headerSize);
+        myAppl.myServer.setHeader(myAppl.header);
+        myAppl.myServer.server_impl.newFrame = true;
+        */
 
         // Calculate Frame Rate
         // -------------------

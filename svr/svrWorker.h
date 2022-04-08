@@ -1,6 +1,10 @@
 #include "test_i.h"
 #include "ace/Task.h"
 
+#ifndef WORKER_H
+#define WORKER_H
+
+
 class Worker : public ACE_Task_Base
 {
     public:
@@ -11,3 +15,5 @@ class Worker : public ACE_Task_Base
         //Corba Orb
         CORBA::ORB_var orb_;
 };
+
+#endif /* WORKER_H */

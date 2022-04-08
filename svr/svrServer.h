@@ -11,6 +11,10 @@
 #include "ace/OS_NS_stdio.h"
 #include "../TAO/orbsvcs/orbsvcs/CosEventCommS.h"
 
+#ifndef SVRSERVER_H
+#define SVRSERVER_H
+
+
 
 
 class svrServer : public POA_CosEventComm::PushSupplier{
@@ -27,7 +31,7 @@ class svrServer : public POA_CosEventComm::PushSupplier{
         void setHeader(unsigned char* header);
         void setHeaderSize(long unsigned int hs);
         void wait();
-        
+
         int run ();
         
         /// The skeleton methods.
@@ -48,3 +52,5 @@ class svrServer : public POA_CosEventComm::PushSupplier{
         bool newFrame = false;
 
 };
+
+#endif /* SVRSERVER_H */
