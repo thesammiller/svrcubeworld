@@ -151,7 +151,7 @@ public:
   // = The CosEventComm::PushConsumer methods
 
   /// The skeleton methods.
-  virtual void push (const CORBA::Any &value);
+  virtual void push (const CORBA::Any &event);
   virtual void disconnect_push_consumer (void);
 
   CosEventChannelAdmin::ProxyPushSupplier_var supplier;
@@ -176,9 +176,9 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   Consumer consumer;
-  consumer.run(argc, argv);
+  
 
-  return 0;
+  return consumer.run(argc, argv);
 }
 
 int Consumer::run(int argc, char** argv) {
@@ -187,26 +187,37 @@ int Consumer::run(int argc, char** argv) {
     {
 
 
-      orb_ =
+      CORBA::ORB_var orb =
         CORBA::ORB_init (argc, argv);
 
       if (parse_args (argc, argv) != 0)
         return 1;
 
-      //Worker worker (orb_->in ());
+      Worker worker (orb.in ());
 
       
-      //VideoWorker videoWorker();
+      //VideoWorker videoWorker(orb.in());
 
       //if (worker.activate (THR_NEW_LWP | THR_JOINABLE, nthreads) != 0)
       //  ACE_ERROR_RETURN ((LM_ERROR,
       //                     "(%P|%t) Cannot activate worker threads\n"),
       //                    1);
 
-      
+      this->orb_ = orb.in ();
+
+      //obtain a reference to the Root POA
+      // Pure CORBA does this after the Event Service 
+      CORBA::Object_var object =
+        orb->resolve_initial_references ("RootPOA"); 
+      PortableServer::POA_var poa =
+        PortableServer::POA::_narrow (object.in ());
+      PortableServer::POAManager_var poa_manager =
+        poa->the_POAManager ();
+      poa_manager->activate ();
+
 
   
-     CORBA::Object_var object =
+     object =
         orb_->string_to_object (ior);
 
       //Simple_Server_var server =
@@ -321,9 +332,9 @@ int Consumer::run(int argc, char** argv) {
     
     while (!glfwWindowShouldClose(window))
     {
-      orb_->work_pending();
 
-      //orb_->run();
+      ACE_Time_Value tv(5, 0);
+      orb_->run(tv);
 
       if (textureBufferList.size() < 3) {
         continue;
@@ -592,14 +603,14 @@ Consumer::disconnect_push_consumer (void)
 
 
 void
-Consumer::push(const CORBA::Any& value )
+Consumer::push(const CORBA::Any& event )
 {
      
      ACE_DEBUG((LM_DEBUG, "PUSH\n"));
 
 
     const Simple_Server::frameData* fd;
-    value >>= fd;
+    event >>= fd;
     Simple_Server::frameData m_fd = (*fd);
 
 
